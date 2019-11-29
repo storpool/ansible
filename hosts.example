@@ -1,0 +1,71 @@
+# variables:
+
+# used by storpool for deployments from bastion host
+# customer=lab-vk-ansible
+# sp_custdir=/home/lab
+
+# what to install:
+# sp_mgmt=True
+# sp_bridge=True
+# sp_iscsi=True
+# sp_server=True
+
+# where to get the storpool release file
+# sp_release_file=/tmp/storpool-...
+
+# drives to initialize
+# sp_drives="...."
+
+# size of the drives that will be used (visible with `lsblk`)
+# sp_drive_size: "....T"
+
+# node for initial drive (if new install)
+# sp_node_with_initial_drive=1
+
+# storpool.conf location
+# sp_config=/tmp/storpool.conf
+
+# storpool_server instances
+# sp_maxinstances=1
+
+# perform node upgrade
+# sp_update_system=True
+
+# reboot node
+# sp_reboot=True
+
+# automatically configure network from storpool.conf data
+# sp_configure_network=True
+
+# stop and disable NetworkManager
+# sp_disable_nm=False
+
+# stop and disable firewalld/ufw
+# sp_disable_fw=False
+
+# nodes are vms
+# sp_vm=False
+
+[all:vars]
+sp_release=19.01
+customer=lab-vk-ansible
+sp_custdir=/home/lab
+sp_config=/home/lab/lab-vk-ansible/storpool.conf
+sp_maxinstances=1
+sp_node_with_initial_drive=1
+sp_configure_network=True
+
+[nodes-server:vars]
+sp_server=True
+sp_drives="/dev/sdb /dev/sdc /dev/sdd"
+
+[nodes-server]
+lab-vk-ansible sp_mgmt=True
+
+[nodes-client]
+#example-node ansible_connection=local
+
+[nodes-hyperconverged:vars]
+sp_max_instances=2
+
+[nodes-hyperconverged]

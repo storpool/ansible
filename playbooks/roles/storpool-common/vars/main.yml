@@ -1,0 +1,26 @@
+sp_services_helper:
+  - storpool_hugepages
+  - storpool_cgmove
+  - storpool_kdump
+  - storpool_abrtsync
+
+sp_services_common:
+  - storpool_beacon
+  - storpool_stat
+  - storpool_block
+
+sp_services_server_helper:
+  - storpool_controller
+
+sp_services_server_nvme:
+  - storpool_nvmed
+
+sp_services_mgmt:
+  - storpool_mgmt
+
+sp_services_bridge:
+  - storpool_bridge
+
+sp_services_iscsi:
+  - storpool_iscsi
+

@@ -1,0 +1,7 @@
+- name: Install storpool.conf
+  copy:
+    src: "{{ sp_config }}"
+    dest: /etc/
+
+- name: Make sure the node exists in storpool.conf
+  shell: '[ -n "`storpool_showconf -n -e SP_OURID`" ]'

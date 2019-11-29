@@ -1,0 +1,8 @@
+- name: Check where I am running
+  local_action: command hostname
+  register: sp_local_hostname
+
+- name: Check if poli
+  set_fact:
+    sp_poli: true
+  when: sp_local_hostname.stdout == "poli"

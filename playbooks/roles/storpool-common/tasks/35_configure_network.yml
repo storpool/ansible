@@ -1,0 +1,27 @@
+- name: Generate network configuration
+  shell: "/usr/sbin/iface-genconf -a -o"
+
+- name: Install ifup-pre-local
+  copy:
+    src: ifup-pre-local
+    dest: /sbin
+    mode: 0755
+
+- name: Start the first Storage interface 
+  shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f3 | xargs /usr/sbin/ifup"
+
+- name: Start the second Storage interface 
+  shell: "/usr/sbin/storpool_showconf sp_iface2_cfg | cut -d: -f3 | xargs /usr/sbin/ifup"
+  ignore_errors: yes
+
+- name: Start the bond (if any)
+  shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2 | cut -d. -f1 | xargs /usr/sbin/ifup"
+  ignore_errors: yes
+
+- name: Start VLAN on iface1 (if any)
+  shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2 | xargs /usr/sbin/ifup"
+  ignore_errors: yes
+
+- name: Start VLAN on iface2 (if any)
+  shell: "/usr/sbin/storpool_showconf sp_iface2_cfg | cut -d: -f2 | xargs /usr/sbin/ifup"
+  ignore_errors: yes

@@ -1,0 +1,66 @@
+- name: Start helper services
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items: "{{ sp_services_helper }}"
+
+- name: Start common services
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items: "{{ sp_services_common }}"
+
+- name: Start server helper services
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items: "{{ sp_services_server_helper }}"
+  when: sp_server is defined and sp_server
+
+- name: Start server nvmed services
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items: "{{ sp_services_server_nvme }}"
+  when: sp_server is defined and sp_server and sp_nvme is defined and sp_nvme
+
+- name: Get needed number of server instances
+  shell: echo -e 'import sys\nsys.path.append("/usr/lib/storpool/python")\nimport sp.disk.disklist as d\nimport sp.tools.cg.cgtool.util.servers as s\nfor p in s.lst(d.server_instances(True)):\n  print "storpool_" + p\n' | python
+  register: sp_instances
+  when: sp_server is defined and sp_server
+
+- name: Start server instances
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items: "{{ sp_instances.stdout_lines }}"
+  when: sp_server is defined and sp_server
+
+- name: Start mgmt
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items: "{{ sp_services_mgmt }}"
+  when: sp_mgmt is defined and sp_mgmt
+
+- name: Start bridge
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items: "{{ sp_services_bridge }}"
+  when: sp_bridge is defined and sp_bridge
+
+- name: Start iscsi
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  with_items: "{{ sp_services_iscsi }}"
+  when: sp_iscsi is defined and sp_iscsi

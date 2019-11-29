@@ -1,0 +1,69 @@
+- name: Copy drive init tools
+  copy:
+    src: "{{ item }}"
+    dest: "/root/storpool/"
+    mode: 0755
+  with_items:
+    - "init_drive.sh"
+    - "perform_disktest.sh"
+
+- name: Convert sp_drives to list
+  set_fact:
+    sp_drives: '{{ sp_drives.split( ) }}'
+  when: sp_drives is defined
+
+- name: Detect drives for StorPool
+  shell: 'lsblk -p | grep "{{ sp_drive_size }}.*disk" | cut -d " " -f1'
+  register: sp_drives_detected
+  when: sp_drives is not defined and sp_drive_size is defined
+
+- name: Set drives for StorPool
+  set_fact:
+    sp_drives: '{{ sp_drives_detected.stdout_lines }}'
+  when: sp_drives is not defined and sp_drives_dected is defined
+
+- name: Make sure we have drives for StorPool
+  fail:
+    msg: "Asked to deploy a server, but no drives detected or configured."
+  when: sp_drives is not defined
+
+- name: Test drives
+  shell: /root/storpool/perform_disktest.sh "{{ sp_drives | join(' ') }}"
+  when: sp_drives is defined and (sp_vm is not defined or not sp_vm)
+
+- name: Init drive
+  shell: "/root/storpool/init_drive.sh {{ item }} {{ sp_node_with_initial_drive }}"
+  with_items: "{{ sp_drives }}"
+  register: sp_initialized_drives
+  when: sp_drives is defined
+
+- name: Get needed number of server instances
+  shell: echo -e 'import sys\nsys.path.append("/usr/lib/storpool/python")\nimport sp.disk.disklist as d\nimport sp.tools.cg.cgtool.util.servers as s\nfor p in s.lst(d.server_instances(True)):\n  print "storpool_" + p\n' | python
+  register: sp_instances
+  when: sp_server is defined and sp_server
+
+- name: Stop server instances
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+  with_items: "{{ sp_instances.stdout_lines }}"
+  when: sp_server is defined and sp_server
+
+- name: Stop storpool_nvmed
+  systemd:
+    name: storpool_nvmed
+    state: stopped
+    enabled: no
+  when: sp_server is defined and sp_server and sp_nvme is defined and sp_nvme
+
+- name: Expose all NVMe drives
+  shell: /usr/lib/storpool/expose_nvme_drives
+  when: sp_nvme is defined and sp_nvme
+
+- name: Settle udev
+  shell: udevadm settle
+
+- name: Assign drives to servers
+  shell: "/usr/lib/storpool/multi-server-helper.py -i {{ sp_maxinstances }} | sh"
+  when: sp_initialized_drives

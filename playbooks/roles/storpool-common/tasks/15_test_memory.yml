@@ -1,0 +1,12 @@
+- name: Copy memtester tools
+  copy:
+    src: "{{ item }}"
+    dest: "/root/storpool/"
+    mode: 0755
+  with_items:
+    - "memtester"
+    - "perform_memtest.sh"
+
+- name: Test memory
+  shell: /root/storpool/perform_memtest.sh
+  when: sp_vm is not defined or not sp_vm

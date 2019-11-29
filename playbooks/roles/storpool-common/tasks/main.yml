@@ -1,0 +1,18 @@
+- import_tasks: 00_whereami.yml
+- import_tasks: 00_dependencies.yml
+- import_tasks: 01_swap.yml
+  when: sp_server is defined and sp_server
+- import_tasks: 05_install_storpool_tools.yml
+- import_tasks: 06_collect_inventory.yml
+- import_tasks: 10_tuning.yml
+- import_tasks: 11_ntp.yml
+- import_tasks: 15_test_memory.yml
+- import_tasks: 20_install_storpool.yml
+- import_tasks: 30_install_config.yml
+- import_tasks: 35_configure_network.yml
+  when: sp_configure_network is defined and sp_configure_network
+- import_tasks: 40_init_drives.yml
+  when: sp_server is defined and sp_server
+- import_tasks: 45_cgroups.yml
+- import_tasks: 46_vf_genconf.yml
+- import_tasks: 50_start_services.yml

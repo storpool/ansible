@@ -1,0 +1,33 @@
+#!/bin/sh
+CONFIG="$1"
+
+. /etc/init.d/functions
+cd /etc/sysconfig/network-scripts
+. ./network-functions
+
+need_config "${CONFIG}"
+source_config
+
+if [ -z "$NAME" ]; then
+        logger "got $NAME"
+        if [ -z "${DEVICE}" ]; then
+                # NAME empty get from CONFIG
+                NAME="${CONFIG##*-}"
+                logger "NAME empty seting to $NAME"
+        fi
+        NAME="${DEVICE}"
+fi
+
+if [ "${SLAVE}" = yes -a "${ISALIAS}" = no -a "${MASTER}" != "" ]; then
+        # get all dummy files for master
+        DUMMYFILES="$(grep -El "^MASTER=.*${MASTER}" ./ifcfg-dummy*)"
+        logger "Got dummyfiles $DUMMYFILES"
+        for DUMMY in ${DUMMYFILES}; do
+                DUMMYNAME="${DUMMY##*-}"
+                if [ "$DUMMYNAME" = "$NAME" ]; then
+                        continue
+                fi
+                logger "Bringing up $DUMMYNAME"
+                /sbin/ifup "$DUMMYNAME"
+        done
+fi

@@ -1,0 +1,5 @@
+- name: Install StorPool Tools
+  run_once: false
+  become: no
+  local_action: command chdir={{ sp_custdir }}/{{ customer }} /usr/local/bin/installtools {{ inventory_hostname }}
+  when: customer is defined and sp_poli is defined and sp_poli
