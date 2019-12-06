@@ -4,15 +4,18 @@
     fstype: swap
     state: absent
 
-- name: Remove swap on Ubuntu
-  systemd:
-    name: "{{ item }}"
-    state: stopped
-    enabled: no
-  with_items:
-    - 'swap.img.swap'
-    - 'swap.target'
+- name: Remove /swap.img from /etc/fstab on Ubuntu
+  mount:
+    path: none
+    fstype: swap
+    src: /swap.img
+    state: absent
   when: ansible_distribution == 'Ubuntu'
 
 - name: Disable swap
   command: swapoff -a
+
+- name: Delete /swap.img if exists
+  file:
+    path: /swap.img
+    state: absent
