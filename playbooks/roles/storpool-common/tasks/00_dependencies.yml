@@ -114,5 +114,5 @@
     - patch
     - chrony
     - lldpd
+    - vlan
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-
