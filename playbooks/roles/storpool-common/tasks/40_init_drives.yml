@@ -38,7 +38,9 @@
   when: sp_drives is defined
 
 - name: Get needed number of server instances
-  shell: echo -e 'import sys\nsys.path.append("/usr/lib/storpool/python")\nimport sp.disk.disklist as d\nimport sp.tools.cg.cgtool.util.servers as s\nfor p in s.lst(d.server_instances(True)):\n  print "storpool_" + p\n' | python
+  script: get_instances.py
+  args:
+    executable: python2
   register: sp_instances
   when: sp_server is defined and sp_server
 
