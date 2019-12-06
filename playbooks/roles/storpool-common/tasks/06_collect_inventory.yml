@@ -2,11 +2,11 @@
   stat:
     path: ~/storpool/mlc/mlc 
   register: mlc_present
-  when: sp_poli is defined and sp_poli
+  when: (sp_vm is not defined or not sp_vm) and sp_poli is defined and sp_poli
 
 - name: Start the mlc test
   shell: '[[ ! -d "/tmp/mlc/" ]] && mkdir -p /tmp/mlc/; [[ ! -f "/tmp/mlc/mlc.output" ]] && ~/storpool/mlc/mlc > /tmp/mlc/mlc.output'
-  when: sp_poli is defined and sp_poli and mlc_present.stat.exists  
+  when: (sp_vm is not defined or not sp_vm) and sp_poli is defined and sp_poli and mlc_present.stat.exists
 
 - name: Collect Inventory
   run_once: false
