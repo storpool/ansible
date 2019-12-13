@@ -1,7 +1,7 @@
 - name: Copy drive init tools
   copy:
     src: "{{ item }}"
-    dest: "/root/storpool/"
+    dest: "{{ sp_toolsdir }}"
     mode: 0755
   with_items:
     - "init_drive.sh"
@@ -28,11 +28,11 @@
   when: sp_drives is not defined
 
 - name: Test drives
-  shell: /root/storpool/perform_disktest.sh "{{ sp_drives | join(' ') }}"
+  shell: "{{ sp_toolsdir }}/perform_disktest.sh {{ sp_drives | join(' ') }}"
   when: sp_drives is defined and (sp_vm is not defined or not sp_vm)
 
 - name: Init drive
-  shell: "/root/storpool/init_drive.sh {{ item }} {{ sp_node_with_initial_drive }}"
+  shell: "{{ sp_toolsdir }}/init_drive.sh {{ item }} {{ sp_node_with_initial_drive }}"
   with_items: "{{ sp_drives }}"
   register: sp_initialized_drives
   when: sp_drives is defined

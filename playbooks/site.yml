@@ -1,7 +1,6 @@
 - name: server nodes
   hosts: nodes-server
-  become: no
-  remote_user: root
+  become: yes
   vars:
     hostname: "{{ inventory_hostname }}"
     sp_server: true
@@ -10,8 +9,7 @@
 
 - name: client nodes
   hosts: nodes-client
-  become: no
-  remote_user: root
+  become: yes
   vars:
     hostname: "{{ inventory_hostname }}"
   roles:
@@ -19,8 +17,7 @@
 
 - name: hyperconverged nodes
   hosts: nodes-hyperconverged
-  become: no
-  remote_user: root
+  become: yes
   vars:
     hostname: "{{ inventory_hostname }}"
     sp_server: true
@@ -30,11 +27,9 @@
 
 - name: backup nodes
   hosts: nodes-backup
-  become: no
-  remote_user: root
+  become: yes
   vars:
     hostname: "{{ inventory_hostname }}"
     sp_server: true
   roles:
   - storpool-common
-

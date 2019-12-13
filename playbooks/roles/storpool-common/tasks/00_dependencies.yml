@@ -8,9 +8,14 @@
     path: /etc/storpool.conf.d
     state: directory
 
-- name: mkdir /root/storpool
+- name: mkdir {{ sp_toolsdir }}
   file:
-    path: /root/storpool
+    path: "{{ sp_toolsdir }}"
+    state: directory
+
+- name: mkdir /usr/lib/storpool
+  file:
+    path: /usr/lib/storpool
     state: directory
 
 - name: Install EPEL

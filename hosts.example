@@ -16,6 +16,9 @@
 # where to get the storpool release file
 # sp_release_file=/tmp/storpool-...
 
+# directory for storpool support tools on the nodes
+sp_toolsdir=/root/storpool
+
 # drives to initialize
 # sp_drives="...."
 
