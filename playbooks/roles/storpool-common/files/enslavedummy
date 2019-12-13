@@ -1,0 +1,16 @@
+#!/bin/sh
+bond="$1"
+dummyname="$2"
+/sbin/ip link add "$bond" type bond
+/sbin/ip link add "$dummyname" type dummy
+/sbin/ip link set "$dummyname" up
+count=0
+while [ ! -f "/run/network/ifenslave.${bond}" ]; do
+  sleep 1
+  count=$((count+1))
+  if [ "$count" -gt 300 ]; then
+    echo "Waited for more than 5 minutes, bailing out" 1>&2
+    break
+  fi
+done
+/sbin/ifenslave "$bond" "$dummyname"

@@ -28,6 +28,13 @@
     mode: 0755
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
+- name: Install enslavedummy
+  copy:
+    src: enslavedummy
+    dest: /sbin
+    mode: 0755
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
 - name: Start the first Storage interface 
   shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f3 | xargs ifup"
   ignore_errors: yes
