@@ -13,8 +13,10 @@
 # sp_iscsi=True
 # sp_server=True
 
-# where to get the storpool release file
-# sp_release_file=/tmp/storpool-...
+# where to get the storpool release file from
+# sp_release_file=/tmp/storpool-...	# path to release file stored locally
+# sp_release_file=web			# download and use latest release from storpool
+sp_release_file=web
 
 # ssh to nodes with root
 ansible_user=root
