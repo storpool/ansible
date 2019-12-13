@@ -1,4 +1,7 @@
-# variables:
+# storpool-common hosts file example
+
+[all:vars]
+# global variables:
 
 # used by storpool for deployments from bastion host
 # customer=lab-vk-ansible
@@ -46,7 +49,6 @@
 # nodes are vms
 # sp_vm=False
 
-[all:vars]
 sp_release=19.01
 customer=lab-vk-ansible
 sp_custdir=/home/lab
