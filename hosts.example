@@ -16,6 +16,13 @@
 # where to get the storpool release file
 # sp_release_file=/tmp/storpool-...
 
+# ssh to nodes with root
+ansible_user=root
+
+# ssh to nodes with regular user and do sudo to gain root
+# /etc/sudoers needs to be adjusted on the nodes
+#ansible_user=storpool
+
 # directory for storpool support tools on the nodes
 sp_toolsdir=/root/storpool
 
