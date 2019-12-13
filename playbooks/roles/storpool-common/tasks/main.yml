@@ -7,8 +7,8 @@
 - import_tasks: 10_tuning.yml
 - import_tasks: 11_ntp.yml
 - import_tasks: 15_test_memory.yml
+- import_tasks: 19_install_config.yml
 - import_tasks: 20_install_storpool.yml
-- import_tasks: 30_install_config.yml
 - import_tasks: 35_configure_network.yml
   when: sp_configure_network is defined and sp_configure_network
 - import_tasks: 40_init_drives.yml

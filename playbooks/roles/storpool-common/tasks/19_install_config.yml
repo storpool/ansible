@@ -1,0 +1,4 @@
+- name: Install storpool.conf
+  copy:
+    src: "{{ sp_config }}"
+    dest: /etc/
