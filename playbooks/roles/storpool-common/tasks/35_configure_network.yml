@@ -1,6 +1,3 @@
-- name: Make sure the node exists in storpool.conf
-  shell: '[ -n "$(storpool_showconf -n -e SP_OURID)" ]'
-
 - name: 'Adjust /etc/network/interfaces on Ubuntu (#1)'
   lineinfile:
     path: /etc/network/interfaces
