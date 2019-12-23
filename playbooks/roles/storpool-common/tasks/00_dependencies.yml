@@ -64,6 +64,7 @@
     - mc
     - perl
     - perl-core
+    - python-requests
     - tcpdump
     - strace
     - mtr
@@ -89,6 +90,7 @@
   vars:
     packages:
     - wget
+    - python-requests
     - dmidecode
     - kexec-tools
     - logrotate
