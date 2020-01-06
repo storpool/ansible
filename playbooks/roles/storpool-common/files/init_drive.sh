@@ -40,7 +40,13 @@ else
 	let num=$last+1 || true
 fi
 
-if ! [ -b ${dev}1 ] ; then
+if [ "${dev#/dev/nvme}" != "$dev" ] ; then
+    part=${dev}p1
+else
+    part=${dev}1
+fi
+
+if ! [ -b ${part} ] ; then
 	echo partitions do not exist, creating
 	parted -s --align optimal ${dev} mklabel gpt -- mkpart primary 2MiB 100%
 	sleep 1
@@ -53,4 +59,4 @@ else
 	init=
 fi
 
-storpool_initdisk $init $num ${dev}1 || true
+storpool_initdisk $init $num $part || true
