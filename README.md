@@ -12,3 +12,33 @@ is needed for:
 - tests of CPU settings (turbocheck)
 - deployment of integrations (lvmsp, cloudstack)
 
+Workflow for internal users
+---------------------------
+
+
+* Create a branch for yourself:
+
+```
+git checkout -b meow
+```
+
+* Do your changes, commit them, do, commit, etc;
+* Get the latest master in your repo and in your branch:
+
+```
+git pull -r origin master
+```
+
+* Submit your branch:
+
+```
+git push origin meow
+```
+
+* If it's acceptable, merge that into master and push:
+
+```
+git checkout master
+git pull origin meow
+git push origin master
+```
