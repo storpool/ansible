@@ -51,16 +51,7 @@
   fail:
     msg: "'{{ item }}' value is not boolean: {{ vars[item] }}"
   when: vars[item] not in [ true, false ]
-  with_items:
-    - sp_poli
-    - sp_new_cluster
-    - sp_update_system
-    - sp_configure_network
-    - sp_disable_nm
-    - sp_disable_fw
-    - sp_vm
-    - sp_reboot
-    - sp_summary_wait
+  with_items: "{{ sp_bool_vars }}"
 
 - name: "sp_roles_list: populate from sp_node_roles"
   set_fact:
