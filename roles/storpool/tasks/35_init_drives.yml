@@ -1,4 +1,4 @@
-- name: Copy drive init tools
+- name: "copy drive init tools"
   copy:
     src: "{{ item }}"
     dest: "{{ sp_toolsdir }}"
@@ -7,64 +7,47 @@
     - "init_drive.sh"
     - "perform_disktest.sh"
 
-- name: Convert sp_drives to list
+- name: "convert sp_drives to list"
   set_fact:
-    sp_drives: "{{ sp_drives.split(',') | map('regex_replace', '^(.*)', '/dev/\\1') | list }}"
-  when: sp_drives is defined
+    sp_drives: "{{ sp_drive_list | map('regex_replace', '^(.*)', '/dev/\\1') | list }}"
 
-- name: Detect drives for StorPool
-  shell: 'lsblk -pb | grep "{{ sp_drive_size }}.*disk" | cut -d " " -f1'
-  register: sp_drives_detected
-  when: sp_drives is not defined and sp_drive_size is defined
-
-- name: Set drives for StorPool
-  set_fact:
-    sp_drives: '{{ sp_drives_detected.stdout_lines }}'
-  when: sp_drives is not defined and sp_drives_dected is defined
-
-- name: Make sure we have drives for StorPool
-  fail:
-    msg: "Asked to deploy a server, but no drives detected or configured."
-  when: sp_drives is not defined
-
-- name: Test drives
+- name: "test drives"
   shell: "{{ sp_toolsdir }}/perform_disktest.sh {{ sp_drives | join(' ') }}"
-  when: sp_drives is defined and not sp_vm
+  when: not sp_vm
   tags: test
 
-- name: Init drive
+- name: "init drive"
   shell: "{{ sp_toolsdir }}/init_drive.sh {{ item }} {{ sp_init_node if sp_init_node is defined else 'noinit' }}"
   with_items: "{{ sp_drives }}"
   register: sp_initialized_drives
-  when: sp_drives is defined
 
-- name: Get needed number of server instances
+- name: "get needed number of server instances"
   script: get_instances.py
   args:
     executable: python2
   register: sp_instances
 
-- name: Stop server instances
+- name: "stop server instances"
   systemd:
     name: "{{ item }}"
     state: stopped
     enabled: no
   with_items: "{{ sp_instances.stdout_lines }}"
 
-- name: Stop storpool_nvmed
+- name: "stop storpool_nvmed"
   systemd:
     name: storpool_nvmed
     state: stopped
     enabled: no
   when: sp_roles.nvme
 
-- name: Expose all NVMe drives
+- name: "expose all NVMe drives"
   shell: /usr/lib/storpool/expose_nvme_drives
   when: sp_roles.nvme
 
-- name: Settle udev
+- name: "settle udev"
   shell: udevadm settle
 
-- name: Assign drives to servers
+- name: "assign drives to servers"
   shell: "/usr/lib/storpool/multi-server-helper.py -i {{ sp_server_instances }} | bash"
   when: sp_initialized_drives

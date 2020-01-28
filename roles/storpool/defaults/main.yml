@@ -13,6 +13,7 @@ sp_reboot: false
 sp_summary_wait: true
 sp_node_roles: 'client'
 sp_cg_conf_extra: ''
+sp_drive_erase: false
 
 # valid sp_node_roles values
 sp_valid_roles:

@@ -173,6 +173,39 @@
     sp_cg_conf_extra: "CONVERGED=1 {{ sp_cg_conf_extra }}"
   when: "sp_roles.server and sp_roles.client and 'CONVERGED' not in sp_cg_conf_extra"
 
+- name: "sp_drive[_size,_model]_list: initial definition"
+  set_fact:
+    sp_drive_list: []
+    sp_drive_size_list: []
+    sp_drive_model_list: "{{ sp_drive_model.split(',') if sp_drive_model is defined else [] }}"
+  when: sp_roles.server
+
+- name: "sp_drive_size_list: convert to bytes and populate"
+  set_fact:
+    sp_drive_size_list: "{{ sp_drive_size_list + [ item | human_to_bytes ] }}"
+  with_items: "{{ sp_drive_size.split(',') }}"
+  when: sp_roles.server and sp_drive_size is defined
+
+- name: "sp_drive_list: populate"
+  set_fact:
+    sp_drive_list: "{{ sp_drive_list + [ item.key ] }}"
+  with_dict: "{{ ansible_devices }}"
+  when: >
+    sp_roles.server and ( (sp_drives is defined and item.key in sp_drives.split(',')) or
+    (sp_drive_size is defined and item.value.size|human_to_bytes in sp_drive_size_list) or
+    (sp_drive_model is defined and item.value.model in sp_drive_model_list) )
+
+- name: "sp_drive_list: validate"
+  fail:
+    msg: "{{ item }} contains partitions! Please remove them or set sp_drive_erase to True"
+  with_items: "{{ sp_drive_list }}"
+  when: ansible_devices[item].partitions|length > 0 and not sp_drive_erase
+
+- name: "check if we have drives for the servers"
+  fail:
+    msg: "Node declared as a server, but no drives found to initialize"
+  when: "sp_roles.server and sp_drive_list|length == 0"
+
 - name: "populate sp_summary_msg"
   set_fact:
     sp_summary_msg: # do not use tabs below - the output gets ugly
@@ -188,6 +221,7 @@
       - "storpool.conf:    {{ sp_config }}"
       - "node roles:       {{ sp_node_roles }}"
       - "install.sh:       {{ sp_install_services }}"
+      - "Drives to init:   {{ sp_drive_list | sort | join(', ') if sp_roles.server else 'none' }}"
       - "Server Instances: {{ sp_server_instances }}"
       - "storpool_cg conf: {{ sp_cg_conf_extra if sp_cg_conf_extra != '' else 'default' }}"
   when: sp_summary_wait

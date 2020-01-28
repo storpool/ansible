@@ -61,26 +61,27 @@ sp_config='/path/to/storpool.conf'
 
 # drive selection section
 #
-# devices matching any of the three conditions below will get initialized
-# values can be obtained by running 'lsblk -dbo NAME,SIZE,MODEL' on the nodes
+# devices matching _any_ of the conditions below will get initialized
+# values can be obtained by running 'lsblk -do NAME,SIZE,MODEL' on the nodes
 # NOTE: a matched device, already containing partitions, will trigger an error
+# 	remove partitions manually or override with sp_drive_erase=True
 #
 # CAUTION: the drive_init procedure is not fully implemented yet
-# - currently works with only one condition (sp_drives OR sp_drive_size)
-# - sp_drive_model: not yet implemented
+# - always creates only one partition per drive
 # - no RAID controller detection, and private case scenarios
-# - always create only one partition per drive
 # - needs ability to specify storpool_initdisk parameters
-# - needs checks on when NOT to touch a drive
 #
 # coma-separated list of devices to initialize
 #sp_drives='nvme0n1,nvme1n1,sdb,sdc'
 #
-# coma-separated sizes of devices in bytes to initialize
-#sp_drive_size='2000398934016,100030242816'
+# coma-separated list of sizes of devices to initialize
+#sp_drive_size='3.5T,1.8T,223.6G'
 #
-# coma-separated list of device models to initialize
-#sp_drive_model='QEMU HARDDISK'
+# coma-separated list of models of devices to initialize 
+#sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8,SAMSUNG MZ7LH3T8'
+#
+# init the drives even if they contain partitions (use with caution)
+#sp_drive_erase=False		# default
 
 # sp_node_roles: comma-separated list of roles for the node(s) being deployed
 # all roles will get '@block cli' services installed
@@ -89,7 +90,7 @@ sp_config='/path/to/storpool.conf'
 #
 # client		# client hypervisor node
 # server[:N]		# N - max instances (1 if omitted)
-# nvme			# needs nvmed enabled (should disappear with disk_init procedure improvement)
+# nvme			# needs nvmed enabled (should disappear with drive_init procedure improvement)
 # iscsi
 # mgmt
 # bridge
