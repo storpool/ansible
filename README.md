@@ -1,14 +1,14 @@
 StorPool ansible deployment
 ===========================
 
-This contains an example role - storpool-common - and an example inventory
-file that has the variables which contains the variables that control the
-deployment.
+The repository contains a playbook for deploying storpool.
+For now there is only one role.
+It is still a work in progress, but should handle most deployments.
 
-This is still work in progress, but is able to do most deployments. Work
-is needed for:
+Work is needed for:
 
 - better disk initialization
 - tests of CPU settings (turbocheck)
-- deployment of integrations (lvmsp, cloudstack)
-
+- auto-enable storpool_nvmed if nvme drives have been initialized
+- add integration roles (onapp, openstack, cloudstack opennebula, etc)
+- ubuntu: more testing to address specific cases
