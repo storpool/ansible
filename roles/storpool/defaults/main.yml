@@ -85,7 +85,6 @@ sp_deps:
     - hwloc
     - kexec-tools
     - libcgroup-tools
-    - libcgroup-tools
     - lldpd
     - logrotate
     - lshw
