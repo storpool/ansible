@@ -40,6 +40,12 @@ else
 	let num=$last+1 || true
 fi
 
+if [[ $(cat /sys/block/${dev#'/dev/'}/queue/rotational) -eq 0 ]]; then
+    ssd='-s'
+else
+    ssd=
+fi
+
 if [ "${dev#/dev/nvme}" != "$dev" ] ; then
     part=${dev}p1
 else
@@ -59,4 +65,4 @@ else
 	init=
 fi
 
-storpool_initdisk $init $num $part || true
+storpool_initdisk $init $ssd $num $part || true
