@@ -40,6 +40,8 @@ sp_config='/path/to/storpool.conf'
 
 # automatically configure network interfaces based on storpool.conf vars
 #sp_configure_network=False	# default
+# overwrite existing ineterface configuration files (iface-genconf -o)
+#sp_overwrite_iface_conf=False	# default
 
 # set SELinux state (permissive or disabled)
 #sp_selinux='disabled'		# default

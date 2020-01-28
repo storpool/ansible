@@ -18,9 +18,6 @@
     mode: '0755'
   when: ansible_os_family == 'Ubuntu'
 
-- name: "generate StorPool net interfaces configuration"
-  shell: "/usr/sbin/iface-genconf -a -o"
-
 - name: "deploy ifup-pre-local on CentOS/RHEL"
   copy:
     src: ifup-pre-local
@@ -34,6 +31,9 @@
     dest: /sbin
     mode: 0755
   when: ansible_os_family == "Debian"
+
+- name: "generate StorPool net interfaces configuration"
+  shell: "/usr/sbin/iface-genconf -a {{ '-o' if sp_overwrite_iface_conf else '' }}"
 
 - name: "init iface1"
   shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f3 | xargs ifup"

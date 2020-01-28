@@ -210,7 +210,7 @@
   set_fact:
     sp_summary_msg: # do not use tabs below - the output gets ugly
       - "OS update:        {{ sp_update_system }}"
-      - "Net config:       {{ sp_configure_network }}"
+      - "Net config:       {{ sp_configure_network }} ({{ '' if sp_overwrite_iface_conf and sp_configure_network else 'do not ' }}overwrite existing)"
       - "Network Manager:  {{ 'disable' if sp_disable_nm else 'leave as is' }}"
       - "Firewall:         {{ 'disable' if sp_disable_fw else 'adjust' }}"
       - "SELinux:          {{ sp_selinux }}"

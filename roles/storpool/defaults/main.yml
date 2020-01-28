@@ -6,6 +6,7 @@ sp_release: '19.01'
 sp_new_cluster: false
 sp_update_system: true
 sp_configure_network: false
+sp_overwrite_iface_conf: false
 sp_selinux: 'disabled'
 sp_disable_nm: true
 sp_disable_fw: true
