@@ -1,0 +1,53 @@
+- name: "copy drive init tools"
+  copy:
+    src: "{{ item }}"
+    dest: "{{ sp_toolsdir }}"
+    mode: 0755
+  with_items:
+    - "init_drive.sh"
+    - "perform_disktest.sh"
+
+- name: "convert sp_drives to list"
+  set_fact:
+    sp_drives: "{{ sp_drive_list | map('regex_replace', '^(.*)', '/dev/\\1') | list }}"
+
+- name: "test drives"
+  shell: "{{ sp_toolsdir }}/perform_disktest.sh {{ sp_drives | join(' ') }}"
+  when: not sp_vm
+  tags: test
+
+- name: "init drive"
+  shell: "{{ sp_toolsdir }}/init_drive.sh {{ item }} {{ sp_init_node if sp_init_node is defined else 'noinit' }}"
+  with_items: "{{ sp_drives }}"
+  register: sp_initialized_drives
+
+- name: "get needed number of server instances"
+  script: get_instances.py
+  args:
+    executable: python2
+  register: sp_instances
+
+- name: "stop server instances"
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+  with_items: "{{ sp_instances.stdout_lines }}"
+
+- name: "stop storpool_nvmed"
+  systemd:
+    name: storpool_nvmed
+    state: stopped
+    enabled: no
+  when: sp_roles.nvme
+
+- name: "expose all NVMe drives"
+  shell: /usr/lib/storpool/expose_nvme_drives
+  when: sp_roles.nvme
+
+- name: "settle udev"
+  shell: udevadm settle
+
+- name: "assign drives to servers"
+  shell: "/usr/lib/storpool/multi-server-helper.py -i {{ sp_server_instances }} | bash"
+  when: sp_initialized_drives

@@ -1,0 +1,12 @@
+- name: "generate cgroups"
+  shell: "/usr/sbin/storpool_cg conf {{ sp_cg_conf_extra }}"
+
+- name: "start/enable cgconfig"
+  systemd:
+    name: cgconfig
+    state: started
+    enabled: yes
+
+- name: "migrate cgroups"
+  shell: "/usr/sbin/storpool_cg conf -E -M {{ sp_cg_conf_extra }}"
+  ignore_errors: yes

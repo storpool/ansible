@@ -1,6 +1,0 @@
-- name: Enable chronyd
-  systemd:
-    name: chronyd
-    enabled: yes
-    state: started
-

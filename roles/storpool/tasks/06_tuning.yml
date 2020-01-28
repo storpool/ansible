@@ -1,0 +1,131 @@
+- name: "remove swap entry from /etc/fstab"
+  mount:
+    name: swap
+    fstype: swap
+    state: absent
+
+- name: "disable swap"
+  command: swapoff -a
+
+- name: "add/update shmfs entry in fstab"
+  mount:
+    name: /dev/shm
+    src: none
+    fstype: tmpfs
+    opts: 'size=90%,nosuid,nodev'
+    state: mounted
+
+- name: "define tuned profile"
+  shell: tuned-adm profile throughput-performance
+  when: ansible_os_family == 'RedHat'
+
+- name: "enable tuned"
+  systemd:
+    name: tuned
+    enabled: yes
+    state: started
+  when: ansible_os_family == 'RedHat'
+
+- name: "enable chronyd"
+  systemd:
+    name: chronyd
+    enabled: yes
+    state: started
+
+- name: "disable irqbalance"
+  systemd:
+    name: irqbalance
+    enabled: no
+    state: stopped
+  ignore_errors: yes
+
+- name: "enable mcelog"
+  systemd:
+    name: mcelog
+    enabled: yes
+    state: started
+  ignore_errors: yes
+
+- name: "enable lldpd"
+  systemd:
+    name: lldpd
+    enabled: yes
+    state: started
+  ignore_errors: yes
+
+- name: "limit journald memory to 64M"
+  lineinfile:
+    path: /etc/systemd/journald.conf
+    regexp: RuntimeMaxUse=
+    line: RuntimeMaxUse=64M
+    insertbefore: RuntimeKeepFree
+  register: sp_journald
+
+- name: "restart journald"
+  systemd:
+    name: systemd-journald
+    state: restarted
+  when: sp_journald.changed
+
+- name: "disable firewalld"
+  systemd:
+    name: firewalld
+    enabled: no
+    state: stopped
+  ignore_errors: yes
+  when: ansible_os_family == 'RedHat' and sp_disable_fw
+
+- name: "add StorPool ports to firewalld (81,3749,47567/tcp)"
+  firewalld:
+    port: "{{ item }}/tcp"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  ignore_errors: yes
+  when: ansible_os_family == 'RedHat' and not sp_disable_fw
+  with_items:
+    - '81'
+    - '3749'
+    - '47567'
+
+- name: "disable ufw"
+  systemd:
+    name: ufw
+    enabled: no
+    state: stopped
+  ignore_errors: yes
+  when: ansible_distribution == 'Ubuntu' and sp_disable_fw
+
+- name: "add StorPool ports to ufw (81,3749,47567/tcp)"
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  ignore_errors: yes
+  when: ansible_distribution == 'Ubuntu' and not sp_disable_fw
+  with_items:
+    - '81'
+    - '3749'
+    - '47567'
+
+- name: "disable ondemand service on Ubuntu"
+  systemd:
+    name: ondemand
+    enabled: no
+    state: stopped
+  ignore_errors: yes
+  when: ansible_distribution == 'Ubuntu'
+
+- name: "disable NetworkManager"
+  systemd:
+    name: NetworkManager
+    enabled: no
+    state: stopped
+  ignore_errors: yes
+  when: sp_disable_nm and ansible_os_family == 'RedHat'
+
+- name: "set SELinux to {{ sp_selinux }}"
+  selinux:
+    state: "{{ sp_selinux }}"
+    policy: targeted
+  ignore_errors: yes

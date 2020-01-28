@@ -1,0 +1,236 @@
+- name: "check where I am running"
+  run_once: true
+  become: no
+  local_action: command hostname
+  register: sp_local_hostname
+
+- name: "sp_poli: set value"
+  set_fact:
+    sp_poli: "{{ sp_local_hostname.stdout == 'poli' }}"
+
+- name: "sp_poli: validation"
+  fail:
+    msg: "sp_release_file set to 'poli' but I am not running on poli!"
+  when: sp_release_file == 'poli' and not sp_poli
+
+- name: "sp_release_file: get file status"
+  run_once: true
+  become: no
+  local_action: stat path={{ sp_release_file }}
+  register: sp_release_file_exists
+  when: sp_release_file not in [ 'web', 'poli' ]
+
+- name: "sp_release_file: check if file is readable"
+  fail:
+    msg: "Unable to read sp_release_file: {{ sp_release_file }}"
+  when: sp_release_file not in [ 'web', 'poli' ] and not sp_release_file_exists.stat.readable
+
+- name: "sp_config: get file status"
+  run_once: true
+  become: no
+  local_action: stat path={{ sp_config }}
+  register: sp_config_exists
+
+- name: "sp_config: check if file is readable"
+  fail:
+    msg: "Unable to read sp_config: {{ sp_config }}"
+  when: not sp_config_exists.stat.exists or not sp_config_exists.stat.readable
+
+- name: "sp_selinux: validate"
+  fail:
+    msg: "invalid 'sp_selinux' value: {{ sp_selinux }}"
+  when: "sp_selinux not in ['disabled', 'permissive', 'enforcing']"
+
+- name: "sp_vm: try to guess if not defined"
+  set_fact:
+    sp_vm: "{{ ansible_product_name == 'KVM' }}"
+    sp_vm_guessed: true
+  when: sp_vm is not defined
+
+- name: "validate boolean variables"
+  fail:
+    msg: "'{{ item }}' value is not boolean: {{ vars[item] }}"
+  when: vars[item] not in [ true, false ]
+  with_items:
+    - sp_poli
+    - sp_new_cluster
+    - sp_update_system
+    - sp_configure_network
+    - sp_disable_nm
+    - sp_disable_fw
+    - sp_vm
+    - sp_reboot
+    - sp_summary_wait
+
+- name: "sp_roles_list: populate from sp_node_roles"
+  set_fact:
+    sp_roles_list: "{{ sp_node_roles.split(',') }}"
+
+- name: "sp_node_roles: validate role list"
+  fail:
+    msg: "'{{ item }}' is not a valid role!"
+  with_items: "{{ sp_roles_list }}"
+  when: "item not in sp_valid_roles"
+
+- name: "sp_roles: initial definition"
+  set_fact:
+    sp_roles: {}
+
+- name: "sp_roles: decide on server"
+  set_fact:
+    sp_roles: "{{ sp_roles | combine({'server': true}) }}"
+    sp_server_instances: "{{ item }}"
+  with_items: "{{ sp_roles_list }}"
+  when: "'server' in item.split(':')"
+
+- name: "sp_server_instances = 1"
+  set_fact:
+    sp_server_instances: '1'
+  when: "sp_server_instances is defined and sp_server_instances == 'server'"
+
+- name: "sp_server_instances > 1"
+  set_fact:
+    sp_server_instances: "{{ sp_server_instances.split(':')[1] }}"
+  when: "sp_server_instances is defined and sp_server_instances != '1'"
+
+- name: "sp_server_instances = 0"
+  set_fact:
+    sp_server_instances: '0'
+  when: "sp_server_instances is not defined"
+
+- name: "sp_roles: decide on other roles"
+  set_fact:
+    sp_roles: "{{ sp_roles | combine({item: true}) }}"
+  when: "item in sp_roles_list"
+  with_items:
+    - client
+    - mgmt
+    - iscsi
+    - bridge
+
+- name: "sp_roles: populate false values"
+  set_fact:
+    sp_roles: "{{ sp_roles | combine({item: false}) }}"
+  when: "item not in sp_roles.keys()"
+  with_items:
+    - server
+    - client
+    - mgmt
+    - iscsi
+    - bridge
+    - nvme
+
+- name: "sp_install_services: initial definition"
+  set_fact:
+    sp_install_services: '@block cli'
+
+- name: "sp_install_services: add services"
+  set_fact:
+    sp_install_services: "{{ sp_install_services }} {{ item }}"
+  when: "sp_roles[item]"
+  with_items:
+    - server
+    - iscsi
+    - mgmt
+    - bridge
+
+- name: "sp_systemd_services: initial definition"
+  set_fact:
+    sp_systemd_services: "{{ sp_services.common }} + {{ sp_services.helper }}"
+
+- name: "sp_ststend_services: add services"
+  set_fact:
+    sp_systemd_services: "{{ sp_systemd_services }} + {{ sp_services[item] }}"
+  when: "sp_roles[item]"
+  with_items:
+    - server
+    - iscsi
+    - mgmt
+    - bridge
+    - nvme
+    
+- name: "pick server node for initial disk"
+  run_once: true
+  set_fact:
+    sp_init_node: >-
+      {{ ansible_play_hosts | map('extract', hostvars) | list |
+         json_query('[?sp_roles.server].ansible_hostname | [0]') }}
+  when: sp_new_cluster
+
+- name: "check for server nodes if new cluster"
+  run_once: true
+  fail:
+    msg: "New cluster deployment, but no server nodes!"
+  when: "sp_new_cluster and sp_init_node|length == 0"
+
+- name: "sp_cg_conf_extra: initial definition"
+  set_fact:
+    sp_cg_conf_extra: "{{ sp_cg_conf_extra|upper }}"
+  when: "sp_cg_conf_extra|length > 0"
+
+- name: "sp_cg_conf_extra: decide if hyperconverged node"
+  set_fact:
+    sp_cg_conf_extra: "CONVERGED=1 {{ sp_cg_conf_extra }}"
+  when: "sp_roles.server and sp_roles.client and 'CONVERGED' not in sp_cg_conf_extra"
+
+- name: "sp_drive[_size,_model]_list: initial definition"
+  set_fact:
+    sp_drive_list: []
+    sp_drive_size_list: []
+    sp_drive_model_list: "{{ sp_drive_model.split(',') if sp_drive_model is defined else [] }}"
+  when: sp_roles.server
+
+- name: "sp_drive_size_list: convert to bytes and populate"
+  set_fact:
+    sp_drive_size_list: "{{ sp_drive_size_list + [ item | human_to_bytes ] }}"
+  with_items: "{{ sp_drive_size.split(',') }}"
+  when: sp_roles.server and sp_drive_size is defined
+
+- name: "sp_drive_list: populate"
+  set_fact:
+    sp_drive_list: "{{ sp_drive_list + [ item.key ] }}"
+  with_dict: "{{ ansible_devices }}"
+  when: >
+    sp_roles.server and ( (sp_drives is defined and item.key in sp_drives.split(',')) or
+    (sp_drive_size is defined and item.value.size|human_to_bytes in sp_drive_size_list) or
+    (sp_drive_model is defined and item.value.model in sp_drive_model_list) )
+
+- name: "sp_drive_list: validate"
+  fail:
+    msg: "{{ item }} contains partitions! Please remove them or set sp_drive_erase to True"
+  with_items: "{{ sp_drive_list }}"
+  when: ansible_devices[item].partitions|length > 0 and not sp_drive_erase
+
+- name: "check if we have drives for the servers"
+  fail:
+    msg: "Node declared as a server, but no drives found to initialize"
+  when: "sp_roles.server and sp_drive_list|length == 0"
+
+- name: "populate sp_summary_msg"
+  set_fact:
+    sp_summary_msg: # do not use tabs below - the output gets ugly
+      - "OS update:        {{ sp_update_system }}"
+      - "Net config:       {{ sp_configure_network }} ({{ '' if sp_overwrite_iface_conf and sp_configure_network else 'do not ' }}overwrite existing)"
+      - "Network Manager:  {{ 'disable' if sp_disable_nm else 'leave as is' }}"
+      - "Firewall:         {{ 'disable' if sp_disable_fw else 'adjust' }}"
+      - "SELinux:          {{ sp_selinux }}"
+      - "VM Node:          {{ sp_vm }} ({{ 'Guessed' if sp_vm_guessed is defined else 'Defined' }}, Product Name: {{ ansible_product_name }})"
+      - "New Cluster:      {{ sp_new_cluster }}{{' (initial disk node)' if sp_new_cluster and sp_init_node == ansible_hostname else ''}}"
+      - "SP release:       {{ sp_release }}"
+      - "Release Source:   {{ sp_release_file }}"
+      - "storpool.conf:    {{ sp_config }}"
+      - "node roles:       {{ sp_node_roles }}"
+      - "install.sh:       {{ sp_install_services }}"
+      - "Drives to init:   {{ sp_drive_list | sort | join(', ') if sp_roles.server else 'none' }}"
+      - "Server Instances: {{ sp_server_instances }}"
+      - "storpool_cg conf: {{ sp_cg_conf_extra if sp_cg_conf_extra != '' else 'default' }}"
+  when: sp_summary_wait
+
+- name: "sp_summary_msg: display"
+  debug: var=sp_summary_msg
+  when: sp_summary_wait
+
+- name: "sp_summary_msg: review"
+  pause:
+    prompt: "\nPlease Review\n\nPress Enter to begin deployment\nor Ctrl-C,A to abort"
+  when: sp_summary_wait

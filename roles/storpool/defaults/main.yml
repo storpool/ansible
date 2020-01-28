@@ -1,0 +1,133 @@
+# default values for vars not defined in inventory file
+
+sp_release_file: 'web'
+sp_toolsdir: '/root/storpool'
+sp_release: '19.01'
+sp_new_cluster: false
+sp_update_system: true
+sp_configure_network: false
+sp_overwrite_iface_conf: false
+sp_selinux: 'disabled'
+sp_disable_nm: true
+sp_disable_fw: true
+sp_reboot: false
+sp_summary_wait: true
+sp_node_roles: 'client'
+sp_cg_conf_extra: ''
+sp_drive_erase: false
+
+# valid sp_node_roles values
+sp_valid_roles:
+  - client
+  - server
+  - server:1
+  - server:2
+  - server:3
+  - server:4
+  - server:5
+  - server:6
+  - nvme
+  - mgmt
+  - bridge
+  - iscsi
+
+# systemd services
+sp_services:
+  helper:
+    - storpool_hugepages
+    - storpool_cgmove
+    - storpool_kdump
+    - storpool_abrtsync
+  common: 
+    - storpool_beacon
+    - storpool_stat
+    - storpool_block
+  server:
+    - storpool_controller
+  nvme:
+    - storpool_nvmed
+  mgmt:
+    - storpool_mgmt
+  bridge:
+    - storpool_bridge
+  iscsi:
+    - storpool_iscsi
+
+# package dependencies
+sp_deps:
+  rpm:
+    - bash-completion
+    - bc
+    - chrony
+    - cpupowerutils
+    - dmidecode
+    - fio
+    - git
+    - hwloc
+    - kexec-tools
+    - libcgroup-tools
+    - libcgroup-tools
+    - lldpd
+    - logrotate
+    - lshw
+    - lsof
+    - lz4
+    - man
+    - mc
+    - mcelog
+    - mtr
+    - numactl
+    - nvme-cli
+    - patch
+    - pciutils
+    - perf
+    - perl
+    - perl-core
+    - psmisc
+    - python-requests
+    - rsync
+    - screen
+    - smartmontools
+    - socat
+    - strace
+    - sysstat
+    - tcpdump
+    - tmux
+    - tuned
+    - vim-enhanced
+    - wget
+  deb:
+    - bash-completion
+    - cgroup-bin
+    - cgroup-tools
+    - chrony
+    - dmidecode
+    - fio
+    - git
+    - hwloc
+    - kexec-tools
+    - liblz4-tool
+    - lldpd
+    - logrotate
+    - lshw
+    - lsof
+    - man
+    - mc
+    - mtr
+    - numactl
+    - nvme-cli
+    - patch
+    - pciutils
+    - perl
+    - psmisc
+    - python-requests
+    - rsync
+    - screen
+    - smartmontools
+    - socat
+    - strace
+    - sysstat
+    - tcpdump
+    - tmux
+    - vlan
+    - wget

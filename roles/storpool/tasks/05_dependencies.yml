@@ -1,0 +1,41 @@
+- name: "install EPEL on CentOS/RHEL"
+  yum:
+    name: epel-release
+  when: ansible_os_family == 'RedHat'
+
+- name: "upgrade all packages on CentOS/RHEL"
+  yum:
+    name: '*'
+    state: latest
+  when: sp_update_system and ansible_os_family == 'RedHat'
+
+- name: "install StorPool dependencies for CentOS/RHEL"
+  yum:
+    name: "{{ packages }}"
+    enablerepo: epel
+  vars:
+    packages: "{{ sp_deps.rpm }}"
+  when: ansible_os_family == 'RedHat'
+
+- name: "upgrade all packages on Ubuntu/Debian"
+  apt:
+    upgrade: yes
+    update_cache: yes
+  when: sp_update_system and ansible_os_family == 'Debian'
+
+- name: "install StorPool dependencies for Ubuntu/Debian"
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+  vars:
+    packages: "{{ sp_deps.deb }}"
+  when: ansible_os_family == 'Debian'
+
+- name: "install HV dependencies for Ubuntu/Debian"
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+  vars:
+    packages:
+    - systemd-container
+  when: sp_roles.client and ansible_os_family == 'Debian'

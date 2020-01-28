@@ -1,0 +1,5 @@
+- name: "deploy storpool"
+  hosts: storpool
+  become: yes
+  roles:
+  - storpool
