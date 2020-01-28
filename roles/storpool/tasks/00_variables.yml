@@ -145,7 +145,7 @@
   set_fact:
     sp_init_node: >-
       {{ ansible_play_hosts | map('extract', hostvars) | list |
-         json_query('[?sp_roles.server].ansible_hostname | [0]') }}
+         json_query('[?sp_roles.server].ansible_fqdn | [0]') }}
   when: sp_new_cluster
 
 - name: "check for server nodes if new cluster"
@@ -206,7 +206,7 @@
       - "Firewall:         {{ 'disable' if sp_disable_fw else 'adjust' }}"
       - "SELinux:          {{ sp_selinux }}"
       - "VM Node:          {{ sp_vm }} ({{ 'Guessed' if sp_vm_guessed is defined else 'Defined' }}, Product Name: {{ ansible_product_name }})"
-      - "New Cluster:      {{ sp_new_cluster }}{{' (initial disk node)' if sp_new_cluster and sp_init_node == ansible_hostname else ''}}"
+      - "New Cluster:      {{ sp_new_cluster }}{{' (initial disk node)' if sp_new_cluster and sp_init_node == ansible_fqdn else ''}}"
       - "SP release:       {{ sp_release }}"
       - "Release Source:   {{ sp_release_file }}"
       - "storpool.conf:    {{ sp_config }}"

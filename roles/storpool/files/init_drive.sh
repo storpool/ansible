@@ -58,7 +58,7 @@ if ! [ -b ${part} ] ; then
 	sleep 1
 fi
 
-if [ "$initdrivenode" == "${HOSTNAME}" ] && ! [ -f /etc/storpool/initialdrive.ansible ]; then
+if [ "$initdrivenode" == "$(hostname -f)" ] && ! [ -f /etc/storpool/initialdrive.ansible ]; then
 	touch /etc/storpool/initialdrive.ansible
 	init=-I
 else
