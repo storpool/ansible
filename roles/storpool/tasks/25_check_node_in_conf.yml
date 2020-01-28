@@ -1,2 +1,2 @@
-- name: Make sure the node exists in storpool.conf
+- name: "make sure the node exists in storpool.conf"
   shell: '[ -n "$(storpool_showconf -n -e SP_OURID)" ]'

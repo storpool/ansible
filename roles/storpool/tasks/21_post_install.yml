@@ -1,0 +1,8 @@
+- name: "restart rsyslog"
+  systemd:
+    name: rsyslog
+    state: restarted
+    enabled: yes
+
+- name: "reload sysctl entries"
+  shell: '`which sysctl` --system'

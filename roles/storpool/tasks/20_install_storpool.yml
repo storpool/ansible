@@ -1,0 +1,64 @@
+- name: "install storpool.conf"
+  copy:
+    src: "{{ sp_config }}"
+    dest: /etc/
+
+- name: "download StorPool package (release: {{ sp_release }})"
+  shell: '`which wget` -q -O - https://vault.storpool.com/getpkg | bash'
+  args:
+    chdir: "{{ sp_toolsdir }}"
+  register: sp_release_tgz
+  when: sp_release_file == 'web'
+
+- name: "generate-build-conf"
+  run_once: true
+  become: no
+  local_action: command chdir="{{ sp_custdir }}/{{ customer }}" /usr/local/bin/generate-build-conf
+  when: sp_release_file == 'poli' and sp_poli and sp_custdir is defined and customer is defined
+
+- name: "copytoservers"
+  run_once: false
+  become: no
+  local_action: command chdir="{{ sp_custdir }}/{{ customer }}" /usr/local/bin/copytoservers r={{ sp_release }} host={{ inventory_hostname }}
+  when: sp_release_file == 'poli' and sp_poli and sp_custdir is defined and customer is defined
+
+- name: "copy local release file to nodes"
+  copy:
+    src: "{{ sp_release_file }}"
+    dest: "{{ sp_toolsdir }}"
+  when: sp_release_file != 'web'
+
+- name: "prepare copied release file for extraction"
+  set_fact:
+    sp_release_tgz: { stdout: "{{ sp_release_file | basename }}" }
+  when: sp_release_file != 'web'
+
+- name: "unpack release file"
+  unarchive:
+    src: "{{ sp_toolsdir }}/{{ sp_release_tgz.stdout }}"
+    dest: "{{ sp_toolsdir }}"
+    remote_src: yes
+  when: sp_release_file != 'poli'
+
+- name: "get unpacked StorPool release directory"
+  shell: 'ls -d {{ sp_toolsdir }}/storpool-1[89].0*/ | sort -V | tail -n 1'
+  register: sp_install_dir
+
+- name: "StorPool install"
+  shell: "./install.sh {{ sp_install_services }}"
+  args:
+    chdir: "{{ sp_install_dir.stdout }}"
+
+- name: "check if booting via EFI on RHEL/CentOS"
+  stat:
+    path: /boot/efi/EFI/centos/grub.cfg
+  register: sp_centos_efi
+  when: ansible_os_family == 'RedHat'
+
+- name: "update GRUB config on CentOS/RHEL"
+  shell: "/usr/sbin/grub2-mkconfig -o {{ '/boot/efi/EFI/centos/grub.cfg' if sp_centos_efi.stat.exists else '$(readlink -f /etc/grub2.cfg)' }}"
+  when: ansible_os_family == 'RedHat'
+
+- name: "update GRUB config on Ubuntu/Debian"
+  shell: "update-grub2"
+  when: ansible_os_family == 'Debian'

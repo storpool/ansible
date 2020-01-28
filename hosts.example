@@ -1,85 +1,133 @@
-# storpool-common hosts file example
+# ansible hosts inventory file for StorPool deployment
+# all variables can also be defined per node in the roles sections below
+# NOTE: all boolean values must be declared as True/False (capital first letter only!)
 
 [all:vars]
-# global variables:
+# global variables for all roles
 
-# used by storpool for deployments from bastion host
-# customer=lab-vk-ansible
-# sp_custdir=/home/lab
+# remote ssh variables for ansible
+# if user!=root /etc/sudoers on nodes needs to be adjusted accordingly
+#ansible_user='storpool'	# defaults use ssh_config
+#ansible_user='root'		# defaults use ssh_config
+#ansible_port=22		# defaults use ssh_config
 
-# what to install:
-# sp_mgmt=True
-# sp_bridge=True
-# sp_iscsi=True
-# sp_server=True
+# used by StorPool for deployments from bastion host
+sp_cluster='ansible-test'
+sp_custdir='/home/cust'
+sp_toolsdir='/root/storpool'
 
-# where to get the storpool release file from
-# sp_release_file=/tmp/storpool-...	# path to release file stored locally
-# sp_release_file=web			# download and use latest release from storpool
-sp_release_file=web
+[storpool:vars]
+# storpool role specific variables
 
-# ssh to nodes with root
-ansible_user=root
+# where to get the StorPool release file from
+# sp_release_file='/path/storpool-...'	# tgz release file stored on ansible deployment host
+# sp_release_file='web'			# default - download release from StorPool
+sp_release_file='web'
 
-# ssh to nodes with regular user and do sudo to gain root
-# /etc/sudoers needs to be adjusted on the nodes
-#ansible_user=storpool
+# StorPool version to be deployed (if sp_release_file='web')
+sp_release='19.01'			# default
 
-# directory for storpool support tools on the nodes
-sp_toolsdir=/root/storpool
+# deployment type
+#sp_new_cluster=True		# new cluster deployment
+#sp_new_cluster=False		# adding node(s) to existing cluster (default)
+sp_new_cluster=True
 
-# drives to initialize
-# sp_drives="...."
+# local path to storpool.conf
+sp_config='/path/to/storpool.conf'
 
-# size of the drives that will be used (visible with `lsblk`)
-# sp_drive_size: "....T"
+# perform node OS update (yum/apt update/upgrade)
+#sp_update_system=True		# default
 
-# node for initial drive (if new install)
-# sp_node_with_initial_drive=1
+# automatically configure network interfaces based on storpool.conf vars
+#sp_configure_network=False	# default
 
-# storpool.conf location
-# sp_config=/tmp/storpool.conf
-
-# storpool_server instances
-# sp_maxinstances=1
-
-# perform node upgrade
-# sp_update_system=True
-
-# reboot node
-# sp_reboot=True
-
-# automatically configure network from storpool.conf data
-# sp_configure_network=True
+# set SELinux state (permissive or disabled)
+#sp_selinux='disabled'		# default
 
 # stop and disable NetworkManager
-# sp_disable_nm=False
+#sp_disable_nm=True		# default
 
-# stop and disable firewalld/ufw
-# sp_disable_fw=False
+# stop and disable firewalld/ufw (if False, will add ports for StorPool)
+#sp_disable_fw=True		# default
 
-# nodes are vms
-# sp_vm=False
+# node is a Virtual Machine (skip tests)
+#sp_vm=False			# default: try to deduct from CPU product_name
 
-sp_release=19.01
-customer=lab-vk-ansible
-sp_custdir=/home/lab
-sp_config=/home/lab/lab-vk-ansible/storpool.conf
-sp_maxinstances=1
-sp_node_with_initial_drive=1
-sp_configure_network=True
+# generate a summary and pause after variable validation
+#sp_summary_wait=True		# default
 
-[nodes-server:vars]
-sp_server=True
-sp_drives="/dev/sdb /dev/sdc /dev/sdd"
+# reboot node after deployment (not implemented yet, maybe combine with kdump)
+#sp_reboot=False		# default
 
-[nodes-server]
-lab-vk-ansible sp_mgmt=True
+# drive selection section
+#
+# devices matching any of the three conditions below will get initialized
+# values can be obtained by running 'lsblk -dbo NAME,SIZE,MODEL' on the nodes
+# NOTE: a matched device, already containing partitions, will trigger an error
+#
+# CAUTION: the drive_init procedure is not fully implemented yet
+# - currently works with only one condition (sp_drives OR sp_drive_size)
+# - sp_drive_model: not yet implemented
+# - no RAID controller detection, and private case scenarios
+# - always create only one partition per drive
+# - needs ability to specify storpool_initdisk parameters
+# - needs checks on when NOT to touch a drive
+#
+# coma-separated list of devices to initialize
+#sp_drives='nvme0n1,nvme1n1,sdb,sdc'
+#
+# coma-separated sizes of devices in bytes to initialize
+#sp_drive_size='2000398934016,100030242816'
+#
+# coma-separated list of device models to initialize
+#sp_drive_model='QEMU HARDDISK'
 
-[nodes-client]
-#example-node ansible_connection=local
+# sp_node_roles: comma-separated list of roles for the node(s) being deployed
+# all roles will get '@block cli' services installed
+# defining 'server' and 'client' will treat the node as hyperconverged
+# available roles:
+#
+# client		# client hypervisor node
+# server[:N]		# N - max instances (1 if omitted)
+# nvme			# needs nvmed enabled (should disappear with disk_init procedure improvement)
+# iscsi
+# mgmt
+# bridge
+#
+#sp_node_roles='client'		# default
+#sp_node_roles='server,iscsi'
 
-[nodes-hyperconverged:vars]
-sp_max_instances=2
+# sp_cg_conf_extra: list of arguments to pass to storpool_cg conf
+# see 'storpool_cg conf -h' for all available arguments
+# examples:
+#
+#sp_cg_conf_extra='CORES=2 NUMA_OVERFLOW=1 SP_COMMON_LIMIT=2G SP_ALLOC_LIMIT=2G'
+#sp_cg_conf_extra='SYSTEM_LIMIT=4G USER_LIMIT=2G MACHINE_LIMIT=4G'
+#
+# default if client+server in sp_node_roles
+#sp_cg_conf_extra='CONVERGED=1'
+#
+# default otherwise
+#sp_cg_conf_extra=''
 
-[nodes-hyperconverged]
+[storpool]
+# node hostnames and per-node variables
+# if no variables are defined will use globals/defaults from above
+# examples:
+#
+#sp-node.1  sp_node_roles='server:6,mgmt' sp_drive_size='2000398934016'
+#sp-node.2  sp_node_roles='server:6,mgmt' sp_drive_size='2000398934016'
+#sp-node.3  sp_node_roles='server:6,mgmt' sp_drive_size='2000398934016'
+#sp-node.4  sp_node_roles='server:4' sp_drives='nvme0n1,nvme1n1,nvme2n1,nvme3n1'
+#sp-node.5  sp_node_roles='server:4' sp_drives='nvme0n1,nvme1n1,nvme2n1,nvme3n1'
+#sp-node.6  sp_node_roles='server:2' sp_drives='nvme0n1,nvme1n1'
+#sp-node.11 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
+#sp-node.12 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
+#sp-node.13 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
+#sp-node.21 sp_node_roles='client,onapp' sp_disable_fw=False
+#sp-node.22 
+#sp-node.23
+#sp-node.31 sp_node_roles='bridge' sp_vm=True sp_configure_network=False
+#sp-node.32 sp_vm=True sp_configure_network=False sp_disable_nm=False
+
+# EOF

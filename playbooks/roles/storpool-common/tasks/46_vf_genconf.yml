@@ -1,7 +1,0 @@
-- name: Generate VF config
-  shell: "/usr/lib/storpool/vf-genconf"
-  when: sp_vm is not defined or not sp_vm
-
-#- name: Apply VF config
-#  shell: "/usr/lib/storpool/vf-genconf -a all"
-#  when: sp_vm is not defined or not sp_vm

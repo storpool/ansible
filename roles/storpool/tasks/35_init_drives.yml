@@ -9,11 +9,11 @@
 
 - name: Convert sp_drives to list
   set_fact:
-    sp_drives: '{{ sp_drives.split( ) }}'
+    sp_drives: "{{ sp_drives.split(',') | map('regex_replace', '^(.*)', '/dev/\\1') | list }}"
   when: sp_drives is defined
 
 - name: Detect drives for StorPool
-  shell: 'lsblk -p | grep "{{ sp_drive_size }}.*disk" | cut -d " " -f1'
+  shell: 'lsblk -pb | grep "{{ sp_drive_size }}.*disk" | cut -d " " -f1'
   register: sp_drives_detected
   when: sp_drives is not defined and sp_drive_size is defined
 
@@ -29,10 +29,11 @@
 
 - name: Test drives
   shell: "{{ sp_toolsdir }}/perform_disktest.sh {{ sp_drives | join(' ') }}"
-  when: sp_drives is defined and (sp_vm is not defined or not sp_vm)
+  when: sp_drives is defined and not sp_vm
+  tags: test
 
 - name: Init drive
-  shell: "{{ sp_toolsdir }}/init_drive.sh {{ item }} {{ sp_node_with_initial_drive }}"
+  shell: "{{ sp_toolsdir }}/init_drive.sh {{ item }} {{ sp_init_node if sp_init_node is defined else 'noinit' }}"
   with_items: "{{ sp_drives }}"
   register: sp_initialized_drives
   when: sp_drives is defined
@@ -42,7 +43,6 @@
   args:
     executable: python2
   register: sp_instances
-  when: sp_server is defined and sp_server
 
 - name: Stop server instances
   systemd:
@@ -50,22 +50,21 @@
     state: stopped
     enabled: no
   with_items: "{{ sp_instances.stdout_lines }}"
-  when: sp_server is defined and sp_server
 
 - name: Stop storpool_nvmed
   systemd:
     name: storpool_nvmed
     state: stopped
     enabled: no
-  when: sp_server is defined and sp_server and sp_nvme is defined and sp_nvme
+  when: sp_roles.nvme
 
 - name: Expose all NVMe drives
   shell: /usr/lib/storpool/expose_nvme_drives
-  when: sp_nvme is defined and sp_nvme
+  when: sp_roles.nvme
 
 - name: Settle udev
   shell: udevadm settle
 
 - name: Assign drives to servers
-  shell: "/usr/lib/storpool/multi-server-helper.py -i {{ sp_maxinstances }} | sh"
+  shell: "/usr/lib/storpool/multi-server-helper.py -i {{ sp_server_instances }} | bash"
   when: sp_initialized_drives

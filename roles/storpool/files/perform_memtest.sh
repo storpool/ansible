@@ -7,7 +7,9 @@ if [ -f /etc/storpool/${memchips}.memtested ]; then
 	exit 0
 fi
 
-if [ -e /usr/local/bin/memtester ]; then
+if [ -e ${1}/memtester ]; then
+	MT=${1}/memtester
+elif [ -e /usr/local/bin/memtester ]; then
 	MT=/usr/local/bin/memtester
 elif [ -e /root/storpool/memtester ]; then
 	MT=/root/storpool/memtester

@@ -1,0 +1,18 @@
+- name: "get needed number of server instances"
+  script: get_instances.py
+  args:
+    executable: python2
+  register: sp_instances
+  when: sp_roles.server
+
+- name: "add storpool_server instances to sp_systemd_services"
+  set_fact:
+    sp_systemd_services: "{{ sp_systemd_services }} + {{ sp_instances.stdout_lines }}"
+  when: sp_roles.server
+
+- name: "start/enable sp_systemd_services"
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items: "{{ sp_systemd_services }}"

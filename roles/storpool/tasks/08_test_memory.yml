@@ -1,0 +1,11 @@
+- name: "copy memtester tools"
+  copy:
+    src: "{{ item }}"
+    dest: "{{ sp_toolsdir }}"
+    mode: 0755
+  with_items:
+    - "memtester"
+    - "perform_memtest.sh"
+
+- name: "perform memory test"
+  shell: "{{ sp_toolsdir }}/perform_memtest.sh {{ sp_toolsdir }}"
