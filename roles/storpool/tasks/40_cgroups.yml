@@ -6,7 +6,17 @@
     name: cgconfig
     state: started
     enabled: yes
+  register: sp_cgconfig
 
-- name: "migrate cgroups"
+- name: "cgconfig was already active - trying migration"
   shell: "/usr/sbin/storpool_cg conf -E -M {{ sp_cg_conf_extra }}"
   ignore_errors: yes
+  register: sp_cg_migrate
+  when: sp_cgconfig.status.ActiveState == 'active'
+
+- name: "migration failed - restarting cgconfig"
+  systemd:
+    name: cgconfig
+    state: restarted
+    enabled: yes
+  when: sp_cg_migrate.stderr is defined and sp_cg_migrate.stderr|length > 0

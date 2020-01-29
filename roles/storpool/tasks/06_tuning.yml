@@ -83,10 +83,7 @@
     state: enabled
   ignore_errors: yes
   when: ansible_os_family == 'RedHat' and not sp_disable_fw
-  with_items:
-    - '81'
-    - '3749'
-    - '47567'
+  with_items: "{{ sp_fw_ports }}"
 
 - name: "disable ufw"
   systemd:
@@ -103,10 +100,7 @@
     proto: tcp
   ignore_errors: yes
   when: ansible_distribution == 'Ubuntu' and not sp_disable_fw
-  with_items:
-    - '81'
-    - '3749'
-    - '47567'
+  with_items: "{{ sp_fw_ports }}"
 
 - name: "disable ondemand service on Ubuntu"
   systemd:

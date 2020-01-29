@@ -9,7 +9,7 @@
 
 - name: "convert sp_drives to list"
   set_fact:
-    sp_drives: "{{ sp_drive_list | map('regex_replace', '^(.*)', '/dev/\\1') | list }}"
+    sp_drives: "{{ sp_drive_list | sort | map('regex_replace', '^(.*)', '/dev/\\1') | list }}"
 
 - name: "test drives"
   shell: "{{ sp_toolsdir }}/perform_disktest.sh {{ sp_drives | join(' ') }}"

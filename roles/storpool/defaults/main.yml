@@ -31,6 +31,25 @@ sp_valid_roles:
   - bridge
   - iscsi
 
+# list of boolean variables for validation
+sp_bool_vars:
+  - sp_poli
+  - sp_new_cluster
+  - sp_update_system
+  - sp_configure_network
+  - sp_overwrite_iface_conf
+  - sp_disable_nm
+  - sp_disable_fw
+  - sp_vm
+  - sp_reboot
+  - sp_drive_erase
+  - sp_summary_wait
+
+sp_fw_ports:
+  - 81
+  - 3749
+  - 47567
+
 # systemd services
 sp_services:
   helper:
@@ -65,7 +84,6 @@ sp_deps:
     - git
     - hwloc
     - kexec-tools
-    - libcgroup-tools
     - libcgroup-tools
     - lldpd
     - logrotate
