@@ -190,7 +190,7 @@
   fail:
     msg: "{{ item }} contains partitions! Please remove them or set sp_drive_erase to True"
   with_items: "{{ sp_drive_list }}"
-  when: ansible_devices[item].partitions|length > 0 and not sp_drive_erase
+  when: sp_roles.server and ansible_devices[item].partitions|length > 0 and not sp_drive_erase
 
 - name: "check if we have drives for the servers"
   fail:
