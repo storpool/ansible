@@ -1,5 +1,11 @@
-- name: "generate cgroups"
+- name: "check if storpool cgroups already exist"
+  stat:
+    path: /etc/cgconfig.d/storpool.slice.conf
+  register: sp_slice
+
+- name: "generate cgroups if missing"
   shell: "/usr/sbin/storpool_cg conf {{ sp_cg_conf_extra }}"
+  when: not sp_slice.stat.exists
 
 - name: "start/enable cgconfig"
   systemd:
@@ -8,15 +14,13 @@
     enabled: yes
   register: sp_cgconfig
 
-- name: "cgconfig was already active - trying migration"
+- name: "cgconfig was active and SP cgroups already exist - trying migration"
   shell: "/usr/sbin/storpool_cg conf -E -M {{ sp_cg_conf_extra }}"
-  ignore_errors: yes
-  register: sp_cg_migrate
-  when: sp_cgconfig.status.ActiveState == 'active'
+  when: sp_cgconfig.status.ActiveState == 'active' and sp_slice.stat.exists
 
-- name: "migration failed - restarting cgconfig"
+- name: "cgconfig was active and SP cgroups did not exist - restarting cgconfig"
   systemd:
     name: cgconfig
     state: restarted
     enabled: yes
-  when: sp_cg_migrate.stderr is defined and sp_cg_migrate.stderr|length > 0
+  when: sp_cgconfig.status.ActiveState == 'active' and not sp_slice.stat.exists
