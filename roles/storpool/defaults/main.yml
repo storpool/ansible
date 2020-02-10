@@ -125,6 +125,7 @@ sp_deps:
     - hwloc
     - kexec-tools
     - liblz4-tool
+    - libselinux-python
     - lldpd
     - logrotate
     - lshw
