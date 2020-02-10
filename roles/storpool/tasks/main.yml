@@ -13,6 +13,7 @@
 - import_tasks: 25_check_node_in_conf.yml
 - import_tasks: 30_configure_network.yml
   when: sp_configure_network
+- import_tasks: 31_network_validation.yml
 - import_tasks: 35_init_drives.yml
   when: sp_roles.server
 - import_tasks: 40_cgroups.yml

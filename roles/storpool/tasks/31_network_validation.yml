@@ -1,0 +1,13 @@
+- name: "get sp_iface1 from storpool.conf"
+  shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2,3"
+  register: sp_iface1
+
+- name: "get sp_iface2 from storpool.conf"
+  shell: "/usr/sbin/storpool_showconf sp_iface2_cfg | cut -d: -f2,3"
+  register: sp_iface2
+
+- name: "validate storpool.conf interfaces"
+  fail:
+    msg: "interface {{ item }} is in storpool.conf, but does not exist"
+  when: item not in ansible_interfaces
+  with_items: "{{ sp_iface1.stdout.split(':') + sp_iface2.stdout.split(':') }}"
