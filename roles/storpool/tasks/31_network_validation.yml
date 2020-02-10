@@ -1,3 +1,6 @@
+- name: "Force ansible to regather interfaces facts"
+  setup: filter='ansible_interfaces'
+
 - name: "get sp_iface1 from storpool.conf"
   shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2,3"
   register: sp_iface1
