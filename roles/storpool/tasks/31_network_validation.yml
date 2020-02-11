@@ -1,16 +1,23 @@
-- name: "Force ansible to regather interfaces facts"
-  setup: filter='ansible_interfaces'
+- name: "force ansible to regather facts"
+  setup: filter='*'
 
-- name: "get sp_iface1 from storpool.conf"
-  shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2,3"
-  register: sp_iface1
+- name: "get StorPool interfaces from storpool.conf"
+  shell: "/usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d : -f 2,3 | sed -e ':a;N;$!ba;s/\\n/:/g'"
+  register: sp_ifaces
 
-- name: "get sp_iface2 from storpool.conf"
-  shell: "/usr/sbin/storpool_showconf sp_iface2_cfg | cut -d: -f2,3"
-  register: sp_iface2
-
-- name: "validate storpool.conf interfaces"
+- name: "validate StorPool interfaces"
   fail:
     msg: "interface {{ item }} is in storpool.conf, but does not exist"
   when: item not in ansible_interfaces
-  with_items: "{{ sp_iface1.stdout.split(':') + sp_iface2.stdout.split(':') }}"
+  with_items: "{{ sp_ifaces.stdout.split(':') }}"
+
+
+- name: "get StorPool IP addresses from storpool.conf"
+  shell: '/usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d : -f 2,5'
+  register: sp_conf_ips
+
+- name: "validate StorPool IP addresses"
+  fail:
+    msg: "IP mismatch! storpool.conf: {{ item }}, OS: {{ item.split(':')[0] }}:{{ ansible_facts[item.split(':')[0]]['ipv4']['address'] }}"
+  when: ansible_facts[item.split(':')[0]]['ipv4']['address'] != item.split(':')[1]
+  with_items: "{{ sp_conf_ips.stdout_lines }}"
