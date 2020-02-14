@@ -119,6 +119,7 @@ sp_deps:
     - cgroup-bin
     - cgroup-tools
     - chrony
+    - curl
     - dmidecode
     - fio
     - git
