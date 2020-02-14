@@ -16,7 +16,7 @@
     path: /etc/network/interfaces.d
     state: directory
     mode: '0755'
-  when: ansible_os_family == 'Ubuntu'
+  when: ansible_os_family == 'Debian'
 
 - name: "deploy ifup-pre-local on CentOS/RHEL"
   copy:
