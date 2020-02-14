@@ -125,7 +125,6 @@ sp_deps:
     - hwloc
     - kexec-tools
     - liblz4-tool
-    - libselinux-python
     - lldpd
     - logrotate
     - lshw
@@ -140,6 +139,7 @@ sp_deps:
     - perl
     - psmisc
     - python-requests
+    - python-selinux
     - rsync
     - screen
     - smartmontools
