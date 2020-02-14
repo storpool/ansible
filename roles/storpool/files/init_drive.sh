@@ -32,18 +32,26 @@ if storpool_initdisk --list |grep -q ^$dev; then
 	exit 0
 fi
 
-last=`storpool_initdisk --list |awk '/diskId/ {print $3 }'|tr -d ,|sort -n |tail -n1`
-
-if [ -z "$last" ]; then
-	num=${id}11
-else
-	let num=$last+1 || true
-fi
-
 if [[ $(cat /sys/block/${dev#'/dev/'}/queue/rotational) -eq 0 ]]; then
     ssd='-s'
 else
     ssd=
+fi
+
+if [ -z "$ssd" ]; then
+    last=`storpool_initdisk --list | grep -v SSD | awk '/diskId/ {print $3}' | tr -d , | sort -n | tail -n1`
+else
+    last=`storpool_initdisk --list | grep SSD | awk '/diskId/ {print $3}' | tr -d , | sort -n | tail -n1`
+fi
+
+if [ -z "$last" ]; then
+    if [ -z "$ssd" ]; then
+	num=${id}11
+    else
+	num=${id}01
+    fi
+else
+	let num=$last+1 || true
 fi
 
 if [ "${dev#/dev/nvme}" != "$dev" ] ; then

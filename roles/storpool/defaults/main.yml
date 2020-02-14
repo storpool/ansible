@@ -119,6 +119,7 @@ sp_deps:
     - cgroup-bin
     - cgroup-tools
     - chrony
+    - curl
     - dmidecode
     - fio
     - git
@@ -139,6 +140,7 @@ sp_deps:
     - perl
     - psmisc
     - python-requests
+    - python-selinux
     - rsync
     - screen
     - smartmontools

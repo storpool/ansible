@@ -13,25 +13,25 @@
 - name: "generate-build-conf"
   run_once: true
   become: no
-  local_action: command chdir="{{ sp_custdir }}/{{ customer }}" /usr/local/bin/generate-build-conf
-  when: sp_release_file == 'poli' and sp_poli and sp_custdir is defined and customer is defined
+  local_action: command chdir="{{ sp_custdir }}/{{ sp_cluster }}" /usr/local/bin/generate-build-conf
+  when: sp_release_file == 'poli'
 
 - name: "copytoservers"
   run_once: false
   become: no
-  local_action: command chdir="{{ sp_custdir }}/{{ customer }}" /usr/local/bin/copytoservers r={{ sp_release }} host={{ inventory_hostname }}
-  when: sp_release_file == 'poli' and sp_poli and sp_custdir is defined and customer is defined
+  local_action: command chdir="{{ sp_custdir }}/{{ sp_cluster }}" /usr/local/bin/copytoservers-old r={{ sp_release }} host={{ inventory_hostname }}
+  when: sp_release_file == 'poli'
 
 - name: "copy local release file to nodes"
   copy:
     src: "{{ sp_release_file }}"
     dest: "{{ sp_toolsdir }}"
-  when: sp_release_file != 'web'
+  when: sp_release_file not in [ 'web', 'poli' ]
 
 - name: "prepare copied release file for extraction"
   set_fact:
     sp_release_tgz: { stdout: "{{ sp_release_file | basename }}" }
-  when: sp_release_file != 'web'
+  when: sp_release_file not in [ 'web', 'poli' ]
 
 - name: "unpack release file"
   unarchive:
