@@ -13,6 +13,18 @@
     msg: "sp_release_file set to 'poli' but I am not running on poli!"
   when: sp_release_file == 'poli' and not sp_poli
 
+- name: "sp_poli: get cluster directory status"
+  run_once: true
+  become: no
+  local_action: stat path="{{ sp_custdir }}/{{ sp_cluster }}"
+  register: sp_cluster_dir
+  when: sp_poli
+
+- name: "sp_poli: cluster directory missing"
+  fail:
+    msg: "{{ sp_custdir }}/{{ sp_cluster }} directory missing on poli"
+  when: sp_poli and (not sp_cluster_dir.stat.exists or not sp_cluster_dir.stat.isdir)
+
 - name: "sp_release_file: get file status"
   run_once: true
   become: no
