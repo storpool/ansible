@@ -1,7 +1,7 @@
-- name: "remove swap entry from /etc/fstab"
-  mount:
-    name: swap
-    fstype: swap
+- name: "remove swap entries from /etc/fstab"
+  lineinfile:
+    dest: /etc/fstab
+    regexp: '^[\S]+\s+none\s+swap\s'
     state: absent
 
 - name: "disable swap"
