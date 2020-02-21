@@ -5,7 +5,7 @@
 
 - name: "storpool_cg: add set_memsw=0 on Ubuntu"
   set_fact:
-    sp_cg_ubutnu: "{{ 'SET_MEMSW=0' if ansible_distribution == 'Ubuntu' else '' }}"
+    sp_cg_ubuntu: "{{ 'SET_MEMSW=0' if ansible_distribution == 'Ubuntu' else '' }}"
 
 - name: "generate cgroups if missing"
   shell: "/usr/sbin/storpool_cg conf {{ sp_cg_conf_extra }} {{ sp_cg_ubuntu }}"
