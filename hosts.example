@@ -92,7 +92,6 @@ sp_config='/path/to/storpool.conf'
 #
 # client		# client hypervisor node
 # server[:N]		# N - max instances (1 if omitted)
-# nvme			# needs nvmed enabled (should disappear with drive_init procedure improvement)
 # iscsi
 # mgmt
 # bridge
