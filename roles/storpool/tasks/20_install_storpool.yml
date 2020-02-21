@@ -3,10 +3,15 @@
     src: "{{ sp_config }}"
     dest: /etc/
 
+- name: "download getpackage.py"
+  get_url:
+    url: https://vault.storpool.com/getpackage.py
+    dest: "{{ sp_toolsdir }}"
+    mode: '0755'
+  when: sp_release_file == 'web'
+
 - name: "download StorPool package (release: {{ sp_release }})"
-  shell: '`which wget` -q -O - https://vault.storpool.com/getpkg | bash'
-  args:
-    chdir: "{{ sp_toolsdir }}"
+  shell: "{{ sp_toolsdir }}/getpackage.py -g {{ sp_release }}"
   register: sp_release_tgz
   when: sp_release_file == 'web'
 
@@ -35,7 +40,7 @@
 
 - name: "unpack release file"
   unarchive:
-    src: "{{ sp_toolsdir }}/{{ sp_release_tgz.stdout }}"
+    src: "{{ sp_toolsdir }}/{{ sp_release_tgz.stdout | basename }}"
     dest: "{{ sp_toolsdir }}"
     remote_src: yes
   when: sp_release_file != 'poli'

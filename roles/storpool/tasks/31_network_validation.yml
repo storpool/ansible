@@ -11,13 +11,12 @@
   when: item not in ansible_interfaces
   with_items: "{{ sp_ifaces.stdout.split(':') }}"
 
-
 - name: "get StorPool IP addresses from storpool.conf"
   shell: '/usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d : -f 2,5'
   register: sp_conf_ips
 
 - name: "validate StorPool IP addresses"
   fail:
-    msg: "IP mismatch! storpool.conf: {{ item }}, OS: {{ item.split(':')[0] }}:{{ ansible_facts[item.split(':')[0]]['ipv4']['address'] }}"
-  when: ansible_facts[item.split(':')[0]]['ipv4']['address'] != item.split(':')[1]
+    msg: "IP missing on node! storpool.conf: {{ item }}, OS: {{ item.split(':')[0] }}:{{ ansible_facts[item.split(':')[0]]['ipv4']['address'] }}"
+  when: ansible_facts[item.split(':')[0]]['ipv4']['address'] != item.split(':')[1] and ansible_facts['lo']['ipv4']['address'] != item.split(':')[1]
   with_items: "{{ sp_conf_ips.stdout_lines }}"
