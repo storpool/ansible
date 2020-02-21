@@ -1,5 +1,4 @@
 - import_tasks: 00_variables.yml
-  any_errors_fatal: true
 - import_tasks: 05_dependencies.yml
 - import_tasks: 06_tuning.yml
 - import_tasks: 07_directories.yml
