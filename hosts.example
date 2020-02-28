@@ -83,6 +83,7 @@ sp_config='/path/to/storpool.conf'
 #sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8,SAMSUNG MZ7LH3T8'
 #
 # init the drives even if they contain partitions (use with caution)
+# StorPool partitions will never be touched regardless of this flag
 #sp_drive_erase=False		# default
 
 # sp_node_roles: comma-separated list of roles for the node(s) being deployed

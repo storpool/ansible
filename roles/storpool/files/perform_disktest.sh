@@ -30,6 +30,11 @@ for i in $*; do
 		exit 3
 	fi
 
+	if storpool_initdisk --list | grep -q ^$i; then
+	# storpool drive - not touching
+		continue
+	fi
+
 	serial=`smartctl -i "$i" | grep ^Serial|cut -d : -f 2|tr -d ' '`
 	if [ -z "$serial" ]; then
 		if smartctl -i "$i" | grep -q "Product.*QEMU"; then
