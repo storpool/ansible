@@ -136,7 +136,6 @@
     - mgmt
     - bridge
 
-    
 - name: "pick server node for initial disk"
   run_once: true
   set_fact:
@@ -161,27 +160,32 @@
     sp_cg_conf_extra: "CONVERGED=1 {{ sp_cg_conf_extra }}"
   when: "sp_roles.server and sp_roles.client and 'CONVERGED' not in sp_cg_conf_extra"
 
-- name: "sp_drive[_size,_model]_list: initial definition"
+- name: "sp_drive_list: initial definition"
   set_fact:
     sp_drive_list: []
-    sp_drive_size_list: []
-    sp_drive_model_list: "{{ sp_drive_model.split(',') if sp_drive_model is defined else [] }}"
   when: sp_roles.server
 
-- name: "sp_drive_size_list: convert to bytes and populate"
-  set_fact:
-    sp_drive_size_list: "{{ sp_drive_size_list + [ item | human_to_bytes ] }}"
-  with_items: "{{ sp_drive_size.split(',') }}"
+- name: "get node drive sizes"
+  shell: "lsblk -ndo TYPE,NAME,SIZE | grep ^disk | awk '{print $2,$3}'"
+  register: sp_node_drive_size
   when: sp_roles.server and sp_drive_size is defined
 
-- name: "sp_drive_list: populate"
+- name: "sp_drive_list: populate by name/model"
   set_fact:
     sp_drive_list: "{{ sp_drive_list + [ item.key ] }}"
   with_dict: "{{ ansible_devices }}"
   when: >
-    sp_roles.server and ( (sp_drives is defined and item.key in sp_drives.split(',')) or
-    (sp_drive_size is defined and item.value.size|human_to_bytes in sp_drive_size_list) or
-    (sp_drive_model is defined and item.value.model in sp_drive_model_list) )
+    sp_roles.server and item.key not in sp_drive_list and
+    ((sp_drives is defined and item.key in sp_drives.split(',')) or
+    (sp_drive_model is defined and item.value.model in sp_drive_model.split(',')))
+
+- name: "sp_drive_list: populate by size"
+  set_fact:
+    sp_drive_list: "{{ sp_drive_list + [ item.split()[0] ] }}"
+  with_items: "{{ sp_node_drive_size.stdout_lines }}"
+  when: >
+    sp_roles.server and sp_drive_size is defined and
+    item.split()[0] not in sp_drive_list and item.split()[1] in sp_drive_size.split(',')
 
 - name: "sp_drive_list: validate"
   fail:
