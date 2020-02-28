@@ -217,6 +217,7 @@
     sp_systemd_services: "{{ sp_systemd_services }} + {{ sp_services[item] }}"
   when: "sp_roles[item]"
   with_items:
+    - server
     - iscsi
     - mgmt
     - bridge
