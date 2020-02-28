@@ -53,17 +53,3 @@
   shell: "./install.sh {{ sp_install_services }}"
   args:
     chdir: "{{ sp_install_dir.stdout }}"
-
-- name: "check if booting via EFI on RHEL/CentOS"
-  stat:
-    path: /boot/efi/EFI/centos/grub.cfg
-  register: sp_centos_efi
-  when: ansible_os_family == 'RedHat'
-
-- name: "update GRUB config on CentOS/RHEL"
-  shell: "/usr/sbin/grub2-mkconfig -o {{ '/boot/efi/EFI/centos/grub.cfg' if sp_centos_efi.stat.exists else '$(readlink -f /etc/grub2.cfg)' }}"
-  when: ansible_os_family == 'RedHat'
-
-- name: "update GRUB config on Ubuntu/Debian"
-  shell: "update-grub2"
-  when: ansible_os_family == 'Debian'
