@@ -43,6 +43,7 @@
 
 - name: "expose all NVMe drives"
   shell: /usr/lib/storpool/expose_nvme_drives
+  ignore_errors: yes
   when: sp_roles.nvme
 
 - name: "settle udev"
