@@ -15,6 +15,13 @@
   shell: '/usr/lib/storpool/patchkdumptools'
   when: ansible_distribution == 'Ubuntu'
 
+- name: "disable iommu"
+  lineinfile:
+    state: present
+    dest: /etc/default/grub
+    backrefs: yes
+    regexp: '^(GRUB_CMDLINE_LINUX=(?!.GRUB_CMD)(?!.iommu)\"[^\"]+)(\".*)'
+    line: '\1 iommu=off amd_iommu=off\2'
 
 - name: "check if booting via EFI on RHEL/CentOS"
   stat:
