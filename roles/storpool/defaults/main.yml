@@ -116,6 +116,7 @@ sp_deps:
     - wget
   deb:
     - bash-completion
+    - bc
     - cgroup-bin
     - cgroup-tools
     - chrony
@@ -124,6 +125,7 @@ sp_deps:
     - fio
     - git
     - hwloc
+    - ifenslave
     - kexec-tools
     - liblz4-tool
     - lldpd

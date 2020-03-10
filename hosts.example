@@ -63,13 +63,13 @@ sp_config='/path/to/storpool.conf'
 
 # drive selection section
 #
-# devices matching _any_ of the conditions below will get initialized
-# values can be obtained by running 'lsblk -do NAME,SIZE,MODEL' on the nodes
-# NOTE: a matched device, already containing partitions, will trigger an error
-# 	remove partitions manually or override with sp_drive_erase=True
+# - values can be obtained by running 'lsblk -do NAME,SIZE,MODEL' on the nodes
+# - devices matching _any_ of the conditions below will get initialized
+# - larger NVME drives will be split into equally-sized partitions smaller than 4T
+# - a matched device, already containing partitions, will trigger an error
+#   remove partitions manually or override with sp_drive_erase=True
 #
 # CAUTION: the drive_init procedure is not fully implemented yet
-# - always creates only one partition per drive
 # - no RAID controller detection, and private case scenarios
 # - needs ability to specify storpool_initdisk parameters
 #
@@ -118,16 +118,16 @@ sp_config='/path/to/storpool.conf'
 # if no variables are defined will use globals/defaults from above
 # examples:
 #
-#sp-node.1  sp_node_roles='server:6,mgmt' sp_drive_size='2000398934016'
-#sp-node.2  sp_node_roles='server:6,mgmt' sp_drive_size='2000398934016'
-#sp-node.3  sp_node_roles='server:6,mgmt' sp_drive_size='2000398934016'
+#sp-node.1  sp_node_roles='server:7,mgmt' sp_drive_size='2T,7T' sp_drives='sdb,sdc'
+#sp-node.2  sp_node_roles='server:7,mgmt' sp_drive_size='2T' sp_drive_model='SAMSUNG MZQLB7T6HMLA-00007'
+#sp-node.3  sp_node_roles='server:3,mgmt' sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8'
 #sp-node.4  sp_node_roles='server:4' sp_drives='nvme0n1,nvme1n1,nvme2n1,nvme3n1'
-#sp-node.5  sp_node_roles='server:4' sp_drives='nvme0n1,nvme1n1,nvme2n1,nvme3n1'
+#sp-node.5  sp_node_roles='server:4' sp_drive_size='4T'
 #sp-node.6  sp_node_roles='server:2' sp_drives='nvme0n1,nvme1n1'
 #sp-node.11 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
 #sp-node.12 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
 #sp-node.13 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
-#sp-node.21 sp_node_roles='client,onapp' sp_disable_fw=False
+#sp-node.21 sp_node_roles='client' sp_disable_fw=False
 #sp-node.22 
 #sp-node.23
 #sp-node.31 sp_node_roles='bridge' sp_vm=True sp_configure_network=False
