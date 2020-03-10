@@ -46,7 +46,7 @@
   when: sp_release_file != 'poli'
 
 - name: "get unpacked StorPool release directory"
-  shell: 'ls -d {{ sp_toolsdir }}/storpool-*{{ sp_release }}*/ | sort -V | tail -n 1'
+  shell: 'ls -d {{ sp_toolsdir }}/storpool-{{ sp_release }}*/ | sort -V | tail -n 1'
   register: sp_install_dir
 
 - name: "StorPool install"
