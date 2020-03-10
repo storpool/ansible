@@ -16,10 +16,9 @@
   when: not sp_vm
   tags: test
 
-- name: "init drive"
-  shell: "{{ sp_toolsdir }}/init_drive.sh {{ item }} {{ sp_init_node if sp_init_node is defined else 'noinit' }}"
+- name: "init drives"
+  shell: "{{ sp_toolsdir }}/init_drive.sh {{ item }} {{ sp_init_node if sp_new_cluster else 'noinit' }}"
   with_items: "{{ sp_drives }}"
-  register: sp_initialized_drives
 
 - name: "get needed number of server instances"
   script: get_instances.py
@@ -51,4 +50,3 @@
 
 - name: "assign drives to servers"
   shell: "/usr/lib/storpool/multi-server-helper.py -i {{ sp_server_instances }} | bash"
-  when: sp_initialized_drives
