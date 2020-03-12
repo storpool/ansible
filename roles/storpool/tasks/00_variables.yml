@@ -217,11 +217,11 @@
     sp_systemd_services: "{{ sp_systemd_services }} + {{ sp_services[item] }}"
   when: "sp_roles[item]"
   with_items:
+    - mgmt
+    - nvme
     - server
     - iscsi
-    - mgmt
     - bridge
-    - nvme
 
 - name: "populate sp_summary_msg"
   set_fact:
