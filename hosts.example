@@ -112,6 +112,10 @@ sp_config='/path/to/storpool.conf'
 #
 # default otherwise
 #sp_cg_conf_extra=''
+#
+# offset to calculate diskid prefix (useful when sp_node_id >= 40)
+# diskid_prefix = sp_node_id - sp_diskid_offset
+#sp_diskid_offset=0		# default
 
 [storpool]
 # node hostnames and per-node variables
