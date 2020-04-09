@@ -1,14 +1,15 @@
 #!/bin/bash -xe
 
-if [ -z "$2" ]; then
-	echo Usage: $0 device node-with-initial-drive
+if [ -z "$3" ]; then
+	echo "Usage: $0 <device> <id prefix> <node-with-initial-drive>"
 	exit 2
 fi
 
 MAXGB=4000
 
 dev="$1"
-initdrivenode="$2"
+id="$2"
+initdrivenode="$3"
 maxpartsize=$((${MAXGB}*10**9))
 
 if ! [ -b "$dev" ]; then
@@ -22,8 +23,6 @@ if ! [ -f /etc/storpool.conf ]; then
 	echo storpool.conf not installed
 	exit 1
 fi
-
-id=`storpool_showconf -n SP_OURID`
 
 if [ -z "$id" ]; then
 	echo SP_OURID not defined

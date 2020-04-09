@@ -16,8 +16,21 @@
   when: not sp_vm
   tags: test
 
+- name: "get node id"
+  command: 'storpool_showconf -n SP_OURID'
+  register: sp_node_id
+
+- name: "calculate diskid prefix"
+  set_fact:
+    sp_diskid_prefix: "{{ sp_node_id.stdout|int - sp_diskid_offset|int }}"
+
+- name: "validate diskid prefix"
+  fail:
+    msg: 'Disk id prefix {{ sp_diskid_prefix }} is not in range (1..39)! Please adjust sp_diskid_offset'
+  when: sp_diskid_prefix|int < 1 or sp_diskid_prefix|int > 39
+
 - name: "init drives"
-  shell: "{{ sp_toolsdir }}/init_drive.sh {{ item }} {{ sp_init_node if sp_new_cluster else 'noinit' }}"
+  shell: "{{ sp_toolsdir }}/init_drive.sh {{ item }} {{ sp_diskid_prefix }} {{ sp_init_node if sp_new_cluster else 'noinit' }}"
   with_items: "{{ sp_drives }}"
 
 - name: "get needed number of server instances"

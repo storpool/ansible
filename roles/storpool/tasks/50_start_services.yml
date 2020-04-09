@@ -5,6 +5,10 @@
   register: sp_instances
   when: sp_roles.server
 
+- name: "running storpool_hugepages to apply NVME config"
+  command: /usr/sbin/storpool_hugepages
+  when: sp_roles.nvme
+
 - name: "add storpool_server instances to sp_systemd_services"
   set_fact:
     sp_systemd_services: "{{ sp_systemd_services }} + {{ sp_instances.stdout_lines }}"
