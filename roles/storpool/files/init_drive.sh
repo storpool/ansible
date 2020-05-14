@@ -5,7 +5,7 @@ if [ -z "$3" ]; then
 	exit 2
 fi
 
-MAXGB=4000
+MAXGB=4400
 
 dev="$1"
 id="$2"
