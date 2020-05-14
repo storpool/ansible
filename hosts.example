@@ -22,7 +22,6 @@ sp_toolsdir='/root/storpool'
 # where to get the StorPool release file from
 # sp_release_file='/path/storpool-...'	# tgz release file stored on ansible deployment host
 # sp_release_file='web'			# default - download release from StorPool
-sp_release_file='web'
 
 # StorPool version to be deployed (if sp_release_file='web')
 sp_release='19.01'			# default
@@ -30,7 +29,6 @@ sp_release='19.01'			# default
 # deployment type
 #sp_new_cluster=True		# new cluster deployment
 #sp_new_cluster=False		# adding node(s) to existing cluster (default)
-sp_new_cluster=True
 
 # local path to storpool.conf
 sp_config='/path/to/storpool.conf'
