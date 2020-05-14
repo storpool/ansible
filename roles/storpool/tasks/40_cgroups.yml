@@ -28,3 +28,7 @@
     state: restarted
     enabled: yes
   when: sp_cgconfig.status.ActiveState == 'active' and not sp_slice.stat.exists
+
+- name: "re-generate cgroups on Ubuntu with memsw enabled"
+  shell: "/usr/sbin/storpool_cg conf {{ sp_cg_conf_extra }}"
+  when: ansible_distribution == 'Ubuntu'
