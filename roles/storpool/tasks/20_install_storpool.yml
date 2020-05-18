@@ -10,6 +10,13 @@
     mode: '0755'
   when: sp_release_file == 'web'
 
+- name: "download install_modules_helper.py"
+  get_url:
+    url: https://vault.storpool.com/install_modules_helper.py
+    dest: "{{ sp_toolsdir }}"
+    mode: '0755'
+  when: sp_release_file == 'web'
+
 - name: "download StorPool package (release: {{ sp_release }})"
   shell: "{{ sp_toolsdir }}/getpackage.py -g {{ sp_release }}"
   register: sp_release_tgz
@@ -50,6 +57,6 @@
   register: sp_install_dir
 
 - name: "StorPool install"
-  shell: "common/usr/lib/storpool/install_modules_helper -r -w {{ sp_toolsdir }} -m '{{ sp_install_services }}'"
+  shell: "{{ sp_toolsdir }}/install_modules_helper.py -r -w {{ sp_toolsdir }} -m '{{ sp_install_services }}'"
   args:
     chdir: "{{ sp_install_dir.stdout }}"
