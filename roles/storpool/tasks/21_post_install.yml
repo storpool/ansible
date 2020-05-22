@@ -21,7 +21,7 @@
     dest: /etc/default/grub
     backrefs: yes
     regexp: '^(GRUB_CMDLINE_LINUX=(?!.\$GRUB_CMD)(?!.iommu)\"[^\"]*)(\".*)'
-    line: '\1 iommu=off amd_iommu=off\2'
+    line: '\1 amd_iommu=off\2'
   when: not sp_vm
 
 - name: "check if booting via EFI on RHEL/CentOS"
