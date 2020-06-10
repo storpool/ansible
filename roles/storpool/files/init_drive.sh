@@ -35,6 +35,7 @@ if storpool_initdisk --list |grep -q ^$dev; then
 fi
 
 parted -s ${dev} mklabel gpt
+udevadm settle
 
 if [ "${dev#/dev/nvme}" != "${dev}" ]; then
 # nvme init
