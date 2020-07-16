@@ -15,6 +15,10 @@
   shell: '/usr/lib/storpool/patchkdumptools'
   when: ansible_distribution == 'Ubuntu'
 
+- name: "run patchkdumpconf on CentOS"
+  shell: '/usr/lib/storpool/patchkdumpconf'
+  when: ansible_distribution == 'CentOS'
+
 - name: "disable iommu"
   lineinfile:
     state: present
