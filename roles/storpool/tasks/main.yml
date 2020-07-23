@@ -21,3 +21,5 @@
 - import_tasks: 45_vf_genconf.yml
   when: not sp_vm
 - import_tasks: 50_start_services.yml
+- import_tasks: 99_sed.yml
+  when: sp_sed_enabled

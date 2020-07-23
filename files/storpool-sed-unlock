@@ -1,0 +1,125 @@
+#!/usr/bin/env python
+
+import ConfigParser
+import argparse
+import subprocess
+import os
+
+from optparse import OptionParser
+
+import logging
+import logging.handlers
+
+def main():
+
+    log = logging.getLogger('storpool-sed-unlock')
+    log.setLevel(logging.DEBUG)
+    handler = logging.handlers.SysLogHandler(address = '/dev/log')
+    log.addHandler(handler)
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '-c',
+        '--config',
+        dest='config_file',
+        help='Path to the configuration file',
+        default='/etc/storpool/sed.conf'
+    )
+
+    parser.add_argument(
+        '-l',
+        '--links',
+        dest='udev_links',
+        help='Udev symlink list',
+        required=True
+    )
+
+    args = parser.parse_args()
+
+    config = ConfigParser.ConfigParser()
+    config.readfp(open(args.config_file))
+
+    for udev_link in args.udev_links.split(' '):
+
+        if udev_link.startswith('disk/by-id/'):
+            udev_device = udev_link.split('/')[2]
+
+            log.info('storpool-sed-unlock: Processing device {}'.format(udev_device))
+
+            if udev_device in config.sections():
+                sed_type = config.get(udev_device, 'sed_type')
+                sed_pass = config.get(udev_device, 'sed_pass')
+
+                if sed_type == 'opal':
+                    nvme_controller = os.path.realpath('/dev/disk/by-id/{}'.format(udev_device)).rpartition('n')[0]
+
+                    try:
+                        output = subprocess.check_output(
+                            ['/usr/sbin/sedutil-cli', "--setlockingrange", "0", "rw", sed_pass, nvme_controller],
+                            shell=False
+                        )
+
+                        log.info('storpool-sed-unlock: Unlocking {}'.format(udev_device))
+
+                    except Exception as e:
+                        log.error('storpool-sed-unlock: Unable to unlock {}'.format(udev_device))
+
+                    try:
+                        output = subprocess.check_output(
+                            ['/usr/sbin/sedutil-cli', '--setmbrdone', 'on', sed_pass, nvme_controller],
+                            shell=False
+                        )
+
+                        log.info('storpool-sed-unlock: Enabling MBRDone for {}'.format(udev_device))
+
+                    except Exception as e:
+                        log.error('storpool-sed-unlock: Unable to enable MBRDone for {}'.format(udev_device))
+
+                    try:
+                        partprobe_output = subprocess.check_output(
+                            ['/usr/sbin/partprobe', '/dev/disk/by-id/{}'.format(udev_device)],
+                            shell=False
+                        )
+
+                        log.info('storpool-sed-unlock: Re-read {}'.format(udev_device))
+
+                    except Exception as e:
+                        log.error('storpool-sed-unlock: Unable to re-read {}'.format(udev_device))
+
+
+                elif sed_type == 'atasf':
+
+                    try:
+                        output = subprocess.check_output(
+                            ['/usr/sbin/hdparm', "--user-master", "u", "--security-unlock", sed_pass, '/dev/disk/by-id/{}'.format(udev_device)],
+                            shell=False
+                        )
+
+                        log.info('storpool-sed-unlock: Unlocking {}'.format(udev_device))
+
+                    except Exception as e:
+                        log.error('storpool-sed-unlock: Unable to unlock {}'.format(udev_device))
+
+                    try:
+                        partprobe_output = subprocess.check_output(
+                            ['/usr/sbin/partprobe', '/dev/disk/by-id/{}'.format(udev_device)],
+                            shell=False
+                        )
+
+                        log.info('storpool-sed-unlock: Re-read {}'.format(udev_device))
+
+                    except Exception as e:
+                        log.error('storpool-sed-unlock: Unable to re-read {}'.format(udev_device))
+
+#                else:
+#                    log.warning('storpool-sed-unlock: Unknown SED type {} for device {}'.format(sed_type, udev_device))
+
+#            else:
+#                log.warning('storpool-sed-unlock: Device {} is ignored. Not found in config.'.format(udev_device))
+
+#        else:
+#            log.info('storpool-sed-unlock: Device {} is ignored. Not referenced by-id.'.format(udev_link))
+
+if __name__ == '__main__':
+    main()

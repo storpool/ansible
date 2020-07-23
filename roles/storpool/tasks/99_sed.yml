@@ -1,0 +1,137 @@
+---
+### --- SED related tasks
+- block:
+
+  - name: "install dependencies for CentOS/RHEL (OPAL)"
+    yum:
+      name: sedutil
+      enablerepo: epel
+    when:
+      - ansible_os_family == 'RedHat'
+      - sp_sed_enable_opal is defined
+      - sp_sed_enable_opal
+
+  - name: "install dependencies for CentOS/RHEL (ATA Security Feature Set)"
+    yum:
+      name: hdparm
+      enablerepo: epel
+    when:
+      - ansible_os_family == 'RedHat'
+      - sp_sed_enable_atasf is defined
+      - sp_sed_enable_atasf
+
+  - name: "allow libata tpm functionality on boot"
+    lineinfile:
+      state: present
+      dest: /etc/default/grub
+      backrefs: yes
+      regexp: '^(GRUB_CMDLINE_LINUX=(?!.\$GRUB_CMD)(?!.iommu)\"[^\"]*)(\".*)'
+      line: '\1 libata.allow_tpm=1\2'
+    when:
+      - sp_sed_enable_opal
+
+  - name: "check if booting via EFI on RHEL/CentOS"
+    stat:
+      path: /boot/efi/EFI/centos/grub.cfg
+    register: sp_centos_efi
+    when:
+      - ansible_os_family == 'RedHat'
+      - sp_sed_enable_opal
+
+  - name: "update GRUB on CentOS/RHEL"
+    shell: "/usr/sbin/grub2-mkconfig -o {{ '/boot/efi/EFI/centos/grub.cfg' if sp_centos_efi.stat.exists else '$(readlink -f /etc/grub2.cfg)' }}"
+    when:
+      - ansible_os_family == 'RedHat'
+      - sp_sed_enable_opal
+
+  - name: "allow writing in /sys/module/libata/parameters/allow_tpm"
+    file:
+      path: /sys/module/libata/parameters/allow_tpm
+      mode: "0644"
+    when:
+      - sp_sed_enable_opal
+
+  - name: "allow libata tpm functionality on running system"
+    shell: "/usr/bin/echo 1 > /sys/module/libata/parameters/allow_tpm"
+    when:
+      - sp_sed_enable_opal
+
+  - name: "restore mode of /sys/module/libata/parameters/allow_tpm" 
+    file:
+      path: /sys/module/libata/parameters/allow_tpm
+      mode: "0444"
+    when:
+      - sp_sed_enable_opal
+
+  - name: "register SED configuration"
+    stat:
+      path: "{{ sp_sed_conf }}"
+    register: sp_sed_conf_file
+    when:
+      - sp_sed_conf is defined
+
+  - name: "fail if SED configuration already exists" 
+    fail:
+      msg: "The SED configuration already exists! - {{ sp_sed_conf }} "
+    when:
+      - sp_sed_conf_file is defined
+      - sp_sed_conf_file.stat.exists
+
+  - name: "classify SED drives"
+    sp_sed_classify:
+      drives: "{{ sp_drives }}"
+      facts: "{{ ansible_device_links.ids }}"
+    register: sp_sed_types
+
+  - name: "if used, check that SED universal password is not empty"
+    assert:
+      that:
+        - sp_sed_universal_password | length > 0
+      fail_msg: "SED universal password is empty. Aborting!"
+    when:
+      - sp_sed_universal_password is defined
+
+  - name: "generate SED key-list (random passwords)"
+    shell:
+      cmd: echo -e "import string,random\nprint(''.join(random.choice(string.ascii_letters + string.digits) for i in range(16)))" | python
+    register: sp_sed_keylist_random
+    loop: "{{ sp_sed_types['opal'] + sp_sed_types.atasf }}"
+    when:
+      - sp_sed_types
+      - sp_sed_universal_password is not defined
+
+  - name: "generate SED configuration"
+    template:
+      src: "templates/sed-conf.j2"
+      dest: "{{ sp_sed_conf }}"
+      mode: 0644
+
+  - name: "fetch SED configuration locally"
+    fetch:
+      src: "{{ sp_sed_conf }}"
+      dest: "{{ sp_custdir }}/{{ sp_cluster }}/sed.conf-{{ inventory_hostname }}-{{ ansible_date_time.epoch }}"
+      flat: yes
+
+  - name: "lock SED devices"
+    sp_sed_lock:
+      conf: "{{ sp_sed_conf }}"
+      drive: "{{ ansible_device_links.ids[item][0] }}"
+    loop: "{{ sp_drives.split(',') }}"
+
+  - name: "copy storpool-sed-unlock tool"
+    copy:
+      src: storpool-sed-unlock
+      dest: /usr/lib/udev/storpool-sed-unlock
+      mode: 0755
+
+  - name: "add udev rules"
+    template:
+      src: "templates/sed-udev-rules.j2"
+      dest: "/etc/udev/rules.d/99-storpool-sed.rules"
+      mode: 644
+      
+  when:
+    - (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int > 6) or (ansible_os_family == 'Debian')
+    - sp_sed_enabled is defined
+    - sp_sed_enabled
+

@@ -1,0 +1,3 @@
+#jinja2: lstrip_blocks: True
+SUBSYSTEM=="block", ACTION=="add", KERNEL=="sd[a-z]|sd[a-z][a-z]", RUN+="storpool-sed-unlock -l '$links'"
+SUBSYSTEM=="block", ACTION=="add", KERNEL=="nvme[0-9]*n[0-9]*", RUN+="storpool-sed-unlock -l '$links'"

@@ -1,0 +1,18 @@
+#jinja2: lstrip_blocks: True
+{% for sp_sed_drive in (sp_sed_types.opal + sp_sed_types.atasf) %}
+  {% if sp_sed_drive|length > 0 %}
+    {{- "[%s]" | format(sp_sed_drive) }}
+    {% if sp_sed_drive in sp_sed_types.atasf %}
+      {{- "sed_type=atasf" }}
+    {% elif sp_sed_drive in sp_sed_types.opal %}
+      {{- "sed_type=opal" }}
+    {% endif %}
+    {% if sp_sed_universal_password is defined %}
+      {{- "sed_pass=%s" | format(sp_sed_universal_password) }}
+      {{- "\n" }}
+    {% elif sp_sed_keylist_random is defined and sp_sed_keylist_random.changed %}
+      {{- "sed_pass=%s" | format(sp_sed_keylist_random.results[loop.index0].stdout) }}
+      {{- "\n" }}
+    {% endif %}
+  {% endif %}
+{% endfor %}
