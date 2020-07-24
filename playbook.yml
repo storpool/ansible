@@ -1,4 +1,7 @@
+#!/usr/bin/env ansible-playbook
+
 - name: "deploy storpool"
+  gather_facts: True
   hosts: storpool
   become: yes
   roles:
