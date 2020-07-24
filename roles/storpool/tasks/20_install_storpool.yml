@@ -50,7 +50,9 @@
     src: "{{ sp_toolsdir }}/{{ sp_release_tgz.stdout | basename }}"
     dest: "{{ sp_toolsdir }}"
     remote_src: yes
-  when: sp_release_file != 'poli'
+  when:
+    - "sp_release_file != 'poli'"
+    - "'Latest file already exists' not in sp_release_tgz.stdout"
 
 - name: "get unpacked StorPool release directory"
   shell: 'ls -d {{ sp_toolsdir }}/storpool-{{ sp_release }}*/ | sort -V | tail -n 1'
