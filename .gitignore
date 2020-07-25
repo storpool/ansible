@@ -1,1 +1,5 @@
+facts/
+roles/
+!roles/storpool
+ansible.log
 playbook.retry
