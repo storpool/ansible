@@ -39,3 +39,7 @@
     packages:
     - systemd-container
   when: sp_roles.client and ansible_os_family == 'Debian'
+
+- name: "Gather OS package facts"
+  package_facts:
+    manager: auto
