@@ -20,3 +20,6 @@
     state: started
     enabled: yes
   with_items: "{{ sp_systemd_services }}"
+
+- name: "Populate service facts"
+  service_facts:
