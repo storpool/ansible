@@ -1,6 +1,7 @@
 - name: "sp_poli: set value (check where I am running)"
   delegate_to: localhost
   set_fact:
+    cacheable: True
     sp_poli: "{{ ansible_hostname == 'poli' }}"
 
 - name: "sp_poli: validation"
@@ -50,6 +51,7 @@
 
 - name: "sp_vm: try to guess if not defined"
   set_fact:
+    cacheable: True
     sp_vm: "{{ ansible_product_name == 'KVM' }}"
     sp_vm_guessed: true
   when: sp_vm is not defined
@@ -62,6 +64,7 @@
 
 - name: "sp_roles_list: populate from sp_node_roles"
   set_fact:
+    cacheable: True
     sp_roles_list: "{{ sp_node_roles.split(',') }}"
 
 - name: "sp_node_roles: validate role list"
@@ -76,6 +79,7 @@
 
 - name: "sp_roles: decide on server"
   set_fact:
+    cacheable: True
     sp_roles: "{{ sp_roles | combine({'server': true}) }}"
     sp_server_instances: "{{ item }}"
   with_items: "{{ sp_roles_list }}"
@@ -83,21 +87,25 @@
 
 - name: "sp_server_instances = 1"
   set_fact:
+    cacheable: True
     sp_server_instances: '1'
   when: "sp_server_instances is defined and sp_server_instances == 'server'"
 
 - name: "sp_server_instances > 1"
   set_fact:
+    cacheable: True
     sp_server_instances: "{{ sp_server_instances.split(':')[1] }}"
   when: "sp_server_instances is defined and sp_server_instances != '1'"
 
 - name: "sp_server_instances = 0"
   set_fact:
+    cacheable: True
     sp_server_instances: '0'
   when: "sp_server_instances is not defined"
 
 - name: "sp_roles: decide on other roles"
   set_fact:
+    cacheable: True
     sp_roles: "{{ sp_roles | combine({item: true}) }}"
   when: "item in sp_roles_list"
   with_items:
@@ -108,6 +116,7 @@
 
 - name: "sp_roles: populate false values"
   set_fact:
+    cacheable: True
     sp_roles: "{{ sp_roles | combine({item: false}) }}"
   when: "item not in sp_roles.keys()"
   with_items:
@@ -119,10 +128,12 @@
 
 - name: "sp_install_services: initial definition"
   set_fact:
+    cacheable: True
     sp_install_services: '@block cli'
 
 - name: "sp_install_services: add services"
   set_fact:
+    cacheable: True
     sp_install_services: "{{ sp_install_services }} {{ item }}"
   when: "sp_roles[item]"
   with_items:
@@ -134,6 +145,7 @@
 - name: "pick server node for initial disk"
   run_once: true
   set_fact:
+    cacheable: True
     sp_init_node: >-
       {{ ansible_play_hosts | map('extract', hostvars) | list |
          json_query('[?sp_roles.server].ansible_fqdn | [0]') }}
@@ -147,11 +159,13 @@
 
 - name: "sp_cg_conf_extra: initial definition"
   set_fact:
+    cacheable: True
     sp_cg_conf_extra: "{{ sp_cg_conf_extra|upper }}"
   when: "sp_cg_conf_extra|length > 0"
 
 - name: "sp_cg_conf_extra: decide if hyperconverged node"
   set_fact:
+    cacheable: True
     sp_cg_conf_extra: "CONVERGED=1 {{ sp_cg_conf_extra }}"
   when: "sp_roles.server and sp_roles.client and 'CONVERGED' not in sp_cg_conf_extra"
 
@@ -167,6 +181,7 @@
 
 - name: "sp_drive_list: populate by name/model"
   set_fact:
+    cacheable: True
     sp_drive_list: "{{ sp_drive_list + [ item.key ] }}"
   with_dict: "{{ ansible_devices }}"
   when: >
@@ -176,6 +191,7 @@
 
 - name: "sp_drive_list: populate by size"
   set_fact:
+    cacheable: True
     sp_drive_list: "{{ sp_drive_list + [ item.split()[0] ] }}"
   with_items: "{{ sp_node_drive_size.stdout_lines }}"
   when: >
@@ -190,11 +206,13 @@
 
 - name: "check for nvme drives"
   set_fact:
+    cacheable: True
     sp_roles: "{{ sp_roles | combine({'nvme': true}) }}"
   when: sp_roles.server and (sp_drive_list | select('match', '^nvme') | list | count > 0)
 
 - name: "no nvme drives found"
   set_fact:
+    cacheable: True
     sp_roles: "{{ sp_roles | combine({'nvme': false}) }}"
   when: sp_roles.nvme is not defined
 
@@ -205,6 +223,7 @@
 
 - name: "sp_systemd_services: initial definition"
   set_fact:
+    cacheable: True
     sp_systemd_services: "{{ sp_services.common }} + {{ sp_services.helper }}"
 
 - name: "sp_systemd_services: add services"

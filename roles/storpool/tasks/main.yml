@@ -1,23 +1,60 @@
 - import_tasks: 00_variables.yml
+  tags:
+  - variables
 - import_tasks: 05_dependencies.yml
+  tags:
+  - dependencies
 - import_tasks: 06_tuning.yml
+  tags:
+  - tuning
 - import_tasks: 07_directories.yml
+  tags:
+  - directories
 - import_tasks: 08_test_memory.yml
-  when: not sp_vm
-  tags: test
+  tags:
+  - test_memory
+  when:
+  - not sp_vm
 - import_tasks: 18_sp_support_common.yml
-  when: sp_poli
+  tags:
+  - support_common
+  when:
+  - sp_poli
 - import_tasks: 20_install_storpool.yml
+  tags:
+  - install_storpool
 - import_tasks: 21_post_install.yml
+  tags:
+  - post_install
 - import_tasks: 25_check_node_in_conf.yml
+  tags:
+  - check_node_in_conf
 - import_tasks: 30_configure_network.yml
-  when: sp_configure_network
+  tags:
+  - configure_network
+  when:
+  - sp_configure_network
 - import_tasks: 31_network_validation.yml
+  tags:
+  - network_validation
 - import_tasks: 32_bond_adjustments.yml
-  when: not sp_configure_network
+  tags:
+  - bond_adjustments
+  when:
+  - not sp_configure_network
 - import_tasks: 35_init_drives.yml
-  when: sp_roles.server
+  tags:
+  - init_drives
+  when:
+  - sp_roles.server
 - import_tasks: 40_cgroups.yml
+  tags:
+  - cgroups
 - import_tasks: 45_vf_genconf.yml
-  when: not sp_vm
+  tags:
+  - vf_genconf
+  when:
+  - not sp_vm
 - import_tasks: 50_start_services.yml
+  tags:
+  - start_services
