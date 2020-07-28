@@ -7,3 +7,5 @@
     - "/etc/storpool.conf.d"
     - "/usr/lib/storpool"
     - "{{ sp_toolsdir }}"
+  tags:
+  - make_sp_dirs

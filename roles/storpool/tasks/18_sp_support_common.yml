@@ -3,20 +3,27 @@
   become: no
   local_action: command chdir={{ sp_custdir }}/{{ sp_cluster }} /usr/local/bin/installtools {{ inventory_hostname }}
   when: sp_cluster is defined
+  tags:
+  - install_support_tools
 
 - name: "check if mlc exists"
   stat:
     path: "{{ sp_toolsdir }}/mlc/mlc"
   register: mlc_present
   when: not sp_vm
-  tags: test
+  tags:
+  - mlc_test
+  - check_if_mcl_exists
 
 - name: "perform mlc test"
   shell: '[[ ! -d "/tmp/mlc/" ]] && mkdir -p /tmp/mlc/; [[ ! -f "/tmp/mlc/mlc.output" ]] && {{ sp_toolsdir }}/mlc/mlc > /tmp/mlc/mlc.output || /bin/true'
   when: not sp_vm and mlc_present.stat.executable
-  tags: test
+  tags:
+  - mlc_test
 
 - name: "collect inventory"
   run_once: false
   become: no
   local_action: command chdir={{ sp_custdir }}/{{ sp_cluster }} /usr/local/bin/collect_inventory {{ inventory_hostname }}
+  tags:
+  - collect_inventory

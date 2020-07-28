@@ -4,12 +4,16 @@
     regexp: '^source /etc/network/interfaces.d'
     state: absent
   when: ansible_os_family == 'Debian'
+  tags:
+  - debian_adjust_interfaces
 
 - name: "adjust /etc/network/interfaces on Ubuntu/Debian (#2)"
   lineinfile:
     path: /etc/network/interfaces
     line: 'source-directory interfaces.d'
   when: ansible_os_family == 'Debian'
+  tags:
+  - debian_adjust_interfaces
 
 - name: "mkdir -p /etc/network/interfaces.d on Ubuntu/Debian"
   file:
@@ -17,6 +21,8 @@
     state: directory
     mode: '0755'
   when: ansible_os_family == 'Debian'
+  tags:
+  - debian_make_interfaces_d
 
 - name: "deploy ifup-pre-local on CentOS/RHEL"
   copy:
@@ -24,6 +30,8 @@
     dest: /sbin
     mode: 0755
   when: ansible_os_family == "RedHat"
+  tags:
+  - rhel_deploy_ifup_pre_local
 
 - name: "deploy enslavedummy on Ubuntu/Debian"
   copy:
@@ -31,26 +39,42 @@
     dest: /sbin
     mode: 0755
   when: ansible_os_family == "Debian"
+  tags:
+  - debian_deploy_enslavedummy
 
 - name: "generate StorPool net interfaces configuration"
   shell: "/usr/sbin/iface-genconf -a {{ '-o' if sp_overwrite_iface_conf else '' }}"
+  tags:
+  - generate_network_conf
 
 - name: "init iface1"
   shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f3 | xargs ifup"
   ignore_errors: yes
+  tags:
+  - init_iface1
 
-- name: "init iface2" 
+- name: "init iface2"
   shell: "/usr/sbin/storpool_showconf sp_iface2_cfg | cut -d: -f3 | xargs ifup"
   ignore_errors: yes
+  tags:
+  - init_iface2
 
 - name: "init bond interfaces (if any)"
   shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2 | cut -d. -f1 | xargs ifup"
   ignore_errors: yes
+  tags:
+  - init_bond_iface
+  - init_iface1
+  - init_iface2
 
 - name: "init iface1 VLANs (if any)"
   shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2 | xargs ifup"
   ignore_errors: yes
+  tags:
+  - init_iface1
 
 - name: "init iface2 VLANs (if any)"
   shell: "/usr/sbin/storpool_showconf sp_iface2_cfg | cut -d: -f2 | xargs ifup"
   ignore_errors: yes
+  tags:
+  - init_iface2

@@ -3,17 +3,25 @@
     name: rsyslog
     state: restarted
     enabled: yes
+  tags:
+  - restart_rsyslog
 
 - name: "reload sysctl entries"
   shell: '`which sysctl` --system'
+  tags:
+  - reload_sysctl_entries
 
 - name: "increase crashkernel size on Ubuntu"
   shell: 'echo "GRUB_CMDLINE_LINUX_DEFAULT=\"\$GRUB_CMDLINE_LINUX_DEFAULT crashkernel=512M"\" > /etc/default/grub.d/kdump-tools.cfg'
   when: ansible_distribution == 'Ubuntu'
+  tags:
+  - ubuntu_increase_crashkernel_size
 
 - name: "run patchkdumptools on Ubuntu"
   shell: '/usr/lib/storpool/patchkdumptools'
   when: ansible_distribution == 'Ubuntu'
+  tags:
+  - ubuntu_patchkdumptools
 
 - name: "disable iommu"
   lineinfile:
@@ -23,17 +31,27 @@
     regexp: '^(GRUB_CMDLINE_LINUX=(?!.\$GRUB_CMD)(?!.*iommu)\"[^\"]*)(\".*)'
     line: '\1 amd_iommu=off\2'
   when: not sp_vm
+  tags:
+  - rhel_update_grub
+  - debian_update_grub
+  - disable_iommu
 
 - name: "check if booting via EFI on RHEL/CentOS"
   stat:
     path: /boot/efi/EFI/centos/grub.cfg
   register: sp_centos_efi
   when: ansible_os_family == 'RedHat'
+  tags:
+  - rhel_update_grub
 
 - name: "update GRUB on CentOS/RHEL"
   shell: "/usr/sbin/grub2-mkconfig -o {{ '/boot/efi/EFI/centos/grub.cfg' if sp_centos_efi.stat.exists else '$(readlink -f /etc/grub2.cfg)' }}"
   when: ansible_os_family == 'RedHat'
+  tags:
+  - rhel_update_grub
 
 - name: "update GRUB on Ubuntu/Debian"
   shell: "update-grub2"
   when: ansible_os_family == 'Debian'
+  tags:
+  - debian_update_grub

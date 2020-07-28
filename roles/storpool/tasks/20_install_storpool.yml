@@ -2,6 +2,8 @@
   copy:
     src: "{{ sp_config }}"
     dest: /etc/
+  tags:
+  - copy_storpool_conf
 
 - name: "download getpackage.py"
   get_url:
@@ -9,6 +11,8 @@
     dest: "{{ sp_toolsdir }}"
     mode: '0755'
   when: sp_release_file == 'web'
+  tags:
+  - download_getpackage_py
 
 - name: "download install_modules_helper.py"
   get_url:
@@ -16,34 +20,46 @@
     dest: "{{ sp_toolsdir }}"
     mode: '0755'
   when: sp_release_file == 'web'
+  tags:
+  - download_install_modules_helper
 
 - name: "download StorPool package (release: {{ sp_release }})"
   shell: "{{ sp_toolsdir }}/getpackage.py -g {{ sp_release }}"
   register: sp_release_tgz
   when: sp_release_file == 'web'
+  tags:
+  - download_storpool
 
 - name: "generate-build-conf"
   run_once: true
   become: no
   local_action: command chdir="{{ sp_custdir }}/{{ sp_cluster }}" /usr/local/bin/generate-build-conf
   when: sp_release_file == 'poli'
+  tags:
+  - generate_build_conf
 
 - name: "copytoservers"
   run_once: false
   become: no
   local_action: command chdir="{{ sp_custdir }}/{{ sp_cluster }}" /usr/local/bin/copytoservers-old r={{ sp_release }} host={{ inventory_hostname }}
   when: sp_release_file == 'poli'
+  tags:
+  - copy_to_servers
 
 - name: "copy local release file to nodes"
   copy:
     src: "{{ sp_release_file }}"
     dest: "{{ sp_toolsdir }}"
   when: sp_release_file not in [ 'web', 'poli' ]
+  tags:
+  - copy_local_release
 
 - name: "prepare copied release file for extraction"
   set_fact:
     sp_release_tgz: { stdout: "{{ sp_release_file | basename }}" }
   when: sp_release_file not in [ 'web', 'poli' ]
+  tags:
+  - prepare_copied_release
 
 - name: "unpack release file"
   unarchive:
@@ -53,12 +69,18 @@
   when:
     - "sp_release_file != 'poli'"
     - "'Latest file already exists' not in sp_release_tgz.stdout"
+  tags:
+  - unpack_release
 
 - name: "get unpacked StorPool release directory"
   shell: 'ls -d {{ sp_toolsdir }}/storpool-{{ sp_release }}*/ | sort -V | tail -n 1'
   register: sp_install_dir
+  tags:
+  - get_upacked_release
 
 - name: "StorPool install"
   shell: "{{ sp_toolsdir }}/install_modules_helper.py -r -w {{ sp_toolsdir }} -m '{{ sp_install_services }}'"
   args:
     chdir: "{{ sp_install_dir.stdout }}"
+  tags:
+  - storpool_install

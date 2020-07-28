@@ -4,26 +4,38 @@
 - name: "get StorPool interfaces from storpool.conf"
   shell: "/usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d : -f 2,3 | sed -e ':a;N;$!ba;s/\\n/:/g'"
   register: sp_ifaces
+  tags:
+  - get_interfaces_from_conf
 
 - name: "validate StorPool interfaces"
   fail:
     msg: "interface {{ item }} is in storpool.conf, but does not exist"
   when: item not in ansible_interfaces
   with_items: "{{ sp_ifaces.stdout.split(':') }}"
+  tags:
+  - validate_interfaces_in_conf
 
 - name: "get StorPool IP addresses from storpool.conf"
   shell: '/usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d : -f 2,5'
   register: sp_conf_ips
+  tags:
+  - get_interfaces_ips_from_conf
 
 - name: "sp_lo_ips: get secondary IPs on loopback"
   set_fact:
     sp_lo_ips: "{{ ansible_facts.lo.ipv4_secondaries | json_query('[].address') }}"
+    cacheable: true
   when: ansible_facts.lo.ipv4_secondaries is defined
+  tags:
+  - sp_lo_ips
 
 - name: "no secondary IPs on loopback"
   set_fact:
     sp_lo_ips: []
+    cacheable: true
   when: ansible_facts.lo.ipv4_secondaries is not defined
+  tags:
+  - sp_lo_ips
 
 - name: "validate StorPool IP addresses"
   fail:

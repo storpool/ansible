@@ -2,12 +2,16 @@
   yum:
     name: epel-release
   when: ansible_os_family == 'RedHat'
+  tags:
+  - centos_install_epel_repo
 
 - name: "upgrade all packages on CentOS/RHEL"
   yum:
     name: '*'
     state: latest
   when: sp_update_system and ansible_os_family == 'RedHat'
+  tags:
+  - centos_upgrade_all_pkgs
 
 - name: "install StorPool dependencies for CentOS/RHEL"
   yum:
@@ -16,12 +20,16 @@
   vars:
     packages: "{{ sp_deps.rpm }}"
   when: ansible_os_family == 'RedHat'
+  tags:
+  - centos_install_sp_deps
 
 - name: "upgrade all packages on Ubuntu/Debian"
   apt:
     upgrade: yes
     update_cache: yes
   when: sp_update_system and ansible_os_family == 'Debian'
+  tags:
+  - debian_upgrade_all_pkgs
 
 - name: "install StorPool dependencies for Ubuntu/Debian"
   apt:
@@ -30,6 +38,8 @@
   vars:
     packages: "{{ sp_deps.deb }}"
   when: ansible_os_family == 'Debian'
+  tags:
+  - debian_install_sp_deps
 
 - name: "install HV dependencies for Ubuntu/Debian"
   apt:
@@ -39,7 +49,17 @@
     packages:
     - systemd-container
   when: sp_roles.client and ansible_os_family == 'Debian'
+  tags:
+  - debian_install_hv_deps
 
 - name: "Gather OS package facts"
   package_facts:
     manager: auto
+  tags:
+  - centos_install_epel_repo
+  - centos_upgrade_all_pkgs
+  - centos_install_sp_deps
+  - debian_upgrade_all_pkgs
+  - debian_install_sp_deps
+  - debian_install_hv_deps
+  - gather_pkg_facts

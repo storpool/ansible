@@ -6,6 +6,10 @@
   with_items:
     - "memtester"
     - "perform_memtest.sh"
+  tags:
+  - copy_memtester
 
 - name: "perform memory test"
   shell: "{{ sp_toolsdir }}/perform_memtest.sh {{ sp_toolsdir }}"
+  tags:
+  - perform_memtest
