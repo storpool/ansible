@@ -8,17 +8,20 @@
 
 - name: "reload sysctl entries"
   shell: '`which sysctl` --system'
+  changed_when: false
   tags:
   - reload_sysctl_entries
 
 - name: "increase crashkernel size on Ubuntu"
   shell: 'echo "GRUB_CMDLINE_LINUX_DEFAULT=\"\$GRUB_CMDLINE_LINUX_DEFAULT crashkernel=512M"\" > /etc/default/grub.d/kdump-tools.cfg'
+  changed_when: false
   when: ansible_distribution == 'Ubuntu'
   tags:
   - ubuntu_increase_crashkernel_size
 
 - name: "run patchkdumptools on Ubuntu"
-  shell: '/usr/lib/storpool/patchkdumptools'
+  command: /usr/lib/storpool/patchkdumptools
+  changed_when: false
   when: ansible_distribution == 'Ubuntu'
   tags:
   - ubuntu_patchkdumptools
@@ -51,7 +54,8 @@
   - rhel_update_grub
 
 - name: "update GRUB on Ubuntu/Debian"
-  shell: "update-grub2"
+  command: update-grub2
+  changed_when: false
   when: ansible_os_family == 'Debian'
   tags:
   - debian_update_grub

@@ -8,6 +8,7 @@
 
 - name: "disable swap"
   command: swapoff -a
+  changed_when: false
   tags:
   - disable_swap
 
@@ -22,7 +23,8 @@
   - disable_swap
 
 - name: "define tuned profile"
-  shell: tuned-adm profile throughput-performance
+  command: tuned-adm profile throughput-performance
+  changed_when: false
   when: ansible_os_family == 'RedHat'
   tags:
   - configure_tuned

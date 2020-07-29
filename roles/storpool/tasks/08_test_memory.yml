@@ -10,6 +10,7 @@
   - copy_memtester
 
 - name: "perform memory test"
-  shell: "{{ sp_toolsdir }}/perform_memtest.sh {{ sp_toolsdir }}"
+  command: "{{ sp_toolsdir }}/perform_memtest.sh {{ sp_toolsdir }}"
+  changed_when: false
   tags:
   - perform_memtest

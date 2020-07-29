@@ -1,8 +1,12 @@
 - name: "force ansible to regather facts"
-  setup: filter='*'
+  setup:
+    filter: '*'
 
 - name: "get StorPool interfaces from storpool.conf"
-  shell: "/usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d : -f 2,3 | sed -e ':a;N;$!ba;s/\\n/:/g'"
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d : -f 2,3 | sed -e ':a;N;$!ba;s/\\n/:/g'
+  changed_when: false
   register: sp_ifaces
   tags:
   - get_interfaces_from_conf
@@ -16,7 +20,10 @@
   - validate_interfaces_in_conf
 
 - name: "get StorPool IP addresses from storpool.conf"
-  shell: '/usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d : -f 2,5'
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d : -f 2,5
+  changed_when: false
   register: sp_conf_ips
   tags:
   - get_interfaces_ips_from_conf

@@ -1,4 +1,5 @@
 - name: Generate VF config
-  shell: "/usr/lib/storpool/vf-genconf"
+  command: /usr/lib/storpool/vf-genconf
+  changed_when: false
   tags:
   - generate_vf_conf

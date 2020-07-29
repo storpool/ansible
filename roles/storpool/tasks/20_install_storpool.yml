@@ -24,24 +24,33 @@
   - download_install_modules_helper
 
 - name: "download StorPool package (release: {{ sp_release }})"
-  shell: "{{ sp_toolsdir }}/getpackage.py -g {{ sp_release }}"
+  command: "{{ sp_toolsdir }}/getpackage.py -g {{ sp_release }}"
+  changed_when: false
   register: sp_release_tgz
   when: sp_release_file == 'web'
   tags:
   - download_storpool
 
 - name: "generate-build-conf"
+  delegate_to: localhost
   run_once: true
   become: no
-  local_action: command chdir="{{ sp_custdir }}/{{ sp_cluster }}" /usr/local/bin/generate-build-conf
+  command:
+    chdir: "{{ sp_custdir }}/{{ sp_cluster }}"
+    cmd: /usr/local/bin/generate-build-conf
+  changed_when: false
   when: sp_release_file == 'poli'
   tags:
   - generate_build_conf
 
 - name: "copytoservers"
+  delegate_to: localhost
   run_once: false
   become: no
-  local_action: command chdir="{{ sp_custdir }}/{{ sp_cluster }}" /usr/local/bin/copytoservers-old r={{ sp_release }} host={{ inventory_hostname }}
+  command:
+    chdir: "{{ sp_custdir }}/{{ sp_cluster }}"
+    cmd: /usr/local/bin/copytoservers-old r="{{ sp_release }}" host="{{ inventory_hostname }}"
+  changed_when: false
   when: sp_release_file == 'poli'
   tags:
   - copy_to_servers
@@ -73,14 +82,18 @@
   - unpack_release
 
 - name: "get unpacked StorPool release directory"
-  shell: 'ls -d {{ sp_toolsdir }}/storpool-{{ sp_release }}*/ | sort -V | tail -n 1'
+  shell: >
+    set -o pipefail && \
+      ls -d {{ sp_toolsdir }}/storpool-{{ sp_release }}*/ | sort -V | tail -n 1
+  changed_when: false
   register: sp_install_dir
   tags:
   - get_upacked_release
 
 - name: "StorPool install"
-  shell: "{{ sp_toolsdir }}/install_modules_helper.py -r -w {{ sp_toolsdir }} -m '{{ sp_install_services }}'"
-  args:
+  command:
+    cmd: "{{ sp_toolsdir }}/install_modules_helper.py -r -w {{ sp_toolsdir | quote }} -m {{ sp_install_services | quote }}"
     chdir: "{{ sp_install_dir.stdout }}"
+  changed_when: false
   tags:
   - storpool_install

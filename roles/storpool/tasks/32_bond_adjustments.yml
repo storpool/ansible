@@ -13,7 +13,10 @@
   when: ansible_os_family == "Debian"
 
 - name: "get StorPool interfaces"
-  shell: '/usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d: -f2 | cut -d. -f1'
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d: -f2 | cut -d. -f1
+  changed_when: false
   register: sp_interfaces
 
 - name: "check if StorPool uses bond interfaces"
@@ -21,7 +24,10 @@
     sp_bonding: "{{ true if sp_interfaces.stdout_lines | select('match', 'bond') | list | count > 0 else false }}"
 
 - name: "get StorPool bond interface"
-  shell: '/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2 | cut -d. -f1'
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2 | cut -d. -f1
+  changed_when: false
   register: sp_bond
   when: sp_bonding
 
@@ -40,7 +46,10 @@
   when: sp_bonding and ansible_os_family == "RedHat"
 
 - name: "get {{ sp_bond.stdout }} slave interfaces"
-  shell: '/usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d: -f3'
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d: -f3
+  changed_when: false
   register: sp_bond_slaves
   when: sp_bonding and ansible_os_family == "Debian"
 

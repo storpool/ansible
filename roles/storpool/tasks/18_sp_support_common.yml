@@ -1,7 +1,11 @@
 - name: "install StorPool support tools"
+  delegate_to: localhost
   run_once: false
   become: no
-  local_action: command chdir={{ sp_custdir }}/{{ sp_cluster }} /usr/local/bin/installtools {{ inventory_hostname }}
+  command:
+    chdir: "{{ sp_custdir }}/{{ sp_cluster }}"
+    cmd: /usr/local/bin/installtools {{ inventory_hostname }}
+  changed_when: false
   when: sp_cluster is defined
   tags:
   - install_support_tools
@@ -16,14 +20,22 @@
   - check_if_mcl_exists
 
 - name: "perform mlc test"
-  shell: '[[ ! -d "/tmp/mlc/" ]] && mkdir -p /tmp/mlc/; [[ ! -f "/tmp/mlc/mlc.output" ]] && {{ sp_toolsdir }}/mlc/mlc > /tmp/mlc/mlc.output || /bin/true'
+  shell: >
+    set -o pipefail && \
+      [[ ! -d "/tmp/mlc/" ]] && mkdir -p /tmp/mlc/; \
+      [[ ! -f "/tmp/mlc/mlc.output" ]] && {{ sp_toolsdir }}/mlc/mlc > /tmp/mlc/mlc.output || /bin/true
+  changed_when: false
   when: not sp_vm and mlc_present.stat.executable
   tags:
   - mlc_test
 
 - name: "collect inventory"
+  delegate_to: localhost
   run_once: false
   become: no
-  local_action: command chdir={{ sp_custdir }}/{{ sp_cluster }} /usr/local/bin/collect_inventory {{ inventory_hostname }}
+  command:
+    chdir: "{{ sp_custdir }}/{{ sp_cluster }}"
+    cmd: /usr/local/bin/collect_inventory "{{ inventory_hostname }}"
+  changed_when: false
   tags:
   - collect_inventory

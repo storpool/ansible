@@ -7,6 +7,7 @@
 
 - name: "running storpool_hugepages to apply NVME config"
   command: /usr/sbin/storpool_hugepages
+  changed_when: false
   when: sp_roles.nvme
 
 - name: "add storpool_server instances to sp_systemd_services"

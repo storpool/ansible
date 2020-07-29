@@ -43,24 +43,34 @@
   - debian_deploy_enslavedummy
 
 - name: "generate StorPool net interfaces configuration"
-  shell: "/usr/sbin/iface-genconf -a {{ '-o' if sp_overwrite_iface_conf else '' }}"
+  command: "/usr/sbin/iface-genconf -a {{ '-o' if sp_overwrite_iface_conf else '' }}"
+  changed_when: false
   tags:
   - generate_network_conf
 
 - name: "init iface1"
-  shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f3 | xargs ifup"
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f3 | xargs ifup
+  changed_when: false
   ignore_errors: yes
   tags:
   - init_iface1
 
 - name: "init iface2"
-  shell: "/usr/sbin/storpool_showconf sp_iface2_cfg | cut -d: -f3 | xargs ifup"
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface2_cfg | cut -d: -f3 | xargs ifup
+  changed_when: false
   ignore_errors: yes
   tags:
   - init_iface2
 
 - name: "init bond interfaces (if any)"
-  shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2 | cut -d. -f1 | xargs ifup"
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2 | cut -d. -f1 | xargs ifup
+  changed_when: false
   ignore_errors: yes
   tags:
   - init_bond_iface
@@ -68,13 +78,19 @@
   - init_iface2
 
 - name: "init iface1 VLANs (if any)"
-  shell: "/usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2 | xargs ifup"
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface1_cfg | cut -d: -f2 | xargs ifup
+  changed_when: false
   ignore_errors: yes
   tags:
   - init_iface1
 
 - name: "init iface2 VLANs (if any)"
-  shell: "/usr/sbin/storpool_showconf sp_iface2_cfg | cut -d: -f2 | xargs ifup"
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface2_cfg | cut -d: -f2 | xargs ifup
+  changed_when: false
   ignore_errors: yes
   tags:
   - init_iface2

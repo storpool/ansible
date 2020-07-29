@@ -20,7 +20,8 @@
   - ubuntu_storpool_cg
 
 - name: "generate cgroups if missing"
-  shell: "/usr/sbin/storpool_cg conf {{ sp_cg_conf_extra }} {{ sp_cg_ubuntu }}"
+  command: "/usr/sbin/storpool_cg conf {{ sp_cg_conf_extra }} {{ sp_cg_ubuntu }}"
+  changed_when: false
   when: not sp_slice.stat.exists
   tags:
   - generate_cgroups
@@ -42,7 +43,8 @@
   - start_cgconfig
 
 - name: "cgconfig was active and SP cgroups already exist - trying migration"
-  shell: "/usr/sbin/storpool_cg conf -E -M {{ sp_cg_conf_extra }}"
+  command: "/usr/sbin/storpool_cg conf -E -M {{ sp_cg_conf_extra }}"
+  changed_when: false
   when: sp_cgconfig.status.ActiveState == 'active' and sp_slice.stat.exists
   tags:
   - start_cgconfig
@@ -57,7 +59,8 @@
   - start_cgconfig
 
 - name: "re-generate cgroups on Ubuntu with memsw enabled"
-  shell: "/usr/sbin/storpool_cg conf {{ sp_cg_conf_extra }}"
+  command: /usr/sbin/storpool_cg conf "{{ sp_cg_conf_extra }}"
+  changed_when: false
   when: ansible_distribution == 'Ubuntu'
   tags:
   - ubuntu_storpool_cg

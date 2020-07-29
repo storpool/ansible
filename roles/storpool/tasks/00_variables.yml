@@ -14,9 +14,11 @@
   - sp_poli
 
 - name: "sp_poli: get cluster directory status"
+  delegate_to: localhost
   run_once: true
   become: no
-  local_action: stat path="{{ sp_custdir }}/{{ sp_cluster }}"
+  stat:
+    path: "{{ sp_custdir }}/{{ sp_cluster }}"
   register: sp_cluster_dir
   when: sp_poli
   tags:
@@ -30,9 +32,11 @@
   - sp_poli
 
 - name: "sp_release_file: get file status"
+  delegate_to: localhost
   run_once: true
   become: no
-  local_action: stat path={{ sp_release_file }}
+  stat:
+    path: "{{ sp_release_file }}"
   register: sp_release_file_exists
   when: sp_release_file not in [ 'web', 'poli' ]
   tags:
@@ -46,9 +50,11 @@
   - sp_release_file
 
 - name: "sp_config: get file status"
+  delegate_to: localhost
   run_once: true
   become: no
-  local_action: stat path={{ sp_config }}
+  stat:
+    path: "{{ sp_config }}"
   register: sp_config_exists
   tags:
   - sp_config
@@ -227,7 +233,10 @@
   - sp_drives
 
 - name: "get node drive sizes"
-  shell: "lsblk -ndo TYPE,NAME,SIZE | grep ^disk | awk '{print $2,$3}'"
+  shell: >
+    set -o pipefail && \
+      lsblk -ndo TYPE,NAME,SIZE | grep ^disk | awk '{print $2,$3}'
+  changed_when: false
   register: sp_node_drive_size
   when: sp_roles.server and sp_drive_size is defined
   tags:

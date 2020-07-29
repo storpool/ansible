@@ -16,7 +16,8 @@
   - prepare_drives
 
 - name: "test drives"
-  shell: "{{ sp_toolsdir }}/perform_disktest.sh {{ sp_drives | join(' ') }}"
+  command: "{{ sp_toolsdir }}/perform_disktest.sh {{ sp_drives | join(' ') }}"
+  changed_when: false
   when: not sp_vm
   tags:
   - prepare_drives
@@ -24,6 +25,7 @@
 
 - name: "get node id"
   command: 'storpool_showconf -n SP_OURID'
+  changed_when: false
   register: sp_node_id
   tags:
   - sp_diskid
@@ -47,7 +49,8 @@
   - init_drives
 
 - name: "init drives"
-  shell: "{{ sp_toolsdir }}/init_drive.sh {{ item }} {{ sp_diskid_prefix }} {{ sp_init_node if sp_new_cluster else 'noinit' }}"
+  command: "{{ sp_toolsdir }}/init_drive.sh {{ item }} {{ sp_diskid_prefix }} {{ sp_init_node if sp_new_cluster else 'noinit' }}"
+  changed_when: false
   with_items: "{{ sp_drives }}"
   tags:
   - init_drives
@@ -79,18 +82,23 @@
   - init_drives
 
 - name: "expose all NVMe drives"
-  shell: /usr/lib/storpool/expose_nvme_drives
+  command: /usr/lib/storpool/expose_nvme_drives
+  changed_when: false
   ignore_errors: yes
   when: sp_roles.nvme
   tags:
   - init_drives
 
 - name: "settle udev"
-  shell: udevadm settle
+  command: udevadm settle
+  changed_when: false
   tags:
   - init_drives
 
 - name: "assign drives to servers"
-  shell: "/usr/lib/storpool/multi-server-helper.py -i {{ sp_server_instances }} | bash"
+  shell: >
+    set -o pipefail && \
+      /usr/lib/storpool/multi-server-helper.py -i {{ sp_server_instances }} | bash
+  changed_when: false
   tags:
   - init_drives
