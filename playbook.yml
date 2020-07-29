@@ -6,3 +6,7 @@
   become: yes
   roles:
   - storpool
+
+- import_playbook: reboot.yml
+  tags:
+  - REBOOT_HOSTS
