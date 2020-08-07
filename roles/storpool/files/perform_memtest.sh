@@ -30,8 +30,8 @@ sysctl vm.drop_caches=3
 for i in /sys/devices/system/node/node*; do
 	node=`basename $i`
 	nodenum=`echo $node|sed s/node//`
-	memavail=`grep MemFree: $i/meminfo |awk '{print $4-3145728}'`
-	if [ "$memavail" -lt 3145728 ]; then
+	memavail=`grep MemFree: $i/meminfo |awk '{print $4-4194304}'`
+	if [ "$memavail" -lt 4194304 ]; then
 		echo Not enough memory in numa node $i, skipping
 		continue
 	fi
