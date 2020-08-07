@@ -10,7 +10,6 @@ sp_overwrite_iface_conf: false
 sp_selinux: 'disabled'
 sp_disable_nm: true
 sp_disable_fw: true
-sp_reboot: false
 sp_summary_wait: true
 sp_node_roles: 'client'
 sp_cg_conf_extra: ''
@@ -43,7 +42,6 @@ sp_bool_vars:
   - sp_disable_nm
   - sp_disable_fw
   - sp_vm
-  - sp_reboot
   - sp_drive_erase
   - sp_summary_wait
 

@@ -1,12 +1,16 @@
 #!/usr/bin/env ansible-playbook
 
-- name: "deploy storpool"
+- name: "Deploy Storpool"
   gather_facts: True
   hosts: storpool
   become: yes
-  roles:
-  - storpool
-
-- import_playbook: reboot.yml
+  tasks:
+    - import_role:
+        name: storpool
   tags:
-  - REBOOT_HOSTS
+    - DEPLOY_STORPOOL
+
+- name: "Reboot servers"
+  import_playbook: reboot.yml
+  tags:
+    - REBOOT_HOSTS
