@@ -20,6 +20,13 @@
     tags:
       - dependencies # Run all tasks from storpool_2-dependencies role
 
+  # Prepare hosts for StorPool installation - tune OS and ensure prerequisites are met
+  - name: System tuning
+    include_role:
+      name: storpool_3-system-tuning
+    tags:
+      - system-tuning # Run all tasks from storpool_3-system-tuning role
+
   tasks:
     - import_role:
         name: storpool

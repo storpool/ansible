@@ -1,0 +1,64 @@
+---
+- name: Include distro-specific variables
+  include_vars: "{{ ansible_os_family|lower }}.yml"
+  tags: ['system-tune']
+
+- name: Add/Update shmfs entry in fstab
+  mount:
+    name: /dev/shm
+    src: none
+    fstype: tmpfs
+    opts: 'size=90%,nosuid,nodev'
+    state: mounted
+  tags: ['system-tune']
+
+- name: Disable swap
+  command: swapoff -a
+  changed_when: true
+  when: ansible_swaptotal_mb > 0
+  tags: ['system-tune']
+
+- name: Remove swap from fstab
+  lineinfile:
+    path: '/etc/fstab'
+    regexp: ' swap '
+    state: 'absent'
+  tags: ['system-tune']
+
+- name: Limit journald memory to 64M
+  lineinfile:
+    path: /etc/systemd/journald.conf
+    regexp: RuntimeMaxUse=
+    line: RuntimeMaxUse=64M
+    insertbefore: RuntimeKeepFree
+  notify: Restart journald service
+  tags: ['system-tune']
+
+- name: Enable generic services
+  systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  ignore_errors: true
+  with_items:
+    - "{{ generic_services }}"
+    - "{{ distro_services|default() }}"
+  tags: ['system-tune']
+
+- name: Disable generic services
+  systemd:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  ignore_errors: true
+  with_items:
+    - "{{ generic_services_stopped }}"
+  tags: ['system-tune']
+
+- name: Restart services
+  meta: flush_handlers
+  tags: ['system-tune']
+
+- name: Include distro-specific tasks
+  include_tasks: "subtasks/{{ ansible_os_family|lower }}.yml"
+  tags: ['system-tune']

@@ -1,0 +1,11 @@
+---
+# Service states
+distro_services:
+  - tuned
+  - mcelog
+distro_services_stopped:
+  - firewalld
+
+# Configuration states
+selinux_state: disabled
+tuned_profile: throughput-performance

@@ -1,0 +1,57 @@
+---
+- name: Configure tuned (CentOS/RHEL)
+  block:
+    - name: Get tuned profile
+      command: /usr/sbin/tuned-adm active
+      register: tuned_active
+      changed_when: false
+    - name: Set tuned profile
+      command: "/usr/sbin/tuned-adm profile {{ tuned_profile }}"
+      changed_when: false
+      when: tuned_profile not in tuned_active.stdout
+  tags: ['system-tune']
+
+- name: Disable firewalld service (CentOS/RHEL)
+  systemd:
+    name: firewalld
+    enabled: false
+    state: stopped
+  ignore_errors: true
+  when:
+    - sp_disable_fw is defined and
+      sp_disable_fw | bool
+  tags: ['system-tune']
+
+- name: Add StorPool ports to firewall - 81,3749,47567/TCP (CentOS/RHEL)
+  firewalld:
+    port: "{{ item }}/tcp"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  ignore_errors: true
+  with_items: "{{ sp_fw_ports }}"
+  when:
+    - sp_disable_fw is defined and
+      not sp_disable_fw | bool
+  tags: ['system-tune']
+
+- name: Disable NetworkManager (CentOS/RHEL)
+  systemd:
+    name: NetworkManager
+    enabled: false
+    state: stopped
+  ignore_errors: true
+  when:
+    - sp_disable_nm is defined and
+      sp_disable_nm | bool
+  tags: ['system-tune']
+
+- name: Configure SELinux (CentOS/RHEL)
+  selinux:
+    state: "{{ sp_selinux | default('disabled') }}"
+    policy: targeted
+  ignore_errors: true
+  when:
+    - sp_selinux is defined and
+      sp_selinux in ['permissive', 'disabled']
+  tags: ['system-tune']
