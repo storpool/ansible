@@ -3,136 +3,134 @@
 # NOTE: all boolean values must be declared as True/False (capital first letter only!)
 
 [all:vars]
-# global variables for all roles
+# Global variables for all roles
 
-# remote ssh variables for ansible
-# if user!=root /etc/sudoers on nodes needs to be adjusted accordingly
-#ansible_user='storpool'	# defaults use ssh_config
-#ansible_user='root'		# defaults use ssh_config
-#ansible_port=22		# defaults use ssh_config
-
-# used by StorPool for deployments from bastion host
-sp_cluster='ansible-test'
-sp_custdir='/home/cust'
-sp_toolsdir='/root/storpool'
+# Remote ssh variables for ansible
+# NOTE: If user!=root /etc/sudoers on nodes needs to be adjusted accordingly
+# ansible_user='storpool'	# defaults use ssh_config
+# ansible_user='root'		# defaults use ssh_config
+# ansible_port=22		# defaults use ssh_config
 
 [storpool:vars]
-# storpool role specific variables
+# StorPool-specific variables
 
-# where to get the StorPool release file from
-# sp_release_file='/path/storpool-...'	# tgz release file stored on ansible deployment host
-# sp_release_file='web'			# default - download release from StorPool
+# sp_cluster = 'ansible-test' # This is the top directory where Ansible configuration is saved
+# sp_custdir = '/home/cust' # The parent directory of sp_cluster
+# sp_toolsdir = '/root/storpool'  # Path on the target hosts where StorPool files will be stored - Defaults to /root/storpool
 
-# StorPool version to be deployed (if sp_release_file='web')
-sp_release='19.01'			# default
+# Where to get the StorPool release package from - Defaults to "web"
+# sp_release_file = '/path/storpool-...'  # Local .tgz release file stored on ansible deployment host
+# sp_release_file = 'web' # Download release from StorPool
 
-# deployment type
-#sp_new_cluster=True		# new cluster deployment
-#sp_new_cluster=False		# adding node(s) to existing cluster (default)
+# StorPool version to be deployed (if sp_release_file='web') - Defaults to 19.01
+# sp_release = '19.01'
 
-# local path to storpool.conf
-sp_config='/path/to/storpool.conf'
+# Deployment type - Defaults to True
+# sp_new_cluster = True	# New cluster deployment
+# sp_new_cluster = False	# Adding node(s) to existing cluster (default)
 
-# perform node OS update (yum/apt update/upgrade)
-#sp_update_system=True		# default
+# Path to storpool.conf on the ansible host - Defaults to the inventory directory (Where this file is located)
+# sp_config = '/path/to/storpool.conf'
 
-# automatically configure network interfaces based on storpool.conf vars
-#sp_configure_network=False	# default
-# overwrite existing ineterface configuration files (iface-genconf -o)
-#sp_overwrite_iface_conf=False	# default
+# Perform OS update (yum/apt update/upgrade) on target hosts - Defaults to True
+# sp_update_system = True
 
-# set SELinux state (permissive or disabled)
-#sp_selinux='disabled'		# default
+# Automatically configure network interfaces based on storpool.conf vars - Defaults to False
+# sp_configure_network = False
 
-# stop and disable NetworkManager
-#sp_disable_nm=True		# default
+# Overwrite existing ineterface configuration files (iface-genconf -o) - Defaults to False
+# sp_overwrite_iface_conf = False
 
-# stop and disable firewalld/ufw (if False, will add ports for StorPool)
-#sp_disable_fw=True		# default
+# Set SELinux state (valid options are "permissive" or "disabled") - Defaults to disabled
+# sp_selinux = 'disabled'
 
-# node is a Virtual Machine (skip tests)
-#sp_vm=False			# default: try to deduct from CPU product_name
+# stop and disable NetworkManager - Defaults to true
+# sp_disable_nm = True
 
-# generate a summary and pause after variable validation
-#sp_summary_wait=True		# default
+# Stop and disable firewalld/ufw (if False, will add ports for StorPool) - Defaults to True
+# sp_disable_fw = True
 
-# reboot node after deployment (not implemented yet, maybe combine with kdump)
-#sp_reboot=False		# default
+# Node is a Virtual Machine - It will be determined automatically if not specifically set
+# sp_vm = False
 
-# drive selection section
+# Generate a summary and pause after variable validation - Defaults to True
+# sp_summary_wait = True
+
+# Reboot node after deployment - Defaults to False
+# sp_reboot = False
+
+# Drive selection section
+#   - Values can be obtained by running 'lsblk -do NAME,SIZE,MODEL' on the nodes
+#   - Devices matching _any_ of the conditions below will get initialized
+#   - Larger NVME drives will be split into equally-sized partitions smaller than 4T
+#   - A matched device, already containing partitions, will trigger an error
+#     remove partitions manually or override with sp_drive_erase=True
 #
-# - values can be obtained by running 'lsblk -do NAME,SIZE,MODEL' on the nodes
-# - devices matching _any_ of the conditions below will get initialized
-# - larger NVME drives will be split into equally-sized partitions smaller than 4T
-# - a matched device, already containing partitions, will trigger an error
-#   remove partitions manually or override with sp_drive_erase=True
-#
-# CAUTION: the drive_init procedure is not fully implemented yet
-# - no RAID controller detection, and private case scenarios
-# - needs ability to specify storpool_initdisk parameters
-#
-# coma-separated list of devices to initialize
-#sp_drives='nvme0n1,nvme1n1,sdb,sdc'
-#
-# coma-separated list of sizes of devices to initialize
-#sp_drive_size='3.5T,1.8T,223.6G'
-#
-# coma-separated list of models of devices to initialize 
-#sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8,SAMSUNG MZ7LH3T8'
-#
-# init the drives even if they contain partitions (use with caution)
-# StorPool partitions will never be touched regardless of this flag
-#sp_drive_erase=False		# default
+# CAUTION: The drive_init procedure is not fully implemented yet
+#   - No RAID controller detection, and private case scenarios
+#   - Needs ability to specify storpool_initdisk parameters
 
-# sp_node_roles: comma-separated list of roles for the node(s) being deployed
-# all roles will get '@block cli' services installed
-# defining 'server' and 'client' will treat the node as hyperconverged
-# available roles:
+# Coma-separated list of devices to initialize
+# sp_drives='nvme0n1,nvme1n1,sdb,sdc'
+
+# Coma-separated list of sizes of devices to initialize
+# sp_drive_size='3.5T,1.8T,223.6G'
+
+# Coma-separated list of models of devices to initialize
+# sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8,SAMSUNG MZ7LH3T8'
+
+# Init the drives even if they contain partitions (use with caution) - Defaults to False
+# NOTE: StorPool partitions will never be touched regardless of this flag
+# sp_drive_erase=False
+
+# Comma-separated list of roles for the node(s) being deployed
+# NOTES:
+#   - All roles will get '@block cli' services installed
+#   - Defining 'server' and 'client' will treat the node as hyperconverged
 #
-# client		# client hypervisor node
-# server[:N]		# N - max instances (1 if omitted)
+# Available roles:
+# client	# client hypervisor node
+# server[:N]	# N - max instances (1 if omitted)
 # iscsi
 # mgmt
 # bridge
-#
-#sp_node_roles='client'		# default
-#sp_node_roles='server,iscsi'
 
-# sp_cg_conf_extra: list of arguments to pass to storpool_cg conf
-# see 'storpool_cg conf -h' for all available arguments
-# examples:
+# sp_node_roles='client'	# Default
+# sp_node_roles='server,iscsi'	# Another Example
+
+# List of arguments to pass to storpool_cg conf
+# NOTE: See 'storpool_cg conf -h' for all available arguments
 #
-#sp_cg_conf_extra='CORES=2 NUMA_OVERFLOW=1 SP_COMMON_LIMIT=2G SP_ALLOC_LIMIT=2G'
-#sp_cg_conf_extra='SYSTEM_LIMIT=4G USER_LIMIT=2G MACHINE_LIMIT=4G'
+# Examples:
+# sp_cg_conf_extra='CORES=2 NUMA_OVERFLOW=1 SP_COMMON_LIMIT=2G SP_ALLOC_LIMIT=2G'
+# sp_cg_conf_extra='SYSTEM_LIMIT=4G USER_LIMIT=2G MACHINE_LIMIT=4G'
 #
-# default if client+server in sp_node_roles
-#sp_cg_conf_extra='CONVERGED=1'
+# Default if client+server is defined in sp_node_roles
+# sp_cg_conf_extra='CONVERGED=1'
 #
-# default otherwise
-#sp_cg_conf_extra=''
+# Default otherwise
+# sp_cg_conf_extra=''
 #
-# offset to calculate diskid prefix (useful when sp_node_id >= 40)
+# Offset to calculate diskid prefix (useful when sp_node_id >= 40)
 # diskid_prefix = sp_node_id - sp_diskid_offset
-#sp_diskid_offset=0		# default
+# sp_diskid_offset=0	# Default
 
 [storpool]
-# node hostnames and per-node variables
-# if no variables are defined will use globals/defaults from above
-# examples:
+# Node hostnames and per-node variables
+# NOTE: If no variables are defined will use globals/defaults from above
 #
-#sp-node.1  sp_node_roles='server:7,mgmt' sp_drive_size='2T,7T' sp_drives='sdb,sdc'
-#sp-node.2  sp_node_roles='server:7,mgmt' sp_drive_size='2T' sp_drive_model='SAMSUNG MZQLB7T6HMLA-00007'
-#sp-node.3  sp_node_roles='server:3,mgmt' sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8'
-#sp-node.4  sp_node_roles='server:4' sp_drives='nvme0n1,nvme1n1,nvme2n1,nvme3n1'
-#sp-node.5  sp_node_roles='server:4' sp_drive_size='4T'
-#sp-node.6  sp_node_roles='server:2' sp_drives='nvme0n1,nvme1n1'
-#sp-node.11 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
-#sp-node.12 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
-#sp-node.13 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
-#sp-node.21 sp_node_roles='client' sp_disable_fw=False
-#sp-node.22 
-#sp-node.23
-#sp-node.31 sp_node_roles='bridge' sp_vm=True sp_configure_network=False
-#sp-node.32 sp_vm=True sp_configure_network=False sp_disable_nm=False
-
-# EOF
+# Examples:
+# sp-node.1  sp_node_roles='server:7,mgmt' sp_drive_size='2T,7T' sp_drives='sdb,sdc'
+# sp-node.2  sp_node_roles='server:7,mgmt' sp_drive_size='2T' sp_drive_model='SAMSUNG MZQLB7T6HMLA-00007'
+# sp-node.3  sp_node_roles='server:3,mgmt' sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8'
+# sp-node.4  sp_node_roles='server:4' sp_drives='nvme0n1,nvme1n1,nvme2n1,nvme3n1'
+# sp-node.5  sp_node_roles='server:4' sp_drive_size='4T'
+# sp-node.6  sp_node_roles='server:2' sp_drives='nvme0n1,nvme1n1'
+# sp-node.11 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
+# sp-node.12 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
+# sp-node.13 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
+# sp-node.21 sp_node_roles='client' sp_disable_fw=False
+# sp-node.22
+# sp-node.23
+# sp-node.31 sp_node_roles='bridge' sp_vm=True sp_configure_network=False
+# sp-node.32 sp_vm=True sp_configure_network=False sp_disable_nm=False
