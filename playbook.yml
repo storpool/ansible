@@ -49,6 +49,13 @@
     tags:
       - setup-network # Run all tasks from storpool_5-setup-network role
 
+  # Setup storage drives and add them to the StorPool cluster
+  - name: Setup drives
+    include_role:
+      name: storpool_6-setup-drives
+    tags:
+      - setup-drives # Run all tasks from storpool_6-setup-drives role
+
   tasks:
     - import_role:
         name: storpool

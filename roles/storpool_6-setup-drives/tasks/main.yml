@@ -1,0 +1,6 @@
+---
+- import_tasks: "subtasks/init_drives.yml"
+  when:
+    - sp_roles.server is defined and
+      sp_roles.server|bool
+  tags: ['setup-drives']

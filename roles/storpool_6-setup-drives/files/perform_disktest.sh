@@ -35,7 +35,7 @@ for i in $*; do
 		continue
 	fi
 
-	serial=`smartctl -i "$i" | grep ^Serial|cut -d : -f 2|tr -d ' '`
+	serial=`/usr/lib/storpool/diskid-helper "$i" 2>/dev/null | grep ^SERIAL|cut -d = -f 2|tr -d ' '`
 	if [ -z "$serial" ]; then
 		if smartctl -i "$i" | grep -q "Product.*QEMU"; then
 			serial=`echo "$i"|sed s%/%_%g`
