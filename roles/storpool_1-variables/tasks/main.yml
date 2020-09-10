@@ -1,149 +1,77 @@
-- name: "sp_poli: set value (check where I am running)"
-  delegate_to: localhost
-  set_fact:
-    cacheable: true
-    sp_poli: "{{ ansible_hostname == 'poli' }}"
-  tags:
-  - sp_poli
+---
+- name: Include local tasks 
+  include_tasks: local.yml
+  tags: ['variables'] # Include local tasks
 
-- name: "sp_poli: validation"
-  fail:
-    msg: "sp_release_file set to 'poli' but I am not running on poli!"
-  when: sp_release_file == 'poli' and not sp_poli
-  tags:
-  - sp_poli
-
-- name: "sp_poli: get cluster directory status"
-  delegate_to: localhost
-  run_once: true
-  become: no
-  stat:
-    path: "{{ sp_custdir }}/{{ sp_cluster }}"
-  register: sp_cluster_dir
-  when: sp_poli
-  tags:
-  - sp_poli
-
-- name: "sp_poli: cluster directory missing"
-  fail:
-    msg: "{{ sp_custdir }}/{{ sp_cluster }} directory missing on poli"
-  when: sp_poli and (not sp_cluster_dir.stat.exists or not sp_cluster_dir.stat.isdir)
-  tags:
-  - sp_poli
-
-- name: "sp_release_file: get file status"
-  delegate_to: localhost
-  run_once: true
-  become: no
-  stat:
-    path: "{{ sp_release_file }}"
-  register: sp_release_file_exists
-  when: sp_release_file not in [ 'web', 'poli' ]
-  tags:
-  - sp_release_file
-
-- name: "sp_release_file: check if file is readable"
-  fail:
-    msg: "Unable to read sp_release_file: {{ sp_release_file }}"
-  when: sp_release_file not in [ 'web', 'poli' ] and not sp_release_file_exists.stat.readable
-  tags:
-  - sp_release_file
-
-- name: "sp_config: get file status"
-  delegate_to: localhost
-  run_once: true
-  become: no
-  stat:
-    path: "{{ sp_config }}"
-  register: sp_config_exists
-  tags:
-  - sp_config
-
-- name: "sp_config: check if file is readable"
-  fail:
-    msg: "Unable to read sp_config: {{ sp_config }}"
-  when: not sp_config_exists.stat.exists or not sp_config_exists.stat.readable
-  tags:
-  - sp_config
-
-- name: "sp_selinux: validate"
+- name: Validate sp_selinux variable (sp_selinux)
   fail:
     msg: "invalid 'sp_selinux' value: {{ sp_selinux }}"
   when: "sp_selinux not in ['disabled', 'permissive', 'enforcing']"
-  tags:
-  - sp_selinux
+  tags: ['variables'] # Validate sp_selinux variable (sp_selinux)
 
-- name: "sp_vm: try to guess if not defined"
+- name: Auto-detect sp_vm if not defined (sp_vm)
   set_fact:
     cacheable: true
     sp_vm: "{{ ansible_product_name == 'KVM' }}"
     sp_vm_guessed: true
   when: sp_vm is not defined
-  tags:
-  - sp_vm
+  tags: ['variables'] # Auto-detect sp_vm if not defined (sp_vm)
 
-- name: "validate boolean variables"
+- name: Validate boolean variables
   fail:
-    msg: "'{{ item }}' value is not boolean: {{ vars[item] }}"
+    msg: "{{ item|quote }} value is not boolean: {{ vars[item] }}"
   when: vars[item] not in [ true, false ]
   with_items: "{{ sp_bool_vars }}"
+  tags: ['variables'] # Validate boolean variables
 
-- name: "sp_roles_list: populate from sp_node_roles"
-  set_fact:
-    cacheable: true
-    sp_roles_list: "{{ sp_node_roles.split(',') }}"
-  tags:
-  - sp_roles
+- name: Define server role
+  block:
+    - name: Populate from sp_node_roles (sp_roles_list)
+      set_fact:
+        cacheable: true
+        sp_roles_list: "{{ sp_node_roles.split(',') }}"
+    - name: Validate roles list (sp_node_roles)
+      fail:
+        msg: "{{ item|quote }} is not a valid role!"
+      with_items: "{{ sp_roles_list }}"
+      when: item not in sp_valid_roles
+    - name: Initial definition (sp_roles)
+      set_fact:
+        sp_roles: {}
+    - name: Decide on server (sp_roles)
+      set_fact:
+        cacheable: true
+        sp_roles: "{{ sp_roles | combine({'server': true}) }}"
+        sp_server_instances: "{{ item }}"
+      with_items: "{{ sp_roles_list }}"
+      when: "'server' in item.split(':')"
+  tags: ['variables'] # Define server role
 
-- name: "sp_node_roles: validate role list"
-  fail:
-    msg: "'{{ item }}' is not a valid role!"
-  with_items: "{{ sp_roles_list }}"
-  when: "item not in sp_valid_roles"
-  tags:
-  - sp_roles
+- name: Define count of server instances 
+  block:
+    - name: 1 server instance (sp_server_instances)
+      set_fact:
+        cacheable: true
+        sp_server_instances: 1
+      when: 
+        - sp_server_instances is defined and
+          sp_server_instances == 'server'
+    - name: More than 1 server instances (sp_server_instances) 
+      set_fact:
+        cacheable: true
+        sp_server_instances: "{{ sp_server_instances.split(':')[1] }}"
+      when: 
+        - sp_server_instances is defined and
+          sp_server_instances > '0' 
+    - name: No server instances (sp_server_instances) 
+      set_fact:
+        cacheable: true
+        sp_server_instances: '0'
+      when:
+        - sp_server_instances is not defined
+  tags: ['variables'] # Define count of server instances
 
-- name: "sp_roles: initial definition"
-  set_fact:
-    sp_roles: {}
-  tags:
-  - sp_roles
-
-- name: "sp_roles: decide on server"
-  set_fact:
-    cacheable: true
-    sp_roles: "{{ sp_roles | combine({'server': true}) }}"
-    sp_server_instances: "{{ item }}"
-  with_items: "{{ sp_roles_list }}"
-  when: "'server' in item.split(':')"
-  tags:
-  - sp_roles
-
-- name: "sp_server_instances = 1"
-  set_fact:
-    cacheable: true
-    sp_server_instances: '1'
-  when: "sp_server_instances is defined and sp_server_instances == 'server'"
-  tags:
-  - sp_roles
-
-- name: "sp_server_instances > 1"
-  set_fact:
-    cacheable: true
-    sp_server_instances: "{{ sp_server_instances.split(':')[1] }}"
-  when: "sp_server_instances is defined and sp_server_instances != '1'"
-  tags:
-  - sp_roles
-
-- name: "sp_server_instances = 0"
-  set_fact:
-    cacheable: true
-    sp_server_instances: '0'
-  when: "sp_server_instances is not defined"
-  tags:
-  - sp_roles
-
-- name: "sp_roles: decide on other roles"
+- name: Decide on other roles (sp_roles)
   set_fact:
     cacheable: true
     sp_roles: "{{ sp_roles | combine({item: true}) }}"
@@ -153,10 +81,9 @@
     - mgmt
     - iscsi
     - bridge
-  tags:
-  - sp_roles
+  tags: ['variables'] # Decide on other roles (sp_roles)
 
-- name: "sp_roles: populate false values"
+- name: Populate false values (sp_roles)
   set_fact:
     cacheable: true
     sp_roles: "{{ sp_roles | combine({item: false}) }}"
@@ -167,17 +94,15 @@
     - mgmt
     - iscsi
     - bridge
-  tags:
-  - sp_roles
+  tags: ['variables'] # Populate false values (sp_roles)
 
 - name: "sp_install_services: initial definition"
   set_fact:
     cacheable: true
     sp_install_services: '@block cli'
-  tags:
-  - sp_install_services
+  tags: ['variables'] #
 
-- name: "sp_install_services: add services"
+- name: Add services (sp_install_services)
   set_fact:
     cacheable: true
     sp_install_services: "{{ sp_install_services }} {{ item }}"
@@ -187,50 +112,46 @@
     - iscsi
     - mgmt
     - bridge
-  tags:
-  - sp_install_services
+  tags: ['variables'] # Add services (sp_install_services)
 
-- name: "pick server node for initial disk"
+- name: Pick server node for initial disk
   run_once: true
   set_fact:
     cacheable: true
-    sp_init_node: >-
-      {{ ansible_play_hosts | map('extract', hostvars) | list |
-         json_query('[?sp_roles.server].ansible_fqdn | [0]') }}
+    sp_init_node: "{{ ansible_play_hosts|map('extract', hostvars)|list|json_query('[?sp_roles.server].ansible_fqdn|[0]') }}"
   when: sp_new_cluster
-  tags:
-  - sp_install_services
+  tags: ['variables'] # Pick server node for initial disk
 
-- name: "check for server nodes if new cluster"
+- name: Check for server nodes if new cluster
   run_once: true
   fail:
     msg: "New cluster deployment, but no server nodes!"
-  when: "sp_new_cluster and sp_init_node|length == 0"
-  tags:
-  - sp_install_services
+  when: 
+    - sp_new_cluster and 
+      sp_init_node|length == 0
+  tags: ['variables'] # Check for server nodes if new cluster
 
-- name: "sp_cg_conf_extra: initial definition"
+- name: Initial definition (sp_cg_conf_extra)
   set_fact:
     cacheable: true
     sp_cg_conf_extra: "{{ sp_cg_conf_extra|upper }}"
-  when: "sp_cg_conf_extra|length > 0"
-  tags:
-  - sp_cg_conf_extra
+  when: 
+    - sp_cg_conf_extra is defined and 
+      sp_cg_conf_extra|length > 0
+  tags: ['variables'] # Initial definition (sp_cg_conf_extra)
 
-- name: "sp_cg_conf_extra: decide if hyperconverged node"
+- name: Decide if hyperconverged node (sp_cg_conf_extra)
   set_fact:
     cacheable: true
     sp_cg_conf_extra: "CONVERGED=1 {{ sp_cg_conf_extra }}"
   when: "sp_roles.server and sp_roles.client and 'CONVERGED' not in sp_cg_conf_extra"
-  tags:
-  - sp_cg_conf_extra
+  tags: ['variables'] # Decide if hyperconverged node (sp_cg_conf_extra)
 
 - name: "sp_drive_list: initial definition"
   set_fact:
     sp_drive_list: []
   when: sp_roles.server
-  tags:
-  - sp_drives
+  tags: ['variables'] #
 
 - name: "get node drive sizes"
   shell: >
@@ -239,8 +160,7 @@
   changed_when: false
   register: sp_node_drive_size
   when: sp_roles.server and sp_drive_size is defined
-  tags:
-  - sp_drives
+  tags: ['variables'] #
 
 - name: "sp_drive_list: populate by name/model"
   set_fact:
@@ -251,8 +171,7 @@
     sp_roles.server and item.key not in sp_drive_list and
     ((sp_drives is defined and item.key in sp_drives.split(',')) or
     (sp_drive_model is defined and item.value.model in sp_drive_model.split(',')))
-  tags:
-  - sp_drives
+  tags: ['variables'] #
 
 - name: "sp_drive_list: populate by size"
   set_fact:
@@ -262,46 +181,41 @@
   when: >
     sp_roles.server and sp_drive_size is defined and
     item.split()[0] not in sp_drive_list and item.split()[1] in sp_drive_size.split(',')
-  tags:
-  - sp_drives
+  tags: ['variables'] #
 
 - name: "sp_drive_list: validate"
   fail:
     msg: "{{ item }} contains partitions! Please remove them or set sp_drive_erase to True"
   with_items: "{{ sp_drive_list }}"
-  when: sp_roles.server and ansible_devices[item].partitions|length > 0 and not sp_drive_erase
-  tags:
-  - sp_drives
+  when: >
+    sp_roles.server and ansible_devices[item].partitions|length > 0 and not sp_drive_erase
+  tags: ['variables'] #
 
 - name: "check for nvme drives"
   set_fact:
     cacheable: true
     sp_roles: "{{ sp_roles | combine({'nvme': true}) }}"
   when: sp_roles.server and (sp_drive_list | select('match', '^nvme') | list | count > 0)
-  tags:
-  - sp_drives
+  tags: ['variables'] #
 
 - name: "no nvme drives found"
   set_fact:
     cacheable: true
     sp_roles: "{{ sp_roles | combine({'nvme': false}) }}"
   when: sp_roles.nvme is not defined
-  tags:
-  - sp_drives
+  tags: ['variables'] #
 
 - name: "check if we have drives for the servers"
   fail:
     msg: "Node declared as a server, but no drives found to initialize"
   when: "sp_roles.server and sp_drive_list|length == 0"
-  tags:
-  - sp_drives
+  tags: ['variables'] #
 
 - name: "sp_systemd_services: initial definition"
   set_fact:
     cacheable: true
     sp_systemd_services: "{{ sp_services.common }} + {{ sp_services.helper }}"
-  tags:
-  - sp_systemd_services
+  tags: ['variables'] #
 
 - name: "sp_systemd_services: add services"
   set_fact:
@@ -314,8 +228,7 @@
     - server
     - iscsi
     - bridge
-  tags:
-  - sp_systemd_services
+  tags: ['variables'] #
 
 - name: "populate sp_summary_msg"
   set_fact:
@@ -334,20 +247,14 @@
       - "install.sh:       {{ sp_install_services }}"
       - "Drives to init:   {{ sp_drive_list | sort | join(', ') if sp_roles.server else 'none' }}"
       - "Server Instances: {{ sp_server_instances }}"
-      - "storpool_cg conf: {{ sp_cg_conf_extra if sp_cg_conf_extra != '' else 'default' }}"
+      - "storpool_cg conf: {{ sp_cg_conf_extra|default('default')}}"
   when: sp_summary_wait
-  tags:
-  - sp_summary_msg
 
 - name: "sp_summary_msg: display"
   debug: var=sp_summary_msg
   when: sp_summary_wait
-  tags:
-  - sp_summary_msg
 
 - name: "sp_summary_msg: review"
   pause:
     prompt: "\nPlease Review\n\nPress Enter to begin deployment\nor Ctrl-C,A to abort"
   when: sp_summary_wait
-  tags:
-  - sp_summary_msg

@@ -1,9 +1,18 @@
 #!/usr/bin/env ansible-playbook
-
-- name: "Deploy Storpool"
-  gather_facts: True
+---
+- name: Install StorPool
   hosts: storpool
-  become: yes
+  gather_facts: true
+  become: true
+  tasks:
+
+  # Predefine common variables that are needed by the other roles during the play
+  - name: Define common variables
+    include_role:
+      name: storpool_1-variables
+    tags:
+      - variables # Run all tasks from storpool_1-variables role
+
   tasks:
     - import_role:
         name: storpool
