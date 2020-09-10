@@ -1,0 +1,105 @@
+---
+- name: Check if sp_release_file is explicitly specified and set sp_release_method variable (local)
+  set_fact:
+    sp_release_method: local
+  when: 
+    - sp_release_file is defined and
+      sp_release_file is file
+  tags: ['install'] # Check if sp_release_file is explicitly specified and set sp_release_method variable (local)
+
+- name: Check if sp_release_file is explicitly specified and set sp_release_method variable (web)
+  set_fact:
+    sp_release_method: web
+  when:
+    - sp_release_file is defined and
+      sp_release_file == 'web' 
+  tags: ['install'] # Check if sp_release_file is explicitly specified and set sp_release_method variable (web)
+
+- name: Check if sp_release_file is explicitly specified and set sp_release_method variable (poli)
+  set_fact:
+    sp_release_method: poli 
+  when:
+    - sp_release_file is defined and
+      sp_release_file == 'poli' 
+  tags: ['install'] # Check if sp_release_file is explicitly specified and set sp_release_method variable (poli)
+
+- name: Create required directories
+  include_tasks: "subtasks/create_directories.yml"
+  tags: ['install', 'install-create_dirs'] # Create required directories
+
+- name: Install support tools
+  include_tasks: "subtasks/support_tools.yml"
+  when:
+    - sp_poli is defined and
+      sp_poli|bool
+  tags: ['install', 'install-support_tools'] # Install support tools
+
+- name: Test memory
+  include_tasks: "subtasks/test_memory.yml"
+  when:
+    - sp_vm is defined and
+      not sp_vm|bool
+  tags: ['install', 'install-test_memory'] # Test Memory
+ 
+- name: Copy storpool.conf to target hosts
+  copy:
+    src: "{{ sp_config }}"
+    dest: /etc/
+  tags: ['install', 'install-sp_config'] # Copy storpool.conf to target hosts
+
+- name: Get StorPool packages
+  include_tasks: "subtasks/get_storpool/storpool_{{ sp_release_method|default('web') }}.yml"
+  tags: ['install', 'install-get_storpool'] # Get StorPool packages
+
+- name: Install StorPool modules
+  command:
+    cmd: "{{ sp_install_helper }} -g {{ sp_release|quote }} -r -w {{ sp_toolsdir|quote }} -m {{ sp_install_services|quote }}"
+    chdir: "{{ sp_toolsdir }}"
+  async: 1000
+  poll: 0
+  register: storpool_modules_sleeper
+  changed_when: false
+  tags: ['install', 'install-install_modules'] # Install StorPool modules
+
+- name: Install StorPool modules - check on async task
+  async_status:
+    jid: "{{ storpool_modules_sleeper.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 25
+  delay: 20
+  tags: ['install', 'install-install_modules'] # Install StorPool modules - check on async task
+
+- name: Restart rsyslog
+  systemd:
+    name: rsyslog
+    state: restarted
+    enabled: yes
+  changed_when: false
+  tags: ['install'] # Restart rsyslog
+
+- name: Reload sysctl entries
+  shell: '`which sysctl` --system'
+  changed_when: false
+  tags: ['install'] # Reload sysctl entries
+
+- name: Disable iommu
+  lineinfile:
+    state: present
+    dest: /etc/default/grub
+    backrefs: yes
+    regexp: '^(GRUB_CMDLINE_LINUX=(?!.\$GRUB_CMD)(?!.*iommu)\"[^\"]*)(\".*)'
+    line: '\1 amd_iommu=off\2'
+  when:
+    - sp_vm is defined and
+      not sp_vm|bool
+  tags: ['install'] # Disable iommu
+
+- name: Include distro-specific tasks
+  include_tasks: "subtasks/post_install_{{ ansible_os_family|lower }}.yml"
+  tags: ['install', 'install-post_install'] # Include distro-specific tasks
+
+- name: Make sure the node exists in storpool.conf
+  shell: '[ -n "$(storpool_showconf -n -e SP_OURID)" ]'
+  changed_when: false
+  tags: ['install'] # Make sure the node exists in storpool.conf

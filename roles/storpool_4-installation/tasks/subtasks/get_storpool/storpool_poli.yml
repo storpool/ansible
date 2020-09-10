@@ -1,0 +1,20 @@
+---
+- name: Generate build conf (Release from poli)
+  delegate_to: localhost
+  run_once: true
+  become: no
+  command:
+    chdir: "{{ sp_custdir }}/{{ sp_cluster }}"
+    cmd: /usr/local/bin/generate-build-conf
+  changed_when: false
+  when: sp_release_file == 'poli'
+  tags: ['install', 'install-get_storpool']
+
+- name: Copy release file to servers (Release from poli)
+  delegate_to: localhost
+  become: no
+  command:
+    chdir: "{{ sp_custdir }}/{{ sp_cluster }}"
+    cmd: "/usr/local/bin/copytoservers-old r={{ sp_release }} host={{ inventory_hostname }}"
+  changed_when: false
+  tags: ['install', 'install-get_storpool']

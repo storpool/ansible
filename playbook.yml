@@ -27,6 +27,21 @@
     tags:
       - system-tuning # Run all tasks from storpool_3-system-tuning role
 
+  # Test memory, install StorPool support tools, create required directories,
+  # download StorPool packages, install StorPool and do post-installation tasks
+  - name: Install StorPool
+    include_role:
+      name: storpool_4-installation
+    tags:
+      - install # Run all tasks from storpool_4-installation role
+      - install-test_memory # Test Memory
+      - install-support_tools # StorPool Support Tools
+      - install-create_dirs # Create StorPool-required directories
+      - install-get_storpool # Get StorPool Packages
+      - install-install_modules # Install StorPool modules
+      - install-sp_config # Copy storpool.conf to servers
+      - install-post_install # Post-installation tasks
+
   tasks:
     - import_role:
         name: storpool

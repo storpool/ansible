@@ -1,5 +1,0 @@
-- name: "make sure the node exists in storpool.conf"
-  shell: '[ -n "$(storpool_showconf -n -e SP_OURID)" ]'
-  changed_when: false
-  tags:
-  - check_sp_ourid

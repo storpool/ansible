@@ -1,4 +1,5 @@
-- name: "install StorPool support tools"
+---
+- name: Install (StorPool Support Tools)
   delegate_to: localhost
   run_once: false
   become: no
@@ -7,29 +8,31 @@
     cmd: /usr/local/bin/installtools {{ inventory_hostname }}
   changed_when: false
   when: sp_cluster is defined
-  tags:
-  - install_support_tools
+  tags: ['install', 'install-support_tools']
 
-- name: "check if mlc exists"
+- name: Check if mlc exists (StorPool Support Tools)
   stat:
     path: "{{ sp_toolsdir }}/mlc/mlc"
   register: mlc_present
-  when: not sp_vm
-  tags:
-  - mlc_test
-  - check_if_mcl_exists
+  when: 
+    - sp_vm is defined and
+      not sp_vm|bool
+  tags: ['install', 'install-support_tools']
 
-- name: "perform mlc test"
+- name: Perform mlc test (StorPool Support Tools)
   shell: >
     set -o pipefail && \
       [[ ! -d "/tmp/mlc/" ]] && mkdir -p /tmp/mlc/; \
       [[ ! -f "/tmp/mlc/mlc.output" ]] && {{ sp_toolsdir }}/mlc/mlc > /tmp/mlc/mlc.output || /bin/true
   changed_when: false
-  when: not sp_vm and mlc_present.stat.executable
-  tags:
-  - mlc_test
+  when:
+    - sp_vm is defined and
+      mlc_present.stat is defined and
+      not sp_vm|bool and 
+      mlc_present.stat.exists|bool
+  tags: ['install', 'install-support_tools']
 
-- name: "collect inventory"
+- name: Collect inventory (StorPool Support Tools)
   delegate_to: localhost
   run_once: false
   become: no
@@ -37,5 +40,5 @@
     chdir: "{{ sp_custdir }}/{{ sp_cluster }}"
     cmd: /usr/local/bin/collect_inventory "{{ inventory_hostname }}"
   changed_when: false
-  tags:
-  - collect_inventory
+  tags: ['install', 'install-support_tools']
+
