@@ -56,11 +56,6 @@
     tags:
       - setup-drives # Run all tasks from storpool_6-setup-drives role
 
-  tasks:
-    - import_role:
-        name: storpool
-  tags:
-    - DEPLOY_STORPOOL
   # Configure cgroups
   - name: Configure cgroups
     include_role:
@@ -68,8 +63,19 @@
     tags:
       - configure-cgroups # Run all tasks from storpool_7-cgroups role
 
+  # Includes enabling of needed storpool services on boot, hugepages setup,
+  # generating the VF configuration
+  - name: Finalise the installation
+    include_role:
+      name: storpool_8-finalise
+    tags:
+      - finalise
 
-- name: "Reboot servers"
-  import_playbook: reboot.yml
-  tags:
-    - REBOOT_HOSTS
+- hosts: storpool
+  serial: 1
+  become: true
+  tasks:
+    - name: Reboot hosts
+      include_role:
+        name: storpool_8-finalise
+        tasks_from: reboot_hosts
