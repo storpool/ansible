@@ -61,6 +61,13 @@
         name: storpool
   tags:
     - DEPLOY_STORPOOL
+  # Configure cgroups
+  - name: Configure cgroups
+    include_role:
+      name: storpool_7-cgroups
+    tags:
+      - configure-cgroups # Run all tasks from storpool_7-cgroups role
+
 
 - name: "Reboot servers"
   import_playbook: reboot.yml
