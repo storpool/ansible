@@ -1,0 +1,42 @@
+---
+- name: Deploy enslavedummy (Ubuntu/Debian)
+  copy:
+    src: enslavedummy
+    dest: /sbin
+    mode: 0755
+  tags: ['setup-network']
+
+- name: Add dummy0 (Ubuntu/Debian)
+  copy:
+    dest: '/etc/network/interfaces.d/dummy0'
+    content: |
+      auto dummy0
+      iface dummy0 inet manual
+      bond-master {{ sp_bond.stdout }}
+      mtu 9000
+  when:
+    - sp_bonding is defined and
+      sp_bonding|bool
+  tags: ['setup-network']
+
+- name: Get {{ sp_bond.stdout }} slave interfaces (Ubuntu/Debian)
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d: -f3
+  changed_when: false
+  register: sp_bond_slaves
+  when:
+    - sp_bonding is defined and
+      sp_bonding|bool
+  tags: ['setup-network']
+
+- name: Add enslavedummy hook to slave interfaces (Ubuntu/Debian)
+  lineinfile:
+    path: "/etc/network/interfaces.d/{{ item }}"
+    line: "pre-up /sbin/enslavedummy {{ sp_bond.stdout }} dummy0 || true"
+    state: present
+  with_items: "{{ sp_bond_slaves.stdout_lines }}"
+  when:
+    - sp_bonding is defined and
+      sp_bonding|bool
+  tags: ['setup-network']

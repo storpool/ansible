@@ -42,6 +42,13 @@
       - install-sp_config # Copy storpool.conf to servers
       - install-post_install # Post-installation tasks
 
+  # Setup StorPool network
+  - name: Setup network
+    include_role:
+      name: storpool_5-setup-network
+    tags:
+      - setup-network # Run all tasks from storpool_5-setup-network role
+
   tasks:
     - import_role:
         name: storpool

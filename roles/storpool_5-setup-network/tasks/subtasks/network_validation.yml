@@ -1,0 +1,52 @@
+- name: Force ansible to regather facts
+  setup:
+    filter: '*'
+  tags: ['setup-network', 'setup-network_validate']
+
+- name: Get StorPool interfaces from storpool.conf
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d : -f 2,3 | sed -e ':a;N;$!ba;s/\\n/:/g'
+  changed_when: false
+  register: sp_ifaces
+  tags: ['setup-network', 'setup-network_validate']
+
+- name: Validate StorPool interfaces
+  fail:
+    msg: "interface {{ item }} is in storpool.conf, but does not exist"
+  when: item not in ansible_interfaces
+  with_items: "{{ sp_ifaces.stdout.split(':')[0] }}"
+  tags: ['setup-network', 'setup-network_validate']
+
+- name: Get StorPool IP addresses from storpool.conf
+  shell: >
+    set -o pipefail && \
+      /usr/sbin/storpool_showconf sp_iface1_cfg sp_iface2_cfg | cut -d : -f 2,5
+  changed_when: false
+  register: sp_conf_ips
+  tags: ['setup-network', 'setup-network_validate']
+
+- name: Get secondary IPs on loopback - sp_lo_ips
+  set_fact:
+    sp_lo_ips: "{{ ansible_facts.lo.ipv4_secondaries | json_query('[].address') }}"
+    cacheable: true
+  when: ansible_facts.lo.ipv4_secondaries is defined
+  tags: ['setup-network', 'setup-network_validate']
+
+- name: No secondary IPs on loopback
+  set_fact:
+    sp_lo_ips: []
+    cacheable: true
+  when: ansible_facts.lo.ipv4_secondaries is not defined
+  tags: ['setup-network', 'setup-network_validate']
+
+- name: Validate StorPool IP addresses
+  fail:
+    msg: "IP {{ item.split(':')[1] }} missing on node!"
+  when:
+    - item.split(':')[1] not in sp_lo_ips and
+      ('ipv4' not in ansible_facts[item.split(':')[0]] or
+      ('ipv4' in ansible_facts[item.split(':')[0]] and
+      ansible_facts[item.split(':')[0]].ipv4.address != item.split(':')[1]))
+  with_items: "{{ sp_conf_ips.stdout_lines }}"
+  tags: ['setup-network', 'setup-network_validate']
