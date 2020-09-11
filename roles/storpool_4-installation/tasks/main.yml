@@ -109,8 +109,8 @@
     jid: "{{ memory_test_sleeper.ansible_job_id }}"
   register: job_result
   until: job_result.finished
-  retries: 100
-  delay: 5
+  retries: 200
+  delay: 30
   when:
     - sp_vm is defined and
       not sp_vm|bool and
