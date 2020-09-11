@@ -22,8 +22,6 @@
       /usr/sbin/storpool_showconf sp_iface2_cfg | cut -d: -f3 | xargs ifup
   changed_when: false
   ignore_errors: true
-  tags:
-  - init_iface2
   tags: ['setup-network']
 
 - name: Init bond interfaces (if any)

@@ -11,7 +11,7 @@
 
 - name: Perform memory tests (Test Memory)
   command: "{{ sp_toolsdir }}/perform_memtest.sh {{ sp_toolsdir }}"
-  async: 45
+  async: 6000
   poll: 0
   register: memory_test_sleeper
   changed_when: false

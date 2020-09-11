@@ -2,7 +2,7 @@
 - name: Check if sp_release_file is explicitly specified and set sp_release_method variable (local)
   set_fact:
     sp_release_method: local
-  when: 
+  when:
     - sp_release_file is defined and
       sp_release_file is file
   tags: ['install'] # Check if sp_release_file is explicitly specified and set sp_release_method variable (local)
@@ -12,15 +12,15 @@
     sp_release_method: web
   when:
     - sp_release_file is defined and
-      sp_release_file == 'web' 
+      sp_release_file == 'web'
   tags: ['install'] # Check if sp_release_file is explicitly specified and set sp_release_method variable (web)
 
 - name: Check if sp_release_file is explicitly specified and set sp_release_method variable (poli)
   set_fact:
-    sp_release_method: poli 
+    sp_release_method: poli
   when:
     - sp_release_file is defined and
-      sp_release_file == 'poli' 
+      sp_release_file == 'poli'
   tags: ['install'] # Check if sp_release_file is explicitly specified and set sp_release_method variable (poli)
 
 - name: Create required directories
@@ -40,7 +40,7 @@
     - sp_vm is defined and
       not sp_vm|bool
   tags: ['install', 'install-test_memory'] # Test Memory
- 
+
 - name: Copy storpool.conf to target hosts
   copy:
     src: "{{ sp_config }}"
@@ -66,8 +66,8 @@
     jid: "{{ storpool_modules_sleeper.ansible_job_id }}"
   register: job_result
   until: job_result.finished
-  retries: 25
-  delay: 20
+  retries: 100
+  delay: 5
   tags: ['install', 'install-install_modules'] # Install StorPool modules - check on async task
 
 - name: Restart rsyslog
@@ -103,3 +103,17 @@
   shell: '[ -n "$(storpool_showconf -n -e SP_OURID)" ]'
   changed_when: false
   tags: ['install'] # Make sure the node exists in storpool.conf
+
+- name: Perform memory tests (Test Memory) - check on async task
+  async_status:
+    jid: "{{ memory_test_sleeper.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 100
+  delay: 5
+  when:
+    - sp_vm is defined and
+      not sp_vm|bool and
+      memory_test_sleeper is defined and
+      memory_test_sleeper.ansible_job_id is defined
+  tags: ['install', 'install-test_memory'] # Test Memory - check on async task
