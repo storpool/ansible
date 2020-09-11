@@ -7,12 +7,12 @@ The repository contains StorPool's playbook and roles for Ansible.
 
 ```
 # Running this playbook with ansible-playbook:
-ansible-playbook /path/to/playbook.yml [parameters]
+ansible-playbook /home/tools/ansible/playbook.yml [parameters]
 ```
 
 ```
 # This playbook can be also execuded directly from the playbook's directory, like this:
-./playbook.yml [parameters]
+/home/tools/ansible/playbook.yml [parameters]
 ```
 
 ### Common `ansible-playbook` parameters
@@ -41,10 +41,10 @@ vi ansible.hosts
 
 ```
 # Save the file and run the playbook:
-ansible-playbook playbook.yml -i ansible.hosts
+ansible-playbook /home/tools/ansible/playbook.yml -i ansible.hosts
 
 # Or run it directly:
-./playbook.yml -i ansible.hosts
+/home/tools/ansible/playbook.yml -i ansible.hosts
 ```
 
 ## Available Tags
@@ -60,6 +60,7 @@ ansible-playbook playbook.yml -i ansible.hosts
 | configure-cgroups | Configure cgroups as per StorPool's requirements |
 | finalise | Final configurations - generate VF configuration, enable storpool systemd services |
 | reboot-hosts | Reboot target hosts |
+
 ```
 # Show list of available tags:
 ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --list-tags
