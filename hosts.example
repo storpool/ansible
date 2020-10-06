@@ -35,6 +35,9 @@
 # Perform OS update (yum/apt update/upgrade) on target hosts - Defaults to True
 # sp_update_system = True
 
+# Set to True if deploying on a machine with single NIC
+# sp_single_iface=False # Default
+
 # Automatically configure network interfaces based on storpool.conf vars - Defaults to False
 # sp_configure_network = False
 
