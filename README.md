@@ -51,15 +51,15 @@ ansible-playbook /home/tools/ansible/playbook.yml -i ansible.hosts
 
 | Tag | Description |
 |--|--|
-| variables | Set common variables for target hosts |
-| dependencies | Install StorPool's dependencies on target hosts |
-| system-tune | OS related configurations and performance tuning tasks |
+| prerequisites | Set common variables for target hosts, do some common tests |
+| setup-infra | Install StorPool's dependencies on target hosts, OS related configurations and performance tuning tasks |
 | install | Download and install StorPool and the StorPool support tools |
 | setup-network | Configure and validate StorPool's network |
 | setup-drives | Initialize StorPool drives |
-| configure-cgroups | Configure cgroups as per StorPool's requirements |
-| finalise | Final configurations - generate VF configuration, enable storpool systemd services |
+| setup-cgroups | Configure cgroups as per StorPool's requirements |
+| setup-services | Enable and start StorPool systemd services |
 | reboot-hosts | Reboot target hosts |
+| tests | Aftertests |
 
 ```
 # Show list of available tags:
@@ -68,17 +68,17 @@ ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --list-
 
 ```
 # Run specific tags:
-ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --tags network_validation
+ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --tags prerequisites 
 ```
 
 ```
 # Skip specific tags:
-ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --skip-tags configure_network,init_drives,network_validation
+ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --skip-tags setup-network,setup-drives
 ```
 
 ```
 # Run specific task on a specific server from your inventory:
-ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --limit example-server.1 --tags configure_network
+ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --limit example-server.1 --tags setup-network 
 ```
 
 > **NOTE:** We use fact caching in order to speed up the process by caching all required variables on the ansible server (inside `./facts` directory) for later runs. If you have deleted the facts directory or any of the hosts facts inside it, you need to execute `ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --tags variables` in order for you to re-gather all required variables inside the facts cache.
@@ -99,12 +99,12 @@ ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --limit
 | sp_update_system | Perform OS update (yum/apt update/upgrade) on target hosts ***Defaults to True*** |
 | sp_configure_network | Automatically configure network interfaces based on storpool.conf variables ***Defaults to False*** |
 | sp_overwrite_iface_conf | Overwrite existing ineterface configuration files (iface-genconf -o). ***Defaults to False*** |
+| sp_single_iface | Specifies `--nettype 0` on `iface_genconf` **Defaults to False** |
 | sp_selinux | Set SELinux state (valid options are "permissive" or "disabled") ***Defaults to `disabled`*** |
 | sp_disable_nm | Stop and disable NetworkManager ***Defaults to True*** |
 | sp_disable_fw | Stop and disable firewalld/ufw (if False, will add ports for StorPool) ***Defaults to True*** |
 | sp_vm | Nodes are virtual machines - It will be determined automatically if not specifically set |
 | sp_summary_wait | Generate a summary and pause after variable validation ***Defaults to True*** |
-| sp_reboot | Reboot node after deployment ***Defaults to False*** |
 | sp_drive_erase | Init the drives even if they contain partitions (use with caution) ***Defaults to False*** |
 | sp_cg_conf_extra | List of arguments to pass to storpool_cg conf |
 | sp_diskid_offset |  Offset to calculate diskid prefix (useful when sp_node_id >= 40) |
@@ -115,12 +115,12 @@ ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --limit
 
 ```
 # Gather all required playbook variables to cache:
-ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --tags variables
+ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --tags prerequisites 
 ```
 
 ```
 # Flush facts cache and gather everything again:
-ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --tags variables --flush-cache
+ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --tags prerequisites --flush-cache
 ```
 
 ## Work is needed for:
