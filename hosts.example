@@ -59,9 +59,6 @@
 # Generate a summary and pause after variable validation - Defaults to True
 # sp_summary_wait = True
 
-# Reboot node after deployment - Defaults to False
-# sp_reboot = False
-
 # Drive selection section
 #   - Values can be obtained by running 'lsblk -do NAME,SIZE,MODEL' on the nodes
 #   - Devices matching _any_ of the conditions below will get initialized
