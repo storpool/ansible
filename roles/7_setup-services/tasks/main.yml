@@ -1,0 +1,36 @@
+---
+- name: Get needed number of server instances
+  script: get_instances.py
+  args:
+    executable: /opt/storpool/python3/bin/python3
+  changed_when: false
+  register: sp_instances
+  when:
+    - sp_roles is defined and
+      sp_roles.server | bool
+
+- name: Run storpool_hugepages to apply NVME config
+  command: /usr/sbin/storpool_hugepages
+  changed_when: false
+  when:
+    - sp_roles is defined and
+      sp_roles.nvme | bool
+
+- name: Add storpool_server instances to sp_systemd_services
+  set_fact:
+    sp_systemd_services: "{{ sp_systemd_services }} + {{ sp_instances.stdout_lines }}"
+  when: sp_roles.server
+
+- name: Start/enable sp_systemd_services
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  changed_when: false
+  with_items: "{{ sp_systemd_services }}"
+  when:
+    - start_services is not defined or
+      start_services|bool
+
+- name: Populate service facts
+  service_facts:

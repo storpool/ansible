@@ -1,0 +1,15 @@
+---
+- name: Download required tools (Release from web)
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+  with_items:
+    - { url: "{{ sp_install_getpackage_url }}", dest: "{{ sp_toolsdir }}" }
+    - { url: "{{ sp_install_helper_url }}", dest: "{{ sp_toolsdir }}" }
+  tags: ["install", "install-get_storpool"]
+
+- name: Get the release archive from vault (Release from web)
+  command: "{{ sp_getpackage }} -g {{ sp_release }}"
+  changed_when: false
+  tags: ["install", "install-get_storpool"]

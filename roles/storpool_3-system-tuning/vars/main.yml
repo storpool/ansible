@@ -1,6 +1,0 @@
----
-generic_services:
-  - lldpd
-  - chronyd
-generic_services_stopped:
-  - irqbalance

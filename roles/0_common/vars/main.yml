@@ -1,0 +1,41 @@
+---
+generic_deps:
+  - wget
+  - curl
+  - mc
+  - man
+  - fio
+  - git
+  - bash-completion
+  - bc
+  - chrony
+  - mtr
+  - numactl
+  - nvme-cli
+  - patch
+  - logrotate
+  - python-requests
+  - rsync
+  - screen
+  - hwloc
+  - smartmontools
+  - lshw
+  - lsof
+  - tmux
+  - socat
+  - strace
+  - sysstat
+  - tcpdump
+  - dmidecode
+  - kexec-tools
+  - lldpd
+  - perl
+  - psmisc
+  - pciutils
+
+generic_services:
+  - lldpd
+  - chronyd
+
+generic_services_stopped:
+  - irqbalance

@@ -1,0 +1,40 @@
+---
+- name: Gather localhost's facts
+  hosts: localhost
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: Collect localhost's facts
+      setup:
+        gather_subset:
+          - "!all"
+
+- name: Prepare environment for StorPool
+  hosts: storpool
+  gather_facts: true
+  become: true
+
+  pre_tasks:
+    - name: Ensure python is installed
+      register: result
+      raw: |
+        if which apt-get >/dev/null && ! which python >/dev/null ; then
+          if ! which python3 >/dev/null ; then
+            apt-get -y install python3
+          fi
+          update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+          exit 2
+        else
+          exit 0
+        fi
+      changed_when: "result.rc == 2"
+      failed_when: "result.rc not in [0, 2]"
+
+  tasks:
+    - name: Define common variables
+      import_role:
+        name: 1_prepare
+
+  tags:
+    - prerequisites

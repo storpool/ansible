@@ -1,0 +1,13 @@
+---
+- name: Setup infrastructure for StorPool
+  hosts: storpool
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: System tuning
+      import_role:
+        name: 2_setup-infra
+
+  tags:
+    - setup-infrastructure

@@ -1,9 +1,0 @@
-galaxy_info:
-  author: StorPool Operations
-  description: Ansible role for setup, configuration and validation of StorPool networking
-  company: StorPool
-  license: Apache
-  min_ansible_version: 2.7
-  galaxy_tags: []
-dependencies:
-  - role: storpool_0-common

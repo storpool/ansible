@@ -1,0 +1,13 @@
+---
+- name: Setup Drives
+  hosts: storpool
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Configure StorPool drives
+      import_role:
+        name: 5_setup-drives
+
+  tags:
+    - setup-drives

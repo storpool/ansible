@@ -1,0 +1,8 @@
+---
+- name: Create StorPool directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ sp_dirs }}"
+  tags: ["install", "install-create_dirs"]

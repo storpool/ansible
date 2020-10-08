@@ -1,0 +1,45 @@
+---
+- name: Check for a supported Operating System
+  assert:
+    that:
+      - (ansible_distribution == 'Debian' and ansible_distribution_release == 'stretch') or
+        (ansible_distribution == 'Debian' and ansible_distribution_release == 'buster') or
+        (ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'bionic') or
+        (ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'focal') or
+        (ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7')
+    msg: >-
+      The only supported platforms for this release are Debian Stretch, Ubuntu 18.04 LTS (Bionic) or
+      Centos 7.
+  when: (check_operating_system | default(True))| bool
+  tags: check-requirements
+
+- name: Identify the space available in /
+  shell: >
+    df -BK / | awk '!/^Filesystem/ {print $4}' | sed 's/K//'
+  environment:
+    LC_ALL: en_US.UTF-8
+  changed_when: false
+  register: root_space_available
+  tags: check-requirements
+
+- name: Set root disk facts
+  set_fact:
+    host_root_space_available_bytes: "{{ ( root_space_available.stdout | int) * 1024 | int }}"
+  tags: check-requirements
+
+- name: Set min size fact
+  set_fact:
+    host_data_disk_min_size_bytes: "{{ ((bootstrap_host_data_disk_min_size | int) * 1024**3) | int }}"
+  tags: check-requirements
+
+- name: Set size facts
+  set_fact:
+    root_gb_available: "{{ ((host_root_space_available_bytes | int ) / 1024**3) | round(2, 'floor') }}"
+  tags: check-requirements
+
+- name: Fail if there is not enough space available in /
+  fail:
+    msg: "Not enough space available in / (found {{ root_gb_available }}GB, required {{ bootstrap_host_data_disk_min_size }}GB)"
+  when:
+    - (host_root_space_available_bytes | int) < (host_data_disk_min_size_bytes | int)
+  tags: check-requirements

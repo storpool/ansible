@@ -1,6 +1,0 @@
----
-- name: Copy local release file to servers (Release from local)
-  copy:
-    src: "{{ sp_release_file }}"
-    dest: "{{ sp_toolsdir }}"
-  tags: ['install', 'install-get_storpool']

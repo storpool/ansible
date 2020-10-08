@@ -1,0 +1,12 @@
+---
+- name: Update /etc/rc.local
+  become: yes
+  template:
+    src: rc.local.j2
+    dest: /etc/rc.local
+    owner: root
+    group: root
+    mode: 0755
+  when:
+    - sp_rc_local is defined and
+      sp_rc_local | bool

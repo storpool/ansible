@@ -1,0 +1,16 @@
+---
+- name: Upgrade all packages (Ubuntu/Debian)
+  apt:
+    upgrade: full
+    update_cache: true
+  when:
+    - sp_update_system is defined and
+      sp_update_system | bool
+
+- name: Install HV dependencies (Ubuntu/Debian)
+  apt:
+    name: systemd-container
+    update_cache: true
+  when:
+    - sp_roles.client is defined and
+      sp_roles.client | bool

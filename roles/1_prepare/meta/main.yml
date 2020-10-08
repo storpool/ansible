@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  author: StorPool Operations
+  description: Ansible role for generating common variables and making common validation steps
+  company: StorPool
+  license: Apache
+  platforms:
+    - name: CentOS
+    - name: Debian
+    - name: Ubuntu
+  min_ansible_version: 2.7
+  galaxy_tags: []
+dependencies:
+  - role: 0_common

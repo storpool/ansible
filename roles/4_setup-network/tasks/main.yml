@@ -1,0 +1,21 @@
+---
+- name: Configure Network
+  import_tasks: "subtasks/configure_network.yml"
+  when:
+  - sp_configure_network is defined and
+    sp_configure_network|bool
+
+- name: Validate Network
+  import_tasks: "subtasks/network_validation.yml"
+
+- name: Make bond adjustments
+  import_tasks: "subtasks/bond_adjustments.yml"
+  when:
+  - sp_configure_network is defined and
+    sp_configure_network|bool
+
+- name: Generate VF configuration 
+  import_tasks: "subtasks/vf_generate_config.yml"
+  when:
+    - sp_vm is defined and
+      not sp_vm | bool

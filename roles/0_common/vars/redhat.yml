@@ -1,0 +1,21 @@
+---
+distro_deps:
+  - cpupowerutils
+  - libcgroup-tools
+  - lz4
+  - mcelog
+  - perf
+  - perl-core
+  - smartmontools
+  - tuned
+  - vim-enhanced
+
+distro_services:
+  - tuned
+  - mcelog
+
+distro_services_stopped:
+  - firewalld
+
+selinux_state: disabled
+tuned_profile: throughput-performance

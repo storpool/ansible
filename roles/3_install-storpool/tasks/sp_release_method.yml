@@ -1,0 +1,24 @@
+---
+- name: Check if sp_release_file is explicitly specified and set sp_release_method variable (local)
+  set_fact:
+    sp_release_method: local
+  when:
+    - sp_release_file is defined and
+      sp_release_file is file
+  tags: install
+
+- name: Check if sp_release_file is explicitly specified and set sp_release_method variable (web)
+  set_fact:
+    sp_release_method: web
+  when:
+    - sp_release_file is defined and
+      sp_release_file == 'web'
+  tags: install
+
+- name: Check if sp_release_file is explicitly specified and set sp_release_method variable (poli)
+  set_fact:
+    sp_release_method: poli
+  when:
+    - sp_release_file is defined and
+      sp_release_file == 'poli'
+  tags: install

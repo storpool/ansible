@@ -1,0 +1,3 @@
+- name: Generate VF configuration
+  command: "/usr/lib/storpool/vf-genconf"
+  changed_when: false

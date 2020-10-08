@@ -1,3 +1,0 @@
----
-- import_tasks: "subtasks/cgroups.yml"
-  tags: ['configure-cgroups']

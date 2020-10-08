@@ -1,0 +1,44 @@
+---
+- name: Validate sp_selinux variable (sp_selinux)
+  fail:
+    msg: "invalid 'sp_selinux' value: {{ sp_selinux }}"
+  when: "sp_selinux not in ['disabled', 'permissive', 'enforcing']"
+
+- name: Validate boolean variables
+  fail:
+    msg: "{{ item | quote }} value is not boolean: {{ vars[item] }}"
+  when:
+    - vars[item] not in [ true, false ]
+  with_items:
+    - "{{ sp_bool_vars }}"
+
+- name: Validate roles list (sp_node_roles)
+  fail:
+    msg: "{{ item | quote }} is not a valid role!"
+  with_items: "{{ sp_roles_list }}"
+  when:
+    - item not in sp_valid_roles
+
+- name: Check for server nodes if new cluster
+  run_once: true
+  fail:
+    msg: "New cluster deployment, but no server nodes!"
+  when:
+    - sp_new_cluster and
+      sp_init_node|length == 0
+
+- name: Validate sp_drive_list variable 
+  fail:
+    msg: "{{ item }} contains partitions! Please remove them or set sp_drive_erase to True"
+  with_items: "{{ sp_drive_list }}"
+  when:
+    - sp_roles.server and 
+      ansible_devices[item].partitions|length > 0 and
+      not sp_drive_erase
+
+- name: "check if we have drives for the servers"
+  fail:
+    msg: "Node declared as a server, but no drives found to initialize"
+  when:
+    - sp_roles.server and
+      sp_drive_list | length == 0

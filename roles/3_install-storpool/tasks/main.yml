@@ -1,0 +1,106 @@
+---
+- name: Define sp_release_method
+  include_tasks: "sp_release_method.yml"
+  tags: install
+
+- name: Create dirs
+  include_tasks: "subtasks/create_directories.yml"
+  tags: ["install", "install-create_dirs"] # Create required directories
+
+- name: Install support tools
+  include_tasks: "subtasks/support_tools.yml"
+  when:
+    - sp_poli is defined and
+      sp_poli|bool
+  tags: ["install", "install-support_tools"] # Install support tools
+
+- name: Test memory
+  include_tasks: "subtasks/test_memory.yml"
+  when:
+    - sp_vm is defined and
+      not sp_vm|bool
+  tags: ["install", "install-test_memory"] # Test Memory
+
+- name: Copy storpool.conf
+  copy:
+    src: "{{ sp_config }}"
+    dest: /etc/
+  tags: ["install", "install-sp_config"] # Copy storpool.conf to target hosts
+
+- name: Get StorPool packages
+  include_tasks: "subtasks/get_storpool/storpool_{{ sp_release_method|default('web') }}.yml"
+  tags: ["install", "install-get_storpool"] # Get StorPool packages
+
+- name: Install StorPool modules
+  command:
+    cmd: "{{ sp_install_helper }} -g {{ sp_release|quote }} -r -w {{ sp_toolsdir|quote }} -m {{ sp_install_services|quote }}"
+    chdir: "{{ sp_toolsdir }}"
+  async: 1000
+  poll: 0
+  register: storpool_modules_sleeper
+  changed_when: false
+  tags: ["install", "install-install_modules"] # Install StorPool modules
+
+- name: Install StorPool modules - check on async task
+  async_status:
+    jid: "{{ storpool_modules_sleeper.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 100
+  delay: 5
+  changed_when: false
+  tags: ["install", "install-install_modules"] # Install StorPool modules - check on async task
+
+- name: Debug StorPool install output
+  debug:
+    var: job_result
+    verbosity: 1
+
+- name: Restart rsyslog
+  systemd:
+    name: rsyslog
+    state: restarted
+    enabled: yes
+  changed_when: false
+  tags: ["install"] # Restart rsyslog
+
+- name: Reload sysctl entries
+  shell: |
+    `which sysctl` --system
+  changed_when: false
+  tags: ["install"] # Reload sysctl entries
+
+- name: Disable iommu
+  lineinfile:
+    state: present
+    dest: /etc/default/grub
+    backrefs: yes
+    regexp: '^(GRUB_CMDLINE_LINUX=(?!.\$GRUB_CMD)(?!.*iommu)\"[^\"]*)(\".*)'
+    line: '\1 amd_iommu=off\2'
+  when:
+    - sp_vm is defined and
+      not sp_vm|bool
+  tags: ["install"] # Disable iommu
+
+- name: Include distro-specific tasks
+  include_tasks: "subtasks/post_install_{{ ansible_os_family|lower }}.yml"
+  tags: ["install", "install-post_install"] # Include distro-specific tasks
+
+- name: Make sure the node exists in storpool.conf
+  shell: '[ -n "$(storpool_showconf -n -e SP_OURID)" ]'
+  changed_when: false
+  tags: ["install"] # Make sure the node exists in storpool.conf
+
+- name: Test Memory - check on async task
+  async_status:
+    jid: "{{ memory_test_sleeper.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 200
+  delay: 30
+  when:
+    - sp_vm is defined and
+      not sp_vm|bool and
+      memory_test_sleeper is defined and
+      memory_test_sleeper.ansible_job_id is defined
+  tags: ["install", "install-test_memory"] # Test Memory - check on async task

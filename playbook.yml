@@ -1,81 +1,11 @@
 #!/usr/bin/env ansible-playbook
 ---
-- name: Install StorPool
-  hosts: storpool
-  gather_facts: true
-  become: true
-  tasks:
-
-  # Predefine common variables that are needed by the other roles during the play
-  - name: Define common variables
-    include_role:
-      name: storpool_1-variables
-    tags:
-      - variables # Run all tasks from storpool_1-variables role
-
-  # Install package depentencies on all hosts
-  - name: Install Dependencies
-    include_role:
-      name: storpool_2-dependencies
-    tags:
-      - dependencies # Run all tasks from storpool_2-dependencies role
-
-  # Prepare hosts for StorPool installation - tune OS and ensure prerequisites are met
-  - name: System tuning
-    include_role:
-      name: storpool_3-system-tuning
-    tags:
-      - system-tuning # Run all tasks from storpool_3-system-tuning role
-
-  # Test memory, install StorPool support tools, create required directories,
-  # download StorPool packages, install StorPool and do post-installation tasks
-  - name: Install StorPool
-    include_role:
-      name: storpool_4-installation
-    tags:
-      - install # Run all tasks from storpool_4-installation role
-      - install-test_memory # Test Memory
-      - install-support_tools # StorPool Support Tools
-      - install-create_dirs # Create StorPool-required directories
-      - install-get_storpool # Get StorPool Packages
-      - install-install_modules # Install StorPool modules
-      - install-sp_config # Copy storpool.conf to servers
-      - install-post_install # Post-installation tasks
-
-  # Setup StorPool network
-  - name: Setup network
-    include_role:
-      name: storpool_5-setup-network
-    tags:
-      - setup-network # Run all tasks from storpool_5-setup-network role
-
-  # Setup storage drives and add them to the StorPool cluster
-  - name: Setup drives
-    include_role:
-      name: storpool_6-setup-drives
-    tags:
-      - setup-drives # Run all tasks from storpool_6-setup-drives role
-
-  # Configure cgroups
-  - name: Configure cgroups
-    include_role:
-      name: storpool_7-cgroups
-    tags:
-      - configure-cgroups # Run all tasks from storpool_7-cgroups role
-
-  # Includes enabling of needed storpool services on boot, hugepages setup,
-  # generating the VF configuration
-  - name: Finalise the installation
-    include_role:
-      name: storpool_8-finalise
-    tags:
-      - finalise
-
-- hosts: storpool
-  serial: 1
-  become: true
-  tasks:
-    - name: Reboot hosts
-      include_role:
-        name: storpool_8-finalise
-        tasks_from: reboot_hosts
+- import_playbook: playbooks/1_prepare.yml
+- import_playbook: playbooks/2_setup-infra.yml
+- import_playbook: playbooks/3_install-storpool.yml
+- import_playbook: playbooks/4_setup-network.yml
+- import_playbook: playbooks/5_setup-drives.yml
+- import_playbook: playbooks/6_setup-cgroups.yml
+- import_playbook: playbooks/7_setup-services.yml
+- import_playbook: playbooks/common_reboot.yml
+- import_playbook: playbooks/8_tests.yml

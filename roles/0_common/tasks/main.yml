@@ -1,0 +1,3 @@
+---
+- name: Include distro-specific variables
+  include_vars: "{{ ansible_os_family | lower }}.yml"

@@ -1,0 +1,13 @@
+---
+- name: Configure StorPool cgroups
+  hosts: storpool
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Configure cgroups
+      import_role:
+        name: 6_setup-cgroups
+
+  tags:
+    - setup-cgroups

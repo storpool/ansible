@@ -1,0 +1,65 @@
+- name: Force ansible to regather facts
+  setup:
+    gather_subset:
+      - "!all"
+      - "network"
+
+- name: Get StorPool interfaces from storpool.conf
+  shell: |
+    set -o pipefail
+    /usr/sbin/storpool_showconf -n -e -- SP_IFACE1_CFG SP_IFACE2_CFG \
+    | cut -d : -f 2,3 \
+    | sed -e ':a;N;$!ba;s/\\n/:/g'
+  changed_when: false
+  register: sp_ifaces
+
+- name: Debug sp_ifaces
+  debug:
+    var: sp_ifaces
+    verbosity: 1
+
+- name: Validate StorPool interfaces
+  fail:
+    msg: "interface {{ item }} is in storpool.conf, but does not exist"
+  when: item not in ansible_interfaces
+  with_items: "{{ sp_ifaces.stdout.split(':')[0] }}"
+
+- name: Get StorPool IP addresses from storpool.conf
+  shell: |
+    set -o pipefail
+    /usr/sbin/storpool_showconf -n -e -- SP_IFACE1_CFG SP_IFACE2_CFG \
+    | cut -d : -f 2,5
+  changed_when: false
+  register: sp_conf_ips
+
+- name: Debug sp_conf_ips
+  debug:
+    var: sp_conf_ips
+    verbosity: 1
+
+- name: Get secondary IPs on loopback - sp_lo_ips
+  set_fact:
+    sp_lo_ips: "{{ ansible_facts.lo.ipv4_secondaries | json_query('[].address') }}"
+    cacheable: true
+  when: ansible_facts.lo.ipv4_secondaries is defined
+
+- name: No secondary IPs on loopback
+  set_fact:
+    sp_lo_ips: []
+    cacheable: true
+  when: ansible_facts.lo.ipv4_secondaries is not defined
+
+- name: Debug sp_lo_ips
+  debug:
+    var: sp_lo_ips
+    verbosity: 1
+
+- name: Validate StorPool IP addresses
+  fail:
+    msg: "IP {{ item.split(':')[1] }} missing on node!"
+  when:
+    - item.split(':')[1] not in sp_lo_ips and
+      ('ipv4' not in ansible_facts[item.split(':')[0]] or
+      ('ipv4' in ansible_facts[item.split(':')[0]] and
+      ansible_facts[item.split(':')[0]].ipv4.address != item.split(':')[1]))
+  with_items: "{{ sp_conf_ips.stdout_lines }}"
