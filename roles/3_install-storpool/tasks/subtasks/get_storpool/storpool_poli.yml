@@ -5,7 +5,7 @@
   become: false
   command:
     chdir: "{{ sp_custdir }}/{{ sp_cluster }}"
-    cmd: "{{ sp_generate_build_conf }}" 
+    cmd: "{{ sp_generate_build_conf }}"
   changed_when: false
   when:
     - sp_release_file == 'poli'
@@ -15,7 +15,7 @@
   become: false
   command:
     cmd: >
-      {{ sp_copytoservers }} 
+      {{ sp_copytoservers }}
       r={{ sp_release }}
       host={{ inventory_hostname }}
     chdir: "{{ sp_custdir }}/{{ sp_cluster }}"

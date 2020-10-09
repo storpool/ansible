@@ -1,13 +1,13 @@
 ---
-- name: Setup StorPool services 
+- name: Setup StorPool services
   hosts: storpool
   gather_facts: false
   become: true
 
   tasks:
-    - name: Configure and start StorPool services 
+    - name: Configure and start StorPool services
       import_role:
-        name: 7_setup-services 
+        name: 7_setup-services
 
   tags:
-    - setup-services 
+    - setup-services

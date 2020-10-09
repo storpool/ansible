@@ -19,7 +19,7 @@
   stat:
     path: "{{ sp_custdir }}/{{ sp_cluster }}"
   register: sp_cluster_dir
-  when: 
+  when:
     - sp_poli | bool
 
 - name: Ensure cluster directory exist
@@ -28,7 +28,7 @@
       - sp_cluster_dir.stat.exists
       - sp_cluster_dir.stat.isdir
     fail_msg: "{{ sp_custdir }}/{{ sp_cluster }} directory missing"
-  when: 
+  when:
     - sp_poli | bool
 
 - name: Get file status (sp_release_file)
@@ -38,7 +38,7 @@
   stat:
     path: "{{ sp_release_file }}"
   register: sp_release_file_exists
-  when: 
+  when:
     - sp_release_file not in [ 'web', 'poli' ]
 
 - name: Check if file is readable
@@ -51,7 +51,7 @@
 - name: Get storpool.conf file status on the bastion
   delegate_to: localhost
   run_once: true
-  become: false 
+  become: false
   stat:
     path: "{{ sp_config }}"
   register: sp_config_exists

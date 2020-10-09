@@ -1,17 +1,17 @@
 ---
-- name: Gather localhost-related facts 
+- name: Gather localhost-related facts
   include_tasks: variables-localhost.yml
 
-- name: Gather common facts 
+- name: Gather common facts
   include_tasks: variables-common.yml
 
-- name: Check variables 
+- name: Check variables
   include_tasks: check-variables.yml
 
 - name: Check requirements
   include_tasks: check-requirements.yml
 
-- name: Generate summary message 
+- name: Generate summary message
   set_fact:
     sp_summary_msg: # do not use tabs below - the output gets ugly
       - "OS update:        {{ sp_update_system }}"
@@ -31,11 +31,11 @@
       - "storpool_cg conf: {{ sp_cg_conf_extra|default('default') }}"
   when: sp_summary_wait
 
-- name: Preview configuration summary 
+- name: Preview configuration summary
   debug: var=sp_summary_msg
   when: sp_summary_wait
 
-- name: Confirm configuration 
+- name: Confirm configuration
   pause:
     prompt: "\nPlease Review\n\nPress Enter to begin deployment\nor Ctrl-C,A to abort"
   when: sp_summary_wait

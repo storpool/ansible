@@ -40,7 +40,7 @@
 
 - name: Cgconfig was active and SP cgroups already exist - trying migration
   command: >
-    {{ sp_cgtool }} conf -E -M 
+    {{ sp_cgtool }} conf -E -M
     {{ sp_cg_conf_extra | default() }}
   changed_when: false
   ignore_errors: true

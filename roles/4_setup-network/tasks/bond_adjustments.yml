@@ -22,7 +22,7 @@
     | cut -d. -f1
   changed_when: false
   register: sp_bond
-  when: 
+  when:
     - sp_bonding
   tags:
     - skip_ansible_lint

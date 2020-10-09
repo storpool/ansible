@@ -2,7 +2,7 @@
 - name: Install dependencies
   include_tasks: "dependencies.yml"
 
-- name: Tune operating system 
+- name: Tune operating system
   include_tasks: "tune-system.yml"
 
 - name: Include distro-specific tasks

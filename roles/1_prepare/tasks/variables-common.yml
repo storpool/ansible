@@ -22,7 +22,7 @@
         sp_roles: "{{ sp_roles | combine({'server': true}) }}"
         sp_server_instances: "{{ item }}"
       with_items: "{{ sp_roles_list }}"
-      when: 
+      when:
         - "'server' in item.split(':')"
 
 - name: Define count of server instances
@@ -63,7 +63,7 @@
   set_fact:
     cacheable: true
     sp_roles: "{{ sp_roles | combine({item: false}) }}"
-  when: 
+  when:
     - item not in sp_roles.keys()
   with_items:
     - server
@@ -110,7 +110,7 @@
     cacheable: true
     sp_cg_conf_extra: "CONVERGED=1 {{ sp_cg_conf_extra }}"
   when:
-    - sp_roles.server and 
+    - sp_roles.server and
       sp_roles.client and
       'CONVERGED'
       not in sp_cg_conf_extra
@@ -163,9 +163,9 @@
   set_fact:
     cacheable: true
     sp_roles: "{{ sp_roles | combine({'nvme': true}) }}"
-  when: 
-    - sp_roles.server and 
-      (sp_drive_list 
+  when:
+    - sp_roles.server and
+      (sp_drive_list
       | select('match', '^nvme')
       | list
       | count > 0)

@@ -27,12 +27,12 @@
     - sp_new_cluster and
       sp_init_node|length == 0
 
-- name: Validate sp_drive_list variable 
+- name: Validate sp_drive_list variable
   fail:
     msg: "{{ item }} contains partitions! Please remove them or set sp_drive_erase to True"
   with_items: "{{ sp_drive_list }}"
   when:
-    - sp_roles.server and 
+    - sp_roles.server and
       ansible_devices[item].partitions|length > 0 and
       not sp_drive_erase
 

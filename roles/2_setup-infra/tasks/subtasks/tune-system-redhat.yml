@@ -8,7 +8,7 @@
     - name: Set tuned profile
       command: "/usr/sbin/tuned-adm profile {{ tuned_profile }}"
       changed_when: false
-      when: 
+      when:
         - tuned_profile not in tuned_active.stdout
 
 - name: Disable firewalld service (CentOS/RHEL)

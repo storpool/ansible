@@ -37,7 +37,7 @@
 
 - name: Init drives
   command: >
-    {{ sp_init_drive }} {{ item }} {{ sp_diskid_prefix }} 
+    {{ sp_init_drive }} {{ item }} {{ sp_diskid_prefix }}
     {{ sp_init_node if sp_new_cluster else 'noinit' }}
   changed_when: false
   with_items: "{{ sp_drives }}"
@@ -45,7 +45,7 @@
 - name: Get needed number of server instances
   script: get_instances.py
   args:
-    executable: "{{ sp_python_executable }}" 
+    executable: "{{ sp_python_executable }}"
   changed_when: false
   register: sp_instances
 
@@ -67,7 +67,7 @@
     - sp_roles.nvme
 
 - name: Expose all NVMe drives
-  command: "{{ sp_expose_nvme_drives }}" 
+  command: "{{ sp_expose_nvme_drives }}"
   changed_when: false
   ignore_errors: yes
   when:

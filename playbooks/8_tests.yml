@@ -1,15 +1,15 @@
 ---
-- name: Run common tests 
+- name: Run common tests
   hosts: storpool
   gather_facts: false
   serial: 1
   become: true
 
   tasks:
-    - name: Test configuration 
+    - name: Test configuration
       import_role:
-        name: 8_tests 
-  
+        name: 8_tests
+
   tags:
     - never
-    - tests 
+    - tests

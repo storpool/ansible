@@ -14,7 +14,7 @@
   - sp_configure_network is defined and
     sp_configure_network | bool
 
-- name: Generate VF configuration 
+- name: Generate VF configuration
   import_tasks: "vf_generate_config.yml"
   when:
     - sp_vm is defined and
