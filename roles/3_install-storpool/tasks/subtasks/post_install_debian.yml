@@ -1,15 +1,15 @@
 ---
 - name: Increase crashkernel size (Debian/Ubuntu)
-  shell: 'echo "GRUB_CMDLINE_LINUX_DEFAULT=\"\$GRUB_CMDLINE_LINUX_DEFAULT crashkernel=512M"\" > /etc/default/grub.d/kdump-tools.cfg'
+  shell: |
+    echo "GRUB_CMDLINE_LINUX_DEFAULT=\"\$GRUB_CMDLINE_LINUX_DEFAULT crashkernel=512M"\" > /etc/default/grub.d/kdump-tools.cfg
   changed_when: false
-  tags: ["install", "install-post_install"]
+  tags:
+    - skip_ansible_lint
 
 - name: Run patchkdumptools (Debian/Ubuntu)
-  command: /usr/lib/storpool/patchkdumptools
+  command: "{{ sp_patchkdumptools }}" 
   changed_when: false
-  tags: ["install", "install-post_install"]
 
 - name: Update GRUB (Debian/Ubuntu)
   command: update-grub2
   changed_when: false
-  tags: ["install", "install-post_install"]

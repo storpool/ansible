@@ -1,5 +1,5 @@
 ---
-- import_tasks: "subtasks/init_drives.yml"
+- import_tasks: "init_drives.yml"
   when:
     - sp_roles.server is defined and
       sp_roles.server | bool

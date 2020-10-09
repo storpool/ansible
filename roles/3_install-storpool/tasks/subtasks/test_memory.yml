@@ -7,12 +7,10 @@
   with_items:
     - "memtester"
     - "perform_memtest.sh"
-  tags: ["install", "install-test_memory"] # Copy memtester tools (Test Memory)
 
 - name: Perform memory tests (Test Memory)
-  command: "{{ sp_toolsdir }}/perform_memtest.sh {{ sp_toolsdir }}"
+  command: "{{ sp_perform_memtest }} {{ sp_toolsdir }}"
   async: 6000
   poll: 0
   register: memory_test_sleeper
   changed_when: false
-  tags: ["install", "install-test_memory"] # Perform memory tests (Test Memory)

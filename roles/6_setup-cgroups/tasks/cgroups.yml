@@ -15,14 +15,16 @@
     cacheable: true
   when:
     - ansible_distribution == 'Ubuntu'
-  tags: setup-cgroups
 
 - name: Generate cgroups if missing
-  command: "/usr/sbin/storpool_cg conf {{ sp_cg_conf_extra|default() }} {{ sp_cg_ubuntu|default() }}"
+  command: >
+    {{ sp_cgtool }} conf
+    {{ sp_cg_conf_extra | default() }}
+    {{ sp_cg_ubuntu | default() }}
   changed_when: false
   when:
     - sp_slice.stat.exists is defined and
-      not sp_slice.stat.exists|bool
+      not sp_slice.stat.exists | bool
 
 - name: Start/enable cgconfig
   systemd:
@@ -33,11 +35,13 @@
 
 - name: Cache sp_cgconfig fact
   set_fact:
-    sp_cgconfig: "{{ sp_cgconfig|default() }}"
+    sp_cgconfig: "{{ sp_cgconfig | default() }}"
     cacheable: true
 
 - name: Cgconfig was active and SP cgroups already exist - trying migration
-  command: "/usr/sbin/storpool_cg conf -E -M {{ sp_cg_conf_extra|default() }}"
+  command: >
+    {{ sp_cgtool }} conf -E -M 
+    {{ sp_cg_conf_extra | default() }}
   changed_when: false
   ignore_errors: true
   when:
@@ -54,7 +58,9 @@
       not sp_slice.stat.exists
 
 - name: Re-generate cgroups on Ubuntu with memsw enabled
-  command: "/usr/sbin/storpool_cg conf {{ sp_cg_conf_extra|default() }}"
+  command: >
+    {{ sp_cgtool }} conf
+    {{ sp_cg_conf_extra | default() }}
   changed_when: false
   ignore_errors: true
   when:

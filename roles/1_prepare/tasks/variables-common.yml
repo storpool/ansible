@@ -93,7 +93,7 @@
   run_once: true
   set_fact:
     cacheable: true
-    sp_init_node: "{{ ansible_play_hosts|map('extract', hostvars)|list|json_query('[?sp_roles.server].ansible_fqdn|[0]') }}"
+    sp_init_node: "{{ ansible_play_hosts | map('extract', hostvars) | list | json_query('[?sp_roles.server].ansible_fqdn | [0]') }}"
   when:
     - sp_new_cluster
 
@@ -132,6 +132,8 @@
   when:
     - sp_roles.server
     - sp_drive_size is defined
+  tags:
+    - skip_ansible_lint
 
 - name: "sp_drive_list: populate by name/model"
   set_fact:

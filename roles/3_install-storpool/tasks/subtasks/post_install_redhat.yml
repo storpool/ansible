@@ -9,3 +9,5 @@
     /usr/sbin/grub2-mkconfig \
     -o {{ '/boot/efi/EFI/centos/grub.cfg' if sp_centos_efi.stat.exists else '$(readlink -f /etc/grub2.cfg)' }}
   changed_when: false
+  tags:
+    - skip_ansible_lint

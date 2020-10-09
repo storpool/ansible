@@ -1,2 +1,2 @@
 ---
-- import_tasks: "subtasks/cgroups.yml"
+- import_tasks: "cgroups.yml"

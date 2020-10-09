@@ -1,8 +1,11 @@
 ---
 - name: Test kdump
-  shell: sleep 5 && echo c > /proc/sysrq-trigger
+  shell: |
+    sleep 5 && echo c > /proc/sysrq-trigger
   async: 1
   poll: 0
+  tags:
+    - skip_ansible_lint
 
 - name: Wait for the reboot to complete 
   wait_for_connection:

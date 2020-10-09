@@ -69,9 +69,28 @@ rc_local_commands:
 # StorPool tools download URLs
 sp_install_getpackage_url: "https://vault.storpool.com/getpackage.py"
 sp_install_helper_url: "https://vault.storpool.com/install_modules_helper.py"
-# StorPool tools executables
+
+# StorPool paths 
+sp_config: "{{ inventory_dir }}/storpool.conf"
+sp_toolsdir: "/root/storpool"
+sp_libdir: "/usr/lib/storpool" 
 sp_getpackage: "{{ sp_toolsdir }}/getpackage.py"
 sp_install_helper: "{{ sp_toolsdir }}/install_modules_helper.py"
+sp_mlc: "{{ sp_toolsdir }}/mlc/mlc"
+sp_perform_memtest: "{{ sp_toolsdir }}/perform_memtest.sh"
+sp_init_drive: "{{ sp_toolsdir }}/init_drive.sh"
+sp_perform_disk_test: "{{ sp_toolsdir }}/perform_disktest.sh"
+sp_patchkdumptools: "{{ sp_libdir }}/patchkdumptools"
+sp_vf_genconf: "{{ sp_libdir }}/vf-genconf"
+sp_expose_nvme_drives: "{{ sp_libdir }}/expose_nvme_drives"
+sp_multi_server_helper: "{{ sp_libdir }}/multi-server-helper.py"
+sp_installtools: "/usr/local/bin/installtools"
+sp_collect_inventory: "/usr/local/bin/collect_inventory"
+sp_generate_build_conf: "/usr/local/bin/generate-build-conf"
+sp_copytoservers: "/usr/local/bin/copytoservers-old"
+sp_showconf: "/usr/sbin/storpool_showconf"
+sp_cgtool: "/usr/sbin/storpool_cg"
+sp_python_executable: "/opt/storpool/python3/bin/python3"
 
 epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
 epel_repo_gpg_key_url: "/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
@@ -80,9 +99,7 @@ cache_timeout: 600
 
 sp_disable_nm: true
 sp_disable_fw: true
-sp_config: "{{ inventory_dir|default(ansible_env.PWD) }}/storpool.conf"
 sp_release_file: "web"
-sp_toolsdir: "/root/storpool"
 sp_release: "19.01"
 sp_fw_ports:
   - 81

@@ -20,13 +20,15 @@
 - name: Get {{ sp_bond.stdout }} slave interfaces (Ubuntu/Debian)
   shell: |
     set -o pipefail
-    /usr/sbin/storpool_showconf -n -e -- SP_IFACE1_CFG SP_IFACE2_CFG \
+    {{ sp_showconf }} -n -e -- SP_IFACE1_CFG SP_IFACE2_CFG \
     | cut -d: -f3
   changed_when: false
   register: sp_bond_slaves
   when:
     - sp_bonding is defined and
       sp_bonding | bool
+  tags:
+    - skip_ansible_lint
 
 - name: Add enslavedummy hook to slave interfaces (Ubuntu/Debian)
   lineinfile:

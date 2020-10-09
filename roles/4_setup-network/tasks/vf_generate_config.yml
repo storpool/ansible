@@ -1,3 +1,3 @@
 - name: Generate VF configuration
-  command: "/usr/lib/storpool/vf-genconf"
+  command: "{{ sp_vf_genconf }}" 
   changed_when: false

@@ -3,4 +3,3 @@
   copy:
     src: "{{ sp_release_file }}"
     dest: "{{ sp_toolsdir }}"
-  tags: ["install", "install-get_storpool"]

@@ -36,4 +36,5 @@
     enabled: false
     state: stopped
   ignore_errors: true
-  when: ansible_distribution == 'Ubuntu'
+  when:
+    - ansible_distribution == 'Ubuntu'

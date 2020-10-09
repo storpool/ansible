@@ -4,24 +4,13 @@
   set_fact:
     cacheable: true
     sp_poli: "{{ hostvars['localhost']['ansible_hostname'] == 'poli' }}"
-  tags:
-    - variables
-    - local
-
-- name: Debug sp_poli
-  debug:
-    var: sp_poli
-    verbosity: 1
 
 - name: Validate sp_poli variable
   fail:
     msg: "sp_release_file set to 'poli' but I am not running on poli!"
   when:
     - sp_release_file == 'poli' and
-      not sp_poli
-  tags:
-    - variables
-    - local
+      not sp_poli | bool
 
 - name: Check cluster directory
   delegate_to: localhost
@@ -30,15 +19,8 @@
   stat:
     path: "{{ sp_custdir }}/{{ sp_cluster }}"
   register: sp_cluster_dir
-  when: sp_poli
-  tags:
-    - variables
-    - local
-
-- name: Debug sp_cluster_dir
-  debug:
-    var: sp_cluster_dir
-    verbosity: 1
+  when: 
+    - sp_poli | bool
 
 - name: Ensure cluster directory exist
   assert:
@@ -46,27 +28,18 @@
       - sp_cluster_dir.stat.exists
       - sp_cluster_dir.stat.isdir
     fail_msg: "{{ sp_custdir }}/{{ sp_cluster }} directory missing"
-  when: sp_poli
-  tags:
-    - variables
-    - local
+  when: 
+    - sp_poli | bool
 
 - name: Get file status (sp_release_file)
   delegate_to: localhost
   run_once: true
-  become: no
+  become: false
   stat:
     path: "{{ sp_release_file }}"
   register: sp_release_file_exists
-  when: sp_release_file not in [ 'web', 'poli' ]
-  tags:
-    - variables
-    - local
-
-- name: Debug sp_release_file
-  debug:
-    var: sp_release_file
-    verbosity: 1
+  when: 
+    - sp_release_file not in [ 'web', 'poli' ]
 
 - name: Check if file is readable
   fail:
@@ -74,20 +47,14 @@
   when:
     - sp_release_file not in [ 'web', 'poli' ] and
       not sp_release_file_exists.stat.readable
-  tags:
-    - variables
-    - local
 
 - name: Get storpool.conf file status on the bastion
   delegate_to: localhost
   run_once: true
-  become: no
+  become: false 
   stat:
     path: "{{ sp_config }}"
   register: sp_config_exists
-  tags:
-    - variables
-    - local
 
 - name: Check if storpool.conf file is readable on the bastion
   fail:
@@ -95,6 +62,3 @@
   when:
     - not sp_config_exists.stat.exists or
       not sp_config_exists.stat.readable
-  tags:
-    - variables
-    - local

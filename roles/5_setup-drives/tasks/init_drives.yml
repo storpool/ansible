@@ -12,12 +12,13 @@
     sp_drives: "{{ sp_drive_list | sort | map('regex_replace', '^(.*)', '/dev/\\1') | list }}"
 
 - name: Test the drives
-  command: "{{ sp_toolsdir }}/perform_disktest.sh {{ sp_drives | join(' ') }}"
+  command: "{{ sp_perform_disk_test }} {{ sp_drives | join(' ') }}"
   changed_when: false
-  when: not sp_vm
+  when:
+    - not sp_vm
 
 - name: Get node id
-  command: "storpool_showconf -n SP_OURID"
+  command: "{{ sp_showconf }} -n SP_OURID"
   changed_when: false
   register: sp_node_id
 
@@ -35,14 +36,16 @@
       sp_diskid_prefix|int > 39
 
 - name: Init drives
-  command: "{{ sp_toolsdir }}/init_drive.sh {{ item }} {{ sp_diskid_prefix }} {{ sp_init_node if sp_new_cluster else 'noinit' }}"
+  command: >
+    {{ sp_init_drive }} {{ item }} {{ sp_diskid_prefix }} 
+    {{ sp_init_node if sp_new_cluster else 'noinit' }}
   changed_when: false
   with_items: "{{ sp_drives }}"
 
 - name: Get needed number of server instances
   script: get_instances.py
   args:
-    executable: /opt/storpool/python3/bin/python3
+    executable: "{{ sp_python_executable }}" 
   changed_when: false
   register: sp_instances
 
@@ -60,13 +63,15 @@
     state: stopped
     enabled: no
   changed_when: false
-  when: sp_roles.nvme
+  when:
+    - sp_roles.nvme
 
 - name: Expose all NVMe drives
-  command: /usr/lib/storpool/expose_nvme_drives
+  command: "{{ sp_expose_nvme_drives }}" 
   changed_when: false
   ignore_errors: yes
-  when: sp_roles.nvme
+  when:
+    - sp_roles.nvme
 
 - name: Settle udev
   command: udevadm settle
@@ -75,6 +80,8 @@
 - name: Assign drives to servers
   shell: |
     set -o pipefail
-    /usr/lib/storpool/multi-server-helper.py -i {{ sp_server_instances }} \
+    {{ sp_multi_server_helper }} -i {{ sp_server_instances }} \
     | bash
   changed_when: false
+  tags:
+    - skip_ansible_lint

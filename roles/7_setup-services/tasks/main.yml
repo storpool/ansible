@@ -30,7 +30,4 @@
   with_items: "{{ sp_systemd_services }}"
   when:
     - start_services is not defined or
-      start_services|bool
-
-- name: Populate service facts
-  service_facts:
+      start_services | bool

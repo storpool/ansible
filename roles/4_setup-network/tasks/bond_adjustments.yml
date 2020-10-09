@@ -2,11 +2,13 @@
 - name: Get StorPool interfaces
   shell: |
     set -o pipefail
-    /usr/sbin/storpool_showconf -n -e -- SP_IFACE1_CFG SP_IFACE2_CFG \
+    {{ sp_showconf }} -n -e -- SP_IFACE1_CFG SP_IFACE2_CFG \
     | cut -d: -f2 \
     | cut -d. -f1
   changed_when: false
   register: sp_interfaces
+  tags:
+    - skip_ansible_lint
 
 - name: Check if StorPool uses bond interfaces
   set_fact:
@@ -15,12 +17,15 @@
 - name: Get StorPool bond interface
   shell: |
     set -o pipefail
-    /usr/sbin/storpool_showconf -n -e -- SP_IFACE1_CFG \
+    {{ sp_showconf }} -n -e -- SP_IFACE1_CFG \
     | cut -d: -f2 \
     | cut -d. -f1
   changed_when: false
   register: sp_bond
-  when: sp_bonding
+  when: 
+    - sp_bonding
+  tags:
+    - skip_ansible_lint
 
 - name: Include distro-specific tasks
-  include_tasks: "subtasks/bond_adjustments_{{ ansible_os_family|lower }}.yml"
+  include_tasks: "subtasks/bond_adjustments_{{ ansible_os_family | lower }}.yml"
