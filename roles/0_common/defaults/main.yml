@@ -30,18 +30,6 @@ sp_valid_roles:
   - mgmt
   - bridge
   - iscsi
-# List of boolean variables for validation
-sp_bool_vars:
-  - sp_poli
-  - sp_new_cluster
-  - sp_update_system
-  - sp_configure_network
-  - sp_overwrite_iface_conf
-  - sp_disable_nm
-  - sp_disable_fw
-  - sp_vm
-  - sp_drive_erase
-  - sp_summary_wait
 # Systemd services
 sp_services:
   helper:
@@ -110,3 +98,11 @@ sp_dirs:
   - "/etc/storpool.conf.d"
   - "/usr/lib/storpool"
   - "{{ sp_toolsdir }}"
+
+sp_roles: {}
+sp_roles_list: "{{ sp_node_roles.split(',') }}"
+sp_server_instances: "0"
+sp_install_services: "@block cli"
+sp_drive_list: []
+sp_poli: "{{ hostvars['localhost']['ansible_hostname'] == 'poli' }}"
+sp_vm: "{{ ansible_product_name == 'KVM' }}"

@@ -1,65 +1,26 @@
 ---
-- name: Auto-detect sp_vm if not defined (sp_vm)
+- name: Assign StorPool server role 
   set_fact:
     cacheable: true
-    sp_vm: "{{ ansible_product_name == 'KVM' }}"
-    sp_vm_guessed: true
+    sp_roles: "{{ sp_roles | combine({'server': true}) }}"
+    sp_server_instances: "{{ item }}"
+  with_items: "{{ sp_roles_list }}"
   when:
-    - sp_vm is not defined
+    - "'server' in item.split(':')"
 
-- name: Define server role
-  block:
-    - name: Populate from sp_node_roles (sp_roles_list)
-      set_fact:
-        cacheable: true
-        sp_roles_list: "{{ sp_node_roles.split(',') }}"
-    - name: Initial definition (sp_roles)
-      set_fact:
-        sp_roles: {}
-    - name: Decide on server (sp_roles)
-      set_fact:
-        cacheable: true
-        sp_roles: "{{ sp_roles | combine({'server': true}) }}"
-        sp_server_instances: "{{ item }}"
-      with_items: "{{ sp_roles_list }}"
-      when:
-        - "'server' in item.split(':')"
-
-- name: Define count of server instances
-  block:
-    - name: 1 server instance (sp_server_instances)
-      set_fact:
-        cacheable: true
-        sp_server_instances: 1
-      when:
-        - sp_server_instances is defined and
-          sp_server_instances == 'server'
-    - name: More than 1 server instances (sp_server_instances)
-      set_fact:
-        cacheable: true
-        sp_server_instances: "{{ sp_server_instances.split(':')[1] }}"
-      when:
-        - sp_server_instances is defined and
-          sp_server_instances > '0'
-    - name: No server instances (sp_server_instances)
-      set_fact:
-        cacheable: true
-        sp_server_instances: "0"
-      when:
-        - sp_server_instances is not defined
-
-- name: Decide on other roles (sp_roles)
+- name: Assign other StorPool roles
   set_fact:
     cacheable: true
     sp_roles: "{{ sp_roles | combine({item: true}) }}"
-  when: "item in sp_roles_list"
   with_items:
     - client
     - mgmt
     - iscsi
     - bridge
+  when:
+    - item in sp_roles_list
 
-- name: Populate false values (sp_roles)
+- name: Populate false values for StorPool roles 
   set_fact:
     cacheable: true
     sp_roles: "{{ sp_roles | combine({item: false}) }}"
@@ -72,10 +33,21 @@
     - iscsi
     - bridge
 
-- name: Initial definition of the sp_install_services variable
+- name: Define StorPool server instances count (1 instance) 
   set_fact:
     cacheable: true
-    sp_install_services: "@block cli"
+    sp_server_instances: 1
+  when:
+    - sp_server_instances is defined and
+      sp_server_instances == 'server'
+
+- name: Define StorPool server instances count (more than 1 instances)
+  set_fact:
+    cacheable: true
+    sp_server_instances: "{{ sp_server_instances.split(':')[1] }}"
+  when:
+    - sp_server_instances is defined and
+      sp_server_instances > '0'
 
 - name: Add services (sp_install_services)
   set_fact:
@@ -100,7 +72,7 @@
 - name: Initial definition (sp_cg_conf_extra)
   set_fact:
     cacheable: true
-    sp_cg_conf_extra: "{{ sp_cg_conf_extra|upper }}"
+    sp_cg_conf_extra: "{{ sp_cg_conf_extra | upper }}"
   when:
     - sp_cg_conf_extra is defined and
       sp_cg_conf_extra | length > 0
@@ -115,12 +87,6 @@
       'CONVERGED'
       not in sp_cg_conf_extra
 
-- name: "sp_drive_list: initial definition"
-  set_fact:
-    sp_drive_list: []
-  when:
-    - sp_roles.server
-
 - name: Get node drive sizes
   shell: |
     set -o pipefail
@@ -129,6 +95,7 @@
     | awk '{print $2,$3}'
   changed_when: false
   register: sp_node_drive_size
+  no_log: true
   when:
     - sp_roles.server
     - sp_drive_size is defined
@@ -154,10 +121,10 @@
     sp_drive_list: "{{ sp_drive_list + [ item.split()[0] ] }}"
   with_items: "{{ sp_node_drive_size.stdout_lines }}"
   when:
-    - sp_roles.server and
-      sp_drive_size is defined and
-      item.split()[0] not in sp_drive_list and
-      item.split()[1] in sp_drive_size.split(',')
+    - sp_roles.server
+    - sp_drive_size is defined
+    - item.split()[0] not in sp_drive_list
+    - item.split()[1] in sp_drive_size.split(',')
 
 - name: "check for nvme drives"
   set_fact:

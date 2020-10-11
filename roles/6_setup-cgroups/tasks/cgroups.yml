@@ -17,9 +17,8 @@
     - ansible_distribution == 'Ubuntu'
 
 - name: Generate cgroups if missing
-  command: >
-    {{ sp_cgtool }} conf
-    {{ sp_cg_conf_extra | default() }}
+  shell: >-
+    {{ sp_cgtool }} conf {{ sp_cg_conf_extra | default() }}
     {{ sp_cg_ubuntu | default() }}
   changed_when: false
   when:
@@ -39,9 +38,8 @@
     cacheable: true
 
 - name: Cgconfig was active and SP cgroups already exist - trying migration
-  command: >
-    {{ sp_cgtool }} conf -E -M
-    {{ sp_cg_conf_extra | default() }}
+  shell: >-
+    {{ sp_cgtool }} conf -E -M {{ sp_cg_conf_extra | default() }}
   changed_when: false
   ignore_errors: true
   when:
@@ -58,9 +56,8 @@
       not sp_slice.stat.exists
 
 - name: Re-generate cgroups on Ubuntu with memsw enabled
-  command: >
-    {{ sp_cgtool }} conf
-    {{ sp_cg_conf_extra | default() }}
+  shell: >-
+    {{ sp_cgtool }} conf {{ sp_cg_conf_extra | default() }}
   changed_when: false
   ignore_errors: true
   when:
