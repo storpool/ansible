@@ -17,10 +17,10 @@
     name: "firewalld.service"
     enabled: false
     state: stopped
-  register: service_status
+  register: fw_service_status
   failed_when:
-    - service_status is failed
-    - not ('Could not find the requested service' in service_status.msg)
+    - fw_service_status is failed
+    - not ('Could not find the requested service' in fw_service_status.msg)
   when:
     - sp_disable_fw is defined and
       sp_disable_fw | bool
@@ -45,6 +45,10 @@
     state: stopped
   with_items:
     - NetworkManager
+  register: nm_service_status
+  failed_when:
+    - nm_service_status is failed
+    - not ('Could not find the requested service' in nm_service_status.msg)
   when:
     - sp_disable_nm is defined and
       sp_disable_nm | bool

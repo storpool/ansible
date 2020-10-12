@@ -174,8 +174,8 @@
       Drive "/dev/{{ item }}" doesn't have any partitions.
   with_items: "{{ sp_drive_list }}"
   when:
-    - sp_roles.server and
-      not sp_drive_erase | bool
+    - sp_roles.server
+    - not sp_drive_erase | bool
 
 - name: Check if we have drives for the StorPool servers
   assert:

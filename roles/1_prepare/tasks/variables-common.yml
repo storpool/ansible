@@ -38,16 +38,16 @@
     cacheable: true
     sp_server_instances: 1
   when:
-    - sp_server_instances is defined and
-      sp_server_instances == 'server'
+    - sp_server_instances is defined
+    - sp_server_instances == 'server'
 
 - name: Define StorPool server instances count (more than 1 instances)
   set_fact:
     cacheable: true
     sp_server_instances: "{{ sp_server_instances.split(':')[1] }}"
   when:
-    - sp_server_instances is defined and
-      sp_server_instances > '0'
+    - sp_server_instances is defined
+    - sp_server_instances > '0'
 
 - name: Add services (sp_install_services)
   set_fact:
@@ -74,18 +74,17 @@
     cacheable: true
     sp_cg_conf_extra: "{{ sp_cg_conf_extra | upper }}"
   when:
-    - sp_cg_conf_extra is defined and
-      sp_cg_conf_extra | length > 0
+    - sp_cg_conf_extra is defined
+    - sp_cg_conf_extra | length > 0
 
 - name: Decide if hyperconverged node (sp_cg_conf_extra)
   set_fact:
     cacheable: true
     sp_cg_conf_extra: "CONVERGED=1 {{ sp_cg_conf_extra }}"
   when:
-    - sp_roles.server and
-      sp_roles.client and
-      'CONVERGED'
-      not in sp_cg_conf_extra
+    - sp_roles.server
+    - sp_roles.client
+    - "'CONVERGED' not in sp_cg_conf_extra"
 
 - name: Get node drive sizes
   shell: |
@@ -108,9 +107,9 @@
     sp_drive_list: "{{ sp_drive_list + [ item.key ] }}"
   with_dict: "{{ ansible_devices }}"
   when:
-    - sp_roles.server and
-      item.key not in sp_drive_list and
-      ((sp_drives is defined and
+    - sp_roles.server
+    - item.key not in sp_drive_list
+    - ((sp_drives is defined and
       item.key in sp_drives.split(',')) or
       (sp_drive_model is defined and
       item.value.model in sp_drive_model.split(',')))
@@ -131,8 +130,8 @@
     cacheable: true
     sp_roles: "{{ sp_roles | combine({'nvme': true}) }}"
   when:
-    - sp_roles.server and
-      (sp_drive_list
+    - sp_roles.server
+    - (sp_drive_list
       | select('match', '^nvme')
       | list
       | count > 0)
