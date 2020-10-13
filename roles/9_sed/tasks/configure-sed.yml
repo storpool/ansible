@@ -1,0 +1,81 @@
+---
+- name: Allow libata tpm functionality on boot
+  lineinfile:
+    state: present
+    dest: /etc/default/grub
+    backrefs: yes
+    regexp: '^(GRUB_CMDLINE_LINUX=(?!.\$GRUB_CMD)(?!.iommu)\"[^\"]*)(\".*)'
+    line: '\1 libata.allow_tpm=1\2'
+  when:
+    - sp_sed_enable_opal is defined
+    - sp_sed_enable_opal
+
+- name: Allow writing in /sys/module/libata/parameters/allow_tpm
+  file:
+    path: /sys/module/libata/parameters/allow_tpm
+    mode: 0644
+  when:
+    - sp_sed_enable_opal is defined
+    - sp_sed_enable_opal
+
+- name: Allow libata tpm functionality on running system
+  shell: >
+    /usr/bin/echo 1 > /sys/module/libata/parameters/allow_tpm
+  when:
+    - sp_sed_enable_opal is defined
+    - sp_sed_enable_opal
+
+- name: Restore mode of /sys/module/libata/parameters/allow_tpm
+  file:
+    path: /sys/module/libata/parameters/allow_tpm
+    mode: 0444
+  when:
+    - sp_sed_enable_opal is defined
+    - sp_sed_enable_opal
+
+- name: Classify SED drives
+  sp_sed_classify:
+    drives: "{{ sp_drives }}"
+    facts: "{{ ansible_device_links.ids }}"
+  register: sp_sed_types
+
+- name: Generate SED key-list (random passwords)
+  shell: >-
+    echo
+    -e "import string,random\nprint(''.join(random.choice(string.ascii_letters + string.digits) for i in range(16)))"
+    | python
+  register: sp_sed_keylist_random
+  loop: "{{ sp_sed_types['opal'] + sp_sed_types.atasf }}"
+  when:
+    - sp_sed_types
+    - sp_sed_universal_password is not defined
+
+- name: Generate SED configuration
+  template:
+    src: "templates/sed-conf.j2"
+    dest: "{{ sp_sed_conf }}"
+    mode: 0644
+
+- name: Fetch SED configuration locally
+  fetch:
+    src: "{{ sp_sed_conf }}"
+    dest: "{{ inventory_dir }}/sed.conf-{{ inventory_hostname }}-{{ ansible_date_time.epoch }}"
+    flat: yes
+
+- name: Lock SED devices
+  sp_sed_lock:
+    conf: "{{ sp_sed_conf }}"
+    drive: "{{ ansible_device_links.ids[item][0] }}"
+  loop: "{{ sp_drives.split(',') }}"
+
+- name: Copy storpool-sed-unlock tool
+  copy:
+    src: storpool-sed-unlock
+    dest: /usr/lib/udev/storpool-sed-unlock
+    mode: 0755
+
+- name: Add udev rules
+  template:
+    src: "templates/sed-udev-rules.j2"
+    dest: "/etc/udev/rules.d/99-storpool-sed.rules"
+    mode: 0644

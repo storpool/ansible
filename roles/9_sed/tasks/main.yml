@@ -1,0 +1,36 @@
+---
+- name: If used, check that SED universal password is not empty
+  assert:
+    that:
+      - sp_sed_universal_password | length > 0
+    fail_msg: "SED universal password is empty. Aborting!"
+  when:
+    - sp_sed_universal_password is defined
+
+- name: Register SED configuration file status
+  stat:
+    path: "{{ sp_sed_conf }}"
+  register: sp_sed_conf_file
+  when:
+    - sp_sed_conf is defined
+
+- name: Check if sed.conf exists on target host
+  debug:
+    msg: |
+      {{ sp_sed_conf }}: {{ sp_sed_conf_file.stat.exists | ternary('Exists, skipping configuration tasks', 'Does not exists, SED will be configured') }} 
+      NOTE: Please remove {{ sp_sed_conf }} if you want to re-configure SED.
+  when:
+    - sp_sed_conf is defined
+    - sp_sed_conf_file is defined
+
+- name: Include distro-specific task (SED prerequisites)
+  include_tasks: "subtasks/pre-sed-{{ ansible_os_family | lower }}.yml"
+  when:
+    - sp_sed_conf_file is defined
+    - not sp_sed_conf_file.stat.exists
+
+- name: Include SED configuration tasks
+  include_tasks: configure-sed.yml
+  when:
+    - sp_sed_conf_file is defined
+    - not sp_sed_conf_file.stat.exists

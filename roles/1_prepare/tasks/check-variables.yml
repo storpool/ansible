@@ -31,7 +31,7 @@
       - sp_cluster_dir.stat.isdir
     fail_msg: >-
       Directory "{{ sp_custdir }}/{{ sp_cluster }}" missing
-      on ansible bastion server. 
+      on ansible bastion server.
       Please create it and populate it with a
       configured storpool.conf file.
     success_msg: >-

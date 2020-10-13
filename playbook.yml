@@ -9,3 +9,4 @@
 - import_playbook: playbooks/7_setup-services.yml
 - import_playbook: playbooks/common_reboot.yml
 - import_playbook: playbooks/8_tests.yml
+- import_playbook: playbooks/9_sed.yml

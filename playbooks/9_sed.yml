@@ -1,0 +1,14 @@
+---
+- name: Configure SED 
+  hosts: storpool
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Configure self encrypting drives (SED) 
+      import_role:
+        name: 9_sed
+
+  tags:
+    - never
+    - sed 

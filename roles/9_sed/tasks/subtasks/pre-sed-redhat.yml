@@ -1,0 +1,31 @@
+---
+- name: Install dependencies for CentOS/RHEL (OPAL)
+  yum:
+    name: sedutil
+    enablerepo: epel
+  when:
+    - sp_sed_enable_opal is defined
+    - sp_sed_enable_opal
+
+- name: Install dependencies for CentOS/RHEL (ATA Security Feature Set)
+  yum:
+    name: hdparm
+    enablerepo: epel
+  when:
+    - sp_sed_enable_atasf is defined
+    - sp_sed_enable_atasf
+
+- name: Check if booting via EFI on RHEL/CentOS
+  stat:
+    path: /boot/efi/EFI/centos/grub.cfg
+  register: sp_centos_efi
+  when:
+    - sp_sed_enable_opal is defined
+    - sp_sed_enable_opal
+
+- name: Update GRUB on CentOS/RHEL
+  shell: >
+    /usr/sbin/grub2-mkconfig -o {{ sp_centos_efi.stat.exists | ternary('/boot/efi/EFI/centos/grub.cfg', '$(readlink -f /etc/grub2.cfg)') }}
+  when:
+    - sp_sed_enable_opal is defined
+    - sp_sed_enable_opal

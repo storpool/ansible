@@ -9,6 +9,8 @@ sp_summary_wait: true
 sp_node_roles: "client"
 sp_drive_erase: false
 sp_diskid_offset: 0
+sp_sed_enable_opal: false
+sp_sed_enable_atasf: false
 # Defines if we should manage the rc.local on the targeted host
 sp_rc_local: true
 # If the storage capacity on this device is greater than or equal to this
@@ -62,6 +64,7 @@ sp_install_helper_url: "https://vault.storpool.com/install_modules_helper.py"
 sp_config: "{{ inventory_dir }}/storpool.conf"
 sp_toolsdir: "/root/storpool"
 sp_libdir: "/usr/lib/storpool" 
+sp_sed_conf: "/etc/storpool/sed.conf"
 sp_getpackage: "{{ sp_toolsdir }}/getpackage.py"
 sp_install_helper: "{{ sp_toolsdir }}/install_modules_helper.py"
 sp_mlc: "{{ sp_toolsdir }}/mlc/mlc"

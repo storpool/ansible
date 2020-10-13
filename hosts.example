@@ -115,6 +115,22 @@
 # diskid_prefix = sp_node_id - sp_diskid_offset
 # sp_diskid_offset=0	# Default
 
+# Enable Self encrypting drives (SED)
+# sp_sed_enabled=False # Default
+#
+# If sp_sed_universal_password is set, all devices will be encrypted with the specified password.
+# Otherwise a random password will be set for each drive.
+# sp_sed_universal_password=''
+#
+# Enable ATA Security Feature Set for SATA SED devices
+# sp_sed_enable_atasf=False # Default
+#
+# Enable OPAL encrypting for NVMe SED devices
+# sp_sed_enable_opal=False # Default
+#
+# Path to the SED configuration file
+# sp_sed_conf='/etc/storpool/sed.conf'
+
 [storpool]
 # Node hostnames and per-node variables
 # NOTE: If no variables are defined will use globals/defaults from above
