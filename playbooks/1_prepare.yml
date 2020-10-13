@@ -9,6 +9,8 @@
       setup:
         gather_subset:
           - "!all"
+      tags:
+        - always
 
 - name: Prepare environment for StorPool
   hosts: storpool

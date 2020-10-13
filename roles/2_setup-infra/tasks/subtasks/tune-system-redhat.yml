@@ -22,8 +22,8 @@
     - fw_service_status is failed
     - not ('Could not find the requested service' in fw_service_status.msg)
   when:
-    - sp_disable_fw is defined and
-      sp_disable_fw | bool
+    - sp_disable_fw is defined
+    - sp_disable_fw | bool
 
 - name: Add StorPool ports to firewall - 81,3749,47567/TCP (CentOS/RHEL)
   become: True
@@ -35,8 +35,8 @@
   ignore_errors: true
   with_items: "{{ sp_fw_ports }}"
   when:
-    - sp_disable_fw is defined and
-      not sp_disable_fw | bool
+    - sp_disable_fw is defined
+    - not sp_disable_fw | bool
 
 - name: Disable NetworkManager (CentOS/RHEL)
   service:
@@ -50,14 +50,18 @@
     - nm_service_status is failed
     - not ('Could not find the requested service' in nm_service_status.msg)
   when:
-    - sp_disable_nm is defined and
-      sp_disable_nm | bool
+    - sp_disable_nm is defined
+    - sp_disable_nm | bool
 
 - name: Configure SELinux (CentOS/RHEL)
   selinux:
     state: "{{ sp_selinux | default('disabled') }}"
     policy: targeted
   ignore_errors: true
+  vars:
+    selinux_states:
+      - permissive
+      - disabled
   when:
-    - sp_selinux is defined and
-      sp_selinux in ['permissive', 'disabled']
+    - sp_selinux is defined 
+    - sp_selinux in selinux_states

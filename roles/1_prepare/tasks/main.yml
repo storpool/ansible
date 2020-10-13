@@ -1,38 +1,14 @@
 ---
-- name: Gather common facts
+- name: Include common facts gathering tasks (Prepare Deployment)
   include_tasks: variables-common.yml
 
-- name: Validate variables
+- name: Validate deployment variables (Prepare Deployment)
   include_tasks: check-variables.yml
 
-- name: Validate that target hosts are covering our requirements
+- name: Validate that target hosts are covering StorPool requirements (Prepare Deployment)
   include_tasks: check-requirements.yml
 
-- name: Generate summary message
-  set_fact:
-    sp_summary_msg: | 
-      1. OS update: {{ sp_update_system }}
-      2. Configure network: {{ sp_configure_network }} ({{ '' if sp_overwrite_iface_conf and sp_configure_network else 'do not' }} overwrite existing configuration)
-      3. Network Manager: {{ 'disable' if sp_disable_nm else 'leave as is' }}
-      4. Firewall: {{ 'disable' if sp_disable_fw else 'adjust' }}
-      5. SELinux: {{ sp_selinux }}
-      6. VM Node: {{ sp_vm }} ({{ 'Guessed' if sp_vm_guessed is defined else 'Defined' }}) (Product Name: {{ ansible_product_name }})
-      7. New Cluster: {{ sp_new_cluster }}{{' (initial disk node)' if sp_new_cluster and sp_init_node == ansible_fqdn else ''}}
-      8. StorPool release: {{ sp_release }}
-      9. Release Source: {{ sp_release_file }}
-      10. Path to storpool.conf: {{ sp_config }}
-      11. StorPool node roles: {{ sp_node_roles }}
-      12. StorPool services that will be installed: {{ sp_install_services }}
-      13. Drives to initialize: {{ sp_drive_list | sort | join(', ') if sp_roles.server else 'none' }}
-      14. Server Instances: {{ sp_server_instances }}
-      15. StorPool control groups configuration + extra configuration: {{ sp_cg_conf_extra | default('default') }}
-  when: sp_summary_wait
-
-- name: Preview configuration summary
-  debug: var=sp_summary_msg
-  when: sp_summary_wait
-
-- name: Confirm configuration
-  pause:
-    prompt: "\nPlease Review\n\nPress Enter to begin deployment\nor Ctrl-C,A to abort"
-  when: sp_summary_wait
+- name: Preview deployment summary (Prepare Deployment)
+  include_tasks: summary.yml
+  when:
+    - sp_summary_wait

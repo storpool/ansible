@@ -82,6 +82,7 @@ sp_copytoservers: "/usr/local/bin/copytoservers-old"
 sp_showconf: "/usr/sbin/storpool_showconf"
 sp_cgtool: "/usr/sbin/storpool_cg"
 sp_python_executable: "/opt/storpool/python3/bin/python3"
+sp_cg_conf_extra: "" 
 
 epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
 epel_repo_gpg_key_url: "/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"

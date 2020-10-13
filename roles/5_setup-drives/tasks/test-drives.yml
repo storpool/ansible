@@ -1,0 +1,13 @@
+---
+- name: Copy drives init tools
+  copy:
+    src: "{{ item }}"
+    dest: "{{ sp_toolsdir }}"
+    mode: 0755
+  with_items:
+    - "init_drive.sh"
+    - "perform_disktest.sh"
+
+- name: Test the drives
+  command: "{{ sp_perform_disk_test }} {{ sp_drives | join(' ') }}"
+  changed_when: false

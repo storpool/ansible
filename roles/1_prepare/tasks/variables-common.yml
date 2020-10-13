@@ -81,10 +81,12 @@
   set_fact:
     cacheable: true
     sp_cg_conf_extra: "CONVERGED=1 {{ sp_cg_conf_extra }}"
+  vars:
+    converged: "CONVERGED"
   when:
     - sp_roles.server
     - sp_roles.client
-    - "'CONVERGED' not in sp_cg_conf_extra"
+    - converged not in sp_cg_conf_extra
 
 - name: Get node drive sizes
   shell: |

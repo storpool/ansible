@@ -15,9 +15,9 @@
 
 - name: Remove swap from fstab
   lineinfile:
-    path: "/etc/fstab"
+    path: /etc/fstab
     regexp: " swap "
-    state: "absent"
+    state: absent
 
 - name: Limit journald memory to 64M
   lineinfile:
@@ -32,16 +32,22 @@
     name: "{{ item }}"
     enabled: true
     state: started
-  ignore_errors: true
+  register: service_status
+  failed_when:
+    - service_status is failed
+    - not ('Could not find the requested service' in service_status.msg)
   with_items:
     - "{{ generic_services }}"
-    - "{{ distro_services|default() }}"
+    - "{{ distro_services | default() }}"
 
 - name: Disable generic services
   systemd:
     name: "{{ item }}"
     enabled: false
     state: stopped
-  ignore_errors: true
+  register: service_status 
+  failed_when:
+    - service_status is failed
+    - not ('Could not find the requested service' in service_status.msg)
   with_items:
     - "{{ generic_services_stopped }}"

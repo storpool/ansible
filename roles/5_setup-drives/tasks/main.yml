@@ -1,5 +1,11 @@
 ---
-- import_tasks: "init_drives.yml"
+- name: Include drives tests (Setup Drives)
+  include_tasks: "test-drives.yml"
+  when:
+    - not sp_vm | bool
+
+- name: Include drives initialisation tasks (Setup Drives)
+  include_tasks: "init-drives.yml"
   when:
     - sp_roles.server is defined and
       sp_roles.server | bool

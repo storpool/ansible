@@ -1,0 +1,28 @@
+---
+- name: Define sp_release_method
+  include_tasks: "subtasks/sp_release_method.yml"
+
+- name: Get StorPool packages
+  include_tasks: "subtasks/get_storpool/storpool_{{ sp_release_method | default('web') }}.yml"
+
+- name: Install StorPool modules
+  command:
+    cmd: >-
+      {{ sp_install_helper }}
+      -g {{ sp_release | quote }}
+      -r -w {{ sp_toolsdir | quote }}
+      -m {{ sp_install_services | quote }}
+    chdir: "{{ sp_toolsdir }}"
+  async: 1000
+  poll: 0
+  register: storpool_modules_sleeper
+  changed_when: false
+
+- name: Install StorPool modules - check on async task
+  async_status:
+    jid: "{{ storpool_modules_sleeper.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 100
+  delay: 5
+  changed_when: false
