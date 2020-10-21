@@ -1,4 +1,10 @@
 ---
+- name: Copy drives init tools
+  copy:
+    src: "init_drive.sh"
+    dest: "{{ sp_toolsdir }}"
+    mode: 0755
+
 - name: Init drives
   command: >
     {{ sp_init_drive }} {{ item }} {{ sp_diskid_prefix }}
