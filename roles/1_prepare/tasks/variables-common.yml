@@ -3,7 +3,9 @@
   set_fact:
     cacheable: true
     sp_roles: "{{ sp_roles | combine({'server': true}) }}"
-    sp_server_instances: "{{ item }}"
+    sp_server_instances: "{{ item.split(':')
+                          | length == 2 and
+                          item.split(':')[1] or 1 }}"
   with_items: "{{ sp_roles_list }}"
   when:
     - "'server' in item.split(':')"
@@ -33,39 +35,34 @@
     - iscsi
     - bridge
 
-- name: Define StorPool server instances count (1 instance) 
-  set_fact:
-    cacheable: true
-    sp_server_instances: 1
-  when:
-    - sp_server_instances is defined
-    - sp_server_instances == 'server'
-
-- name: Define StorPool server instances count (more than 1 instances)
-  set_fact:
-    cacheable: true
-    sp_server_instances: "{{ sp_server_instances.split(':')[1] }}"
-  when:
-    - sp_server_instances is defined
-    - sp_server_instances > '0'
-
-- name: Add services (sp_install_services)
-  set_fact:
-    cacheable: true
-    sp_install_services: "{{ sp_install_services }} {{ item }}"
-  when:
-    - sp_roles[item]
-  with_items:
-    - server
-    - iscsi
-    - mgmt
-    - bridge
+- name: Define StorPool services to install
+  block:
+    - name: Validate and define services_to_install variable
+      set_fact:
+        services_to_install: "{{ services_to_install
+                              | default('@block cli') }}
+                              {{ item }}"
+      when:
+        - sp_roles[item]
+      with_items:
+        - server
+        - iscsi
+        - mgmt
+        - bridge
+    - name: Cache sp_install_services fact 
+      set_fact:
+        sp_install_services: "{{ services_to_install }}"
+        cacheable: true
 
 - name: Pick server node for initial disk
   run_once: true
   set_fact:
     cacheable: true
-    sp_init_node: "{{ ansible_play_hosts | map('extract', hostvars) | list | json_query('[?sp_roles.server].ansible_fqdn | [0]') }}"
+    sp_init_node: "{{ ansible_play_hosts
+                   | map('extract', hostvars)
+                   | list
+                   | json_query('[?sp_roles.server].ansible_fqdn
+                   | [0]') }}"
   when:
     - sp_new_cluster
 

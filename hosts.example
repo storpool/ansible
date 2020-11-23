@@ -25,6 +25,9 @@
 # StorPool version to be deployed (if sp_release_file='web') - Defaults to 19.01
 # sp_release = '19.01'
 
+# StorPool target release - release, pre-release or sp-lab
+# sp_target_release = 'release' # Default 
+
 # Deployment type - Defaults to False
 # sp_new_cluster = True	# New cluster deployment
 # sp_new_cluster = False	# Adding node(s) to existing cluster (default)

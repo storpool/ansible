@@ -6,7 +6,7 @@ sp_new_cluster: false
 sp_update_system: true
 sp_selinux: "disabled"
 sp_summary_wait: true
-sp_node_roles: "client"
+# sp_node_roles: "client"
 sp_drive_erase: false
 sp_diskid_offset: 0
 sp_sed_enable_opal: false
@@ -92,6 +92,7 @@ cache_timeout: 600
 sp_disable_nm: true
 sp_disable_fw: true
 sp_release_file: "web"
+sp_target_release: "release"
 sp_release: "19.01"
 sp_fw_ports:
   - 81

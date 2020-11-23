@@ -8,10 +8,5 @@
 - name: Include distro-specific tasks (Setup Infrastructure)
   include_tasks: "subtasks/tune-system-{{ ansible_os_family | lower }}.yml"
 
-- name: Include rc.local tuning tasks (Setup Infrastructure)
-  include_tasks: "rc-local.yml"
-  when:
-    - not sp_vm | bool
-
 - name: Flush handlers
   meta: flush_handlers
