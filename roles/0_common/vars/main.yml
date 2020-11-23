@@ -14,7 +14,8 @@ generic_deps:
   - nvme-cli
   - patch
   - logrotate
-  - python-requests
+  - "{{ (ansible_distribution_major_version == '8')
+     | ternary('python3-requests','python-requests') }}"
   - rsync
   - screen
   - hwloc

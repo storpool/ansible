@@ -10,12 +10,5 @@ distro_deps:
   - tuned
   - vim-enhanced
 
-distro_services:
-  - tuned
-  - mcelog
-
-distro_services_stopped:
-  - firewalld
-
 selinux_state: disabled
 tuned_profile: throughput-performance

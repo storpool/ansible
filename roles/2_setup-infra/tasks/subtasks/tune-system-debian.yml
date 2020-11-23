@@ -12,13 +12,6 @@
     - sp_disable_fw is defined and
       sp_disable_fw | bool
 
-- name: Debug service_status
-  debug:
-    var: service_status
-  when:
-    - sp_debug is defined
-    - sp_debug | bool
-
 - name: Add StorPool ports to firewall - 81,3749,47567/TCP (Ubuntu/Debian)
   ufw:
     rule: allow
