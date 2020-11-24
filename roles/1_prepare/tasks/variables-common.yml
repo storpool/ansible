@@ -39,9 +39,7 @@
   block:
     - name: Validate and define services_to_install variable
       set_fact:
-        services_to_install: "{{ services_to_install
-                              | default('@block cli') }}
-                              {{ item }}"
+        services_to_install: "{{ item }}"
       when:
         - sp_roles[item]
       with_items:
@@ -51,7 +49,7 @@
         - bridge
     - name: Cache sp_install_services fact 
       set_fact:
-        sp_install_services: "{{ services_to_install }}"
+        sp_install_services: "@block cli {{ services_to_install | default('') }}"
         cacheable: true
 
 - name: Pick server node for initial disk

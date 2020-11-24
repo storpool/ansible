@@ -1,109 +1,170 @@
 ---
-- name: >
-    Validate that sp_poli variable is set
-    when sp_release_file is set to "poli"
-  assert:
-    that:
-      - sp_poli
-    fail_msg: >-
-      Value of sp_release_file was set to poli,
-      but ansible bastion machine is not poli.
-      Please change sp_release_file to either web or file.
-    success_msg: >- 
-      Value of sp_release_file is poli and ansible is running from poli. 
-  when:
-    - sp_release_file == 'poli'
+- name: Checks related to the ansible bastion
+  block:
+    - name: >-
+        Get storpool.conf file status
+        on the ansible bastion machine
+      delegate_to: localhost
+      run_once: true
+      become: false
+      stat:
+        path: "{{ sp_config }}"
+      register: sp_config_exists
+    - name: >-
+        Validate that storpool.conf file
+        is readable on the ansible bastion machine
+      assert:
+        that:
+          - sp_config_exists.stat.exists
+          - sp_config_exists.stat.readable
+        fail_msg: >-
+          Unable to read storpool.conf file on specified path: {{ sp_config }}
+        success_msg: >-
+          The storpool.conf file is valid: {{ sp_config }}
+    - name: >-
+        Validate that sp_poli variable is set
+        when sp_release_file is set to "poli"
+      assert:
+        that:
+          - sp_poli
+        fail_msg: >-
+          Value of sp_release_file was set to poli,
+          but ansible bastion machine is not poli.
+          Please change sp_release_file to either web or file.
+        success_msg: >-
+          Value of sp_release_file is poli
+          and ansible is running from poli.
+      when:
+        - sp_release_file == 'poli'
+    - name: Check cluster directory
+      delegate_to: localhost
+      run_once: true
+      become: false
+      stat:
+        path: "{{ sp_custdir }}/{{ sp_cluster }}"
+      register: sp_cluster_dir
+      when:
+        - sp_poli | bool
+    - name: Ensure cluster directory exist
+      assert:
+        that:
+          - sp_cluster_dir.stat.exists
+          - sp_cluster_dir.stat.isdir
+        fail_msg: >-
+          Directory "{{ sp_custdir }}/{{ sp_cluster }}" missing
+          on ansible bastion server.
+          Please create it and populate it with a
+          configured storpool.conf file.
+        success_msg: >-
+          Directory "{{ sp_custdir }}/{{ sp_cluster }}"
+          is available on the ansible bastion server.
+      when:
+        - sp_poli | bool
+    - name: Get file status (sp_release_file)
+      delegate_to: localhost
+      run_once: true
+      become: false
+      stat:
+        path: "{{ sp_release_file }}"
+      register: sp_release_file_exists
+      when:
+        - sp_release_file not in valid_release_methods
+      vars:
+        valid_release_methods:
+          - web
+          - poli
+    - name: >-
+        Validate that sp_release_file
+        is a readable file on the
+        ansible bastion machine
+      assert:
+        that:
+          - sp_release_file_exists.stat.exists
+          - sp_release_file_exists.stat.readable
+        fail_msg: >-
+          Unable to read sp_release_file: {{ sp_release_file }}
+        success_msg: >-
+          The sp_release_file was verified: {{ sp_release_file }}
+      vars:
+        valid_release_methods:
+          - web
+          - poli
+      when:
+        - sp_release_file not in valid_release_methods
 
-- name: Check cluster directory
-  delegate_to: localhost
-  run_once: true
-  become: false
-  stat:
-    path: "{{ sp_custdir }}/{{ sp_cluster }}"
-  register: sp_cluster_dir
-  when:
-    - sp_poli | bool
-
-- name: Ensure cluster directory exist
-  assert:
-    that:
-      - sp_cluster_dir.stat.exists
-      - sp_cluster_dir.stat.isdir
-    fail_msg: >-
-      Directory "{{ sp_custdir }}/{{ sp_cluster }}" missing
-      on ansible bastion server.
-      Please create it and populate it with a
-      configured storpool.conf file.
-    success_msg: >-
-      Directory "{{ sp_custdir }}/{{ sp_cluster }}"
-      is available on the ansible bastion server.
-  when:
-    - sp_poli | bool
-
-- name: Get file status (sp_release_file)
-  delegate_to: localhost
-  run_once: true
-  become: false
-  stat:
-    path: "{{ sp_release_file }}"
-  register: sp_release_file_exists
-  when:
-    - sp_release_file not in valid_release_methods
-  vars:
-    valid_release_methods:
-      - web
-      - poli
+- name: Check if defined StorPool roles are valid
+  block:
+    - name: Validate StorPool roles
+      assert:
+        that:
+          - item in sp_valid_roles
+        fail_msg: >-
+          Defined role {{ item | quote }} 
+          is not a valid StorPool role.
+        success_msg: >-
+          Defined role {{ item | quote }}
+          is valid StorPool role.
+      with_items: "{{ sp_roles_list }}"
+    - name: >-
+        Check if there are no servers specified,
+        but the cluster is defined as new
+      assert:
+        that:
+          - sp_init_node | length > 0
+        fail_msg: >-
+          New cluster deployment,
+          but no server nodes
+        success_msg: >-
+          New cluster deployment,
+          and there are server nodes properly defined
+          in the ansible inventory
+      when:
+        - sp_new_cluster
 
 - name: >-
-    Validate that sp_release_file
-    is a readable file on the
-    ansible bastion machine
-  assert:
-    that:
-      - sp_release_file_exists.stat.exists
-      - sp_release_file_exists.stat.readable
-    fail_msg: >-
-      Unable to read sp_release_file: {{ sp_release_file }}
-    success_msg: >-
-      The sp_release_file was verified: {{ sp_release_file }}
-  vars:
-    valid_release_methods:
-      - web
-      - poli
-  when:
-    - sp_release_file not in valid_release_methods
+    Check if targeted drives 
+    are meeting StorPool's requirements
+  block:
+    - name: Check if we have drives for the StorPool servers
+      assert:
+        that: sp_drive_list | length > 0
+        fail_msg: >-
+          Node declared as a server,
+          but no drives found to initialize
+        success_msg: >-
+          Node declared as a server,
+          and drives for this node are
+          properly defined in the inventory
+      when:
+        - sp_roles.server
+    - name: Check and register drives information
+      parted:
+        device: "/dev/{{ item }}"
+        unit: MiB
+      register: info
+      loop: "{{ sp_drive_list }}"
+    - name: Fail when disk has partitions and sp_drive_erase is not set
+      assert:
+        quiet: true
+        that:
+          - item.1.num == ""
+        msg: >-
+          Drive "{{ item.0.disk.dev }}" contains "{{ item.1.num }}" partition/s.
+          Please remove them or set "sp_drive_erase" to "True".
+      loop: "{{ info.results | subelements('partitions') }}"
+      when:
+        - sp_roles.server
+        - not sp_drive_erase | bool
 
-- name: >-
-    Get storpool.conf file status
-    on the ansible bastion machine
-  delegate_to: localhost
-  run_once: true
-  become: false
-  stat:
-    path: "{{ sp_config }}"
-  register: sp_config_exists
-
-- name: >-
-    Validate that storpool.conf file
-    is readable on the ansible bastion machine
-  assert:
-    that:
-      - sp_config_exists.stat.exists
-      - sp_config_exists.stat.readable
-    fail_msg: >-
-      Unable to read storpool.conf file on specified path: {{ sp_config }}
-    success_msg: >-
-      The storpool.conf file is valid: {{ sp_config }} 
-
-- name: Test boolean variables 
+- name: Test boolean variables
   assert:
     that:
       - lookup('vars', item) | type_debug == 'bool'
     fail_msg: >-
-      Value of {{ item | quote }} is not bool.
-      {{ item | quote }}: {{ lookup('vars', item) }}
+      Value of {{ item }} is not bool.
+      {{ item }}: {{ lookup('vars', item) }}
     success_msg: >-
-      Value of {{ item | quote }} is bool.
+      Value of {{ item }} is bool.
   with_items:
     - sp_poli
     - sp_new_cluster
@@ -117,7 +178,7 @@
     - sp_drive_erase
     - sp_summary_wait
 
-- name: Validate if sp_selinux value is valid 
+- name: Validate if sp_selinux value is valid
   assert:
     that:
       - sp_selinux in selinux_state
@@ -127,65 +188,10 @@
       Valid values are -
       disabled, permissive and enforcing.
     success_msg: >-
-      Value of sp_selinux is either disabled, permissive or enforcing. 
+      Value of sp_selinux is either 
+      disabled, permissive or enforcing.
   vars:
     selinux_state:
       - disabled
       - permissive
       - enforcing
-
-- name: Validate StorPool roles
-  assert:
-    that:
-      - item in sp_valid_roles
-    fail_msg: >-
-      Defined role {{ item | quote }} 
-      is not a valid StorPool role.
-    success_msg: >-
-      Defined role {{ item | quote }}
-      is valid StorPool role.
-  with_items: "{{ sp_roles_list }}"
-
-- name: Validate StorPool roles
-  assert:
-    that:
-      - sp_init_node | length > 0
-    fail_msg: >-
-      New cluster deployment,
-      but no server nodes
-    success_msg: >-
-      New cluster deployment,
-      and there are server nodes properly defined
-      in the ansible inventory
-  when:
-    - sp_new_cluster
-
-- name: >-
-    Validate sp_drive_list contains clean,
-    unpartitioned drives when sp_drive_erase
-    not set to True
-  assert:
-    that: 
-      - ansible_devices[item].partitions | length > 0
-    fail_msg: >-
-      Drive "/dev/{{ item }}" contains partitions.
-      Please remove them or set "sp_drive_erase" to "True".
-    success_msg: >-
-      Drive "/dev/{{ item }}" doesn't have any partitions.
-  with_items: "{{ sp_drive_list }}"
-  when:
-    - sp_roles.server
-    - not sp_drive_erase | bool
-
-- name: Check if we have drives for the StorPool servers
-  assert:
-    that: sp_drive_list | length > 0
-    fail_msg: >-
-      Node declared as a server,
-      but no drives found to initialize
-    success_msg: >-
-      Node declared as a server,
-      and drives for this node are
-      properly defined in the inventory
-  when:
-    - sp_roles.server
