@@ -2,7 +2,7 @@
 - name: Assign StorPool server role 
   set_fact:
     cacheable: true
-    sp_roles: "{{ sp_roles | combine({'server': true}) }}"
+    sp_roles: "{{ sp_roles | combine([{'server': true}]) }}"
     sp_server_instances: "{{ item.split(':')
                           | length == 2 and
                           item.split(':')[1] or 1 }}"
@@ -13,7 +13,7 @@
 - name: Assign other StorPool roles
   set_fact:
     cacheable: true
-    sp_roles: "{{ sp_roles | combine({item: true}) }}"
+    sp_roles: "{{ sp_roles | combine([{item: true}]) }}"
   with_items:
     - client
     - mgmt
@@ -25,7 +25,7 @@
 - name: Populate false values for StorPool roles 
   set_fact:
     cacheable: true
-    sp_roles: "{{ sp_roles | combine({item: false}) }}"
+    sp_roles: "{{ sp_roles | combine([{item: false}]) }}"
   when:
     - item not in sp_roles.keys()
   with_items:
@@ -39,9 +39,7 @@
   block:
     - name: Validate and define services_to_install variable
       set_fact:
-        services_to_install: "{{ services_to_install
-                              | default('@block cli') }}
-                              {{ item }}"
+        services_to_install: "{{ item }}"
       when:
         - sp_roles[item]
       with_items:
@@ -51,7 +49,7 @@
         - bridge
     - name: Cache sp_install_services fact 
       set_fact:
-        sp_install_services: "{{ services_to_install }}"
+        sp_install_services: "@block cli {{ services_to_install | default('') }}"
         cacheable: true
 
 - name: Pick server node for initial disk
@@ -127,7 +125,7 @@
 - name: "check for nvme drives"
   set_fact:
     cacheable: true
-    sp_roles: "{{ sp_roles | combine({'nvme': true}) }}"
+    sp_roles: "{{ sp_roles | combine([{'nvme': true}]) }}"
   when:
     - sp_roles.server
     - (sp_drive_list
@@ -138,7 +136,7 @@
 - name: "no nvme drives found"
   set_fact:
     cacheable: true
-    sp_roles: "{{ sp_roles | combine({'nvme': false}) }}"
+    sp_roles: "{{ sp_roles | combine([{'nvme': false}]) }}"
   when: sp_roles.nvme is not defined
 
 - name: "sp_systemd_services: initial definition"
