@@ -145,7 +145,6 @@
       loop: "{{ sp_drive_list }}"
     - name: Fail when disk has partitions and sp_drive_erase is not set
       assert:
-        quiet: true
         that:
           - item.1.num == ""
         msg: >-
