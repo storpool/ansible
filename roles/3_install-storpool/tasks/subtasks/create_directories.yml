@@ -5,3 +5,4 @@
     state: directory
   with_items:
     - "{{ sp_dirs }}"
+    - "/etc/cgconfig.d"

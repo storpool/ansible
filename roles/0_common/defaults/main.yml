@@ -16,7 +16,7 @@ sp_rc_local: true
 # If the storage capacity on this device is greater than or equal to this
 # size (in GB), the installation process will continue.
 # NOTE: For VMs the limit is disabled.
-bootstrap_host_data_disk_min_size: "{{ sp_vm | ternary('0', '50') }}"
+bootstrap_host_data_disk_min_size: "{{ sp_vm | ternary('0', '25') }}"
 # Valid sp_node_roles values
 sp_valid_roles:
   - client
