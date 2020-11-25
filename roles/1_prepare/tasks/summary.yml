@@ -3,7 +3,7 @@
   set_fact:
     sp_summary_msg: |
       1. OS update: {{ sp_update_system }}
-      2. Configure network: {{ sp_configure_network }} ({{ '' if sp_overwrite_iface_conf and sp_configure_network else 'do not' }} overwrite existing configuration)
+      2. Configure network: {{ sp_configure_network }} ({{ 'overwrite' if sp_overwrite_iface_conf and sp_configure_network else 'do not overwrite' }} existing configuration)
       3. Network Manager: {{ 'disable' if sp_disable_nm else 'leave as is' }}
       4. Firewall: {{ 'disable' if sp_disable_fw else 'adjust' }}
       5. SELinux: {{ sp_selinux }}

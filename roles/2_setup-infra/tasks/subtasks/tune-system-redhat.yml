@@ -5,6 +5,7 @@
       command: "grep -q AMD /proc/cpuinfo"
       ignore_errors: true
       failed_when: false
+      changed_when: false
       register: is_amd
     - name: Start and enable mcelog on boot (CentOS/RHEL)
       systemd:
@@ -16,7 +17,7 @@
         - mcelog_service_status is failed
         - not ('Could not find the requested service' in mcelog_service_status.msg)
       when:
-        - is_amd.rc == 0
+        - is_amd.rc == 1
     
 - name: Configure tuned (CentOS/RHEL)
   block:
