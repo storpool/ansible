@@ -37,9 +37,12 @@
 
 - name: Define StorPool services to install
   block:
+    - name: Initial definition of services_to_install
+      set_fact:
+        services_to_install:
     - name: Validate and define services_to_install variable
       set_fact:
-        services_to_install: "{{ item }}"
+        services_to_install: "{{item}} {{services_to_install}}"
       when:
         - sp_roles[item]
       with_items:
@@ -49,7 +52,7 @@
         - bridge
     - name: Cache sp_install_services fact 
       set_fact:
-        sp_install_services: "@block cli {{ services_to_install | default('') }}"
+        sp_install_services: "@block cli {{services_to_install}}"
         cacheable: true
 
 - name: Pick server node for initial disk
@@ -91,7 +94,6 @@
     | awk '{print $2,$3}'
   changed_when: false
   register: sp_node_drive_size
-  no_log: true
   when:
     - sp_roles.server
     - sp_drive_size is defined

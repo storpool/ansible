@@ -3,12 +3,18 @@
   command: "{{ sp_showconf }} -n SP_OURID"
   changed_when: false
   register: sp_node_id
+  when:
+    - sp_roles.server is defined
+    - sp_roles.server
   tags:
     - setup-drives
 
 - name: Convert sp_drives to list
   set_fact:
     sp_drives: "{{ sp_drive_list | sort | map('regex_replace', '^(.*)', '/dev/\\1') | list }}"
+  when:
+    - sp_roles.server is defined
+    - sp_roles.server
   tags:
     - setup-drives
 
@@ -17,6 +23,9 @@
     sp_node_id: "{{ sp_node_id }}"
     sp_diskid_prefix: "{{ sp_node_id.stdout | int - sp_diskid_offset | int }}"
     cacheable: true
+  when:
+    - sp_roles.server is defined
+    - sp_roles.server
   tags:
     - setup-drives
 
@@ -24,6 +33,8 @@
   fail:
     msg: "Disk id prefix {{ sp_diskid_prefix }} is not in range (1..39)! Please adjust sp_diskid_offset"
   when:
+    - sp_roles.server is defined
+    - sp_roles.server
     - sp_diskid_prefix|int < 1 or
       sp_diskid_prefix|int > 39
   tags:
