@@ -1,3 +1,4 @@
 facts/
 ansible.log
 playbook.retry
+roles/custom_*
