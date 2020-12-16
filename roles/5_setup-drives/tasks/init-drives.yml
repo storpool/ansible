@@ -5,12 +5,12 @@
     dest: "{{ sp_toolsdir }}"
     mode: 0755
 
+# temporary patch for auto-test-cluster: begin
 - name: Init drives
   command: >
-    {{ sp_init_drive }} {{ item }} {{ sp_diskid_prefix }}
-    {{ sp_init_node if sp_new_cluster else 'noinit' }}
+    /usr/local/bin/initdisks
   changed_when: false
-  with_items: "{{ sp_drives }}"
+# temporary patch for auto-test-cluster: end
 
 - name: Get needed number of server instances
   script: get_instances.py
