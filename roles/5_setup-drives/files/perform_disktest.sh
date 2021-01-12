@@ -40,8 +40,11 @@ for i in $*; do
 		if smartctl -i "$i" | grep -q "Product.*QEMU"; then
 			serial=`echo "$i"|sed s%/%_%g`
 		else
-			echo Cannot detect serial number and not a virtual drive
-			exit 4
+			serial=`smartctl -i "$i" |grep ^Serial|awk '{print $3}'`
+			if [ -z "$serial" ]; then
+				echo Cannot detect serial number and not a virtual drive
+				exit 4
+			fi
 		fi
 	fi
 	if [ -f "/etc/storpool/${serial}.tested" ]; then
