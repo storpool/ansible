@@ -58,7 +58,8 @@ rc_local_commands:
   - "/usr/bin/cpupower set -b 0; # set energy/performance policy to performance"
   - '/usr/bin/cpupower frequency-set -g performance; # set cpufreq/pstate governor to "performance"'
 # StorPool tools download URLs
-sp_install_getpackage_url: "https://vault.storpool.com/getpackage.py"
+sp_getpackage_name: "{{ 'getpackage-py3.py' if ansible_distribution_release == 'focal' else 'getpackage.py' }}"
+sp_install_getpackage_url: "https://vault.storpool.com/{{ sp_getpackage_name }}"
 sp_install_helper_url: "https://vault.storpool.com/install_modules_helper.py"
 
 # StorPool paths 
@@ -66,7 +67,7 @@ sp_config: "{{ inventory_dir }}/storpool.conf"
 sp_toolsdir: "/root/storpool"
 sp_libdir: "/usr/lib/storpool" 
 sp_sed_conf: "/etc/storpool/sed.conf"
-sp_getpackage: "{{ sp_toolsdir }}/getpackage.py"
+sp_getpackage: "{{ sp_toolsdir }}/{{ sp_getpackage_name }}"
 sp_install_helper: "{{ sp_toolsdir }}/install_modules_helper.py"
 sp_vault_url: "{{'http://buildvault.dhcp.vm.storpool.local/getpkg-internal.php' if (sp_testing_lab) else 'https://vault.storpool.com/getpkg.php'}}"
 sp_mlc: "{{ sp_toolsdir }}/mlc/mlc"

@@ -14,10 +14,14 @@ generic_deps:
   - nvme-cli
   - patch
   - logrotate
-  - python3
-  - python2
-  - python2-requests
-  - python3-requests
+  - "{{ 'python' if (ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6') or
+        (ansible_distribution == 'Debian' and ansible_distribution_release == 'stretch') or
+        (ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'xenial') or
+        (ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'bionic') else 'python3' }}"
+  - "{{ 'python-requests' if (ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6') or
+        (ansible_distribution == 'Debian' and ansible_distribution_release == 'stretch') or
+        (ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'xenial') or
+        (ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'bionic') else 'python3' }}"
   - rsync
   - screen
   - hwloc
