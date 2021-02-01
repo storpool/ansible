@@ -2,9 +2,15 @@
 - name: Include distro-specific tasks
   include_tasks: "subtasks/configure_network_{{ ansible_os_family | lower }}.yml"
 
+- name: Alternative network setup tool
+  command: "/usr/local/bin/preconfignet"
+  register: preconfignet
+  when: sp_alternative_net_setup
+
 - name: Generate StorPool net interfaces configuration
   command: "/usr/sbin/iface-genconf -a {{ '-o' if sp_overwrite_iface_conf else '' }} {{ '--nettype 0' if sp_single_iface else '' }}"
   register: iface_genconf
+  when: not sp_alternative_net_setup
   changed_when: false
 
 - name: Init first interface
@@ -16,6 +22,7 @@
   changed_when: false
   tags:
     - skip_ansible_lint
+  when: not sp_alternative_net_setup
 
 - name: Init second interface
   shell: |
@@ -27,6 +34,7 @@
   ignore_errors: "{{ sp_single_iface | ternary (true, false) }}"
   tags:
     - skip_ansible_lint
+  when: not sp_alternative_net_setup
 
 - name: Init bond interfaces (if any)
   shell: |
@@ -39,6 +47,7 @@
   ignore_errors: "{{ sp_single_iface | ternary (true, false) }}"
   tags:
     - skip_ansible_lint
+  when: not sp_alternative_net_setup
 
 - name: Init iface1 VLANs (if any)
   shell: |
@@ -49,6 +58,7 @@
   changed_when: false
   tags:
     - skip_ansible_lint
+  when: not sp_alternative_net_setup
 
 - name: Init iface2 VLANs (if any)
   shell: |
@@ -60,3 +70,4 @@
   ignore_errors: "{{ sp_single_iface | ternary (true, false) }}"
   tags:
     - skip_ansible_lint
+  when: not sp_alternative_net_setup

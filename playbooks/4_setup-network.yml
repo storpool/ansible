@@ -1,6 +1,7 @@
 ---
 - name: Setup Network
   hosts: storpool
+  serial: 2
   gather_facts: false
   become: true
 

@@ -169,6 +169,7 @@
     - sp_new_cluster
     - sp_update_system
     - sp_configure_network
+    - sp_alternative_net_setup
     - sp_overwrite_iface_conf
     - sp_single_iface
     - sp_disable_nm
