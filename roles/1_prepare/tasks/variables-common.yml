@@ -95,6 +95,8 @@
     | grep ^disk \
     | awk '{print $2,$3}'
   changed_when: false
+  args:
+    executable: /bin/bash
   register: sp_node_drive_size
   when:
     - sp_roles.server

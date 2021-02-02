@@ -19,6 +19,8 @@
     | cut -d: -f3 \
     | xargs ifup
   register: iface1_init
+  args:
+    executable: /bin/bash
   changed_when: false
   tags:
     - skip_ansible_lint
@@ -30,6 +32,8 @@
     | cut -d: -f3 \
     | xargs ifup
   register: iface2_init
+  args:
+    executable: /bin/bash
   changed_when: false
   ignore_errors: "{{ sp_single_iface | ternary (true, false) }}"
   tags:
@@ -43,6 +47,8 @@
     | cut -d. -f1 \
     | xargs ifup
   register: bond_init
+  args:
+    executable: /bin/bash
   changed_when: false
   ignore_errors: "{{ sp_single_iface | ternary (true, false) }}"
   tags:
@@ -55,6 +61,8 @@
     | cut -d: -f2 \
     | xargs ifup
   register: iface1_vlan_init
+  args:
+    executable: /bin/bash
   changed_when: false
   tags:
     - skip_ansible_lint
@@ -66,6 +74,8 @@
     | cut -d: -f2 \
     | xargs ifup
   register: iface2_vlan_init
+  args:
+    executable: /bin/bash
   changed_when: false
   ignore_errors: "{{ sp_single_iface | ternary (true, false) }}"
   tags:

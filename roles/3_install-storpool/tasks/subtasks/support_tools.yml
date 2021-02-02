@@ -23,6 +23,8 @@
     [[ ! -d "/tmp/mlc/" ]] && mkdir -p /tmp/mlc/; \
     [[ ! -f "/tmp/mlc/mlc.output" ]] && {{ sp_toolsdir }}/mlc/mlc > /tmp/mlc/mlc.output || /bin/true
   changed_when: false
+  args:
+    executable: /bin/bash
   when:
     - sp_vm is defined and
       not sp_vm | bool and

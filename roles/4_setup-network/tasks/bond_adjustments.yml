@@ -5,6 +5,8 @@
     | cut -d: -f2 \
     | cut -d. -f1
   changed_when: false
+  args:
+    executable: /bin/bash
   register: sp_interfaces
   tags:
     - skip_ansible_lint
