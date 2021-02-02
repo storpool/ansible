@@ -60,5 +60,6 @@
     {{ sp_multi_server_helper }} -i {{ sp_server_instances }} \
     | bash
   changed_when: false
+  when: sp_multi_server_helper_enabled
   tags:
     - skip_ansible_lint

@@ -95,6 +95,7 @@ ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --limit
 | sp_release_file | Full path the StorPool tar.gz archive, or `web` to download it from StorPool's repo ***Defaults to web***|
 | sp_release | StorPool version to be deployed (if sp_release_file='web')  ***Defaults to `19.01`*** |
 | sp_new_cluster | Deployment type ***Defaults to False*** |
+| sp_multi_server_helper_enabled | Redistributes the disks on multiple server instances ***Defaults to True*** |
 | sp_config | Path to storpool.conf on the ansible host ***Defaults to the inventory directory (Where the ansible inventory file is located)*** |
 | sp_update_system | Perform OS update (yum/apt update/upgrade) on target hosts ***Defaults to True*** |
 | sp_alternative_net_setup | Used for an alternative networking setup tooling during internal testing ***Defaults to False*** |

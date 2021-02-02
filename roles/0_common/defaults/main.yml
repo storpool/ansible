@@ -3,6 +3,7 @@ sp_testing_lab: false
 sp_configure_network: false
 sp_alternative_net_setup: false
 sp_overwrite_iface_conf: false
+sp_multi_server_helper_enabled: true
 sp_single_iface: false
 sp_new_cluster: false
 sp_update_system: true
