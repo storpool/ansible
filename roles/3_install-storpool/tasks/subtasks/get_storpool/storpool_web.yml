@@ -9,5 +9,5 @@
     - { url: "{{ sp_install_helper_url }}", dest: "{{ sp_toolsdir }}" }
 
 - name: Get the release archive from vault (Release from web)
-  command: "{{ sp_getpackage }} -g {{ sp_release }} -t {{ sp_target_release }} -u {{ sp_vault_url }}"
+  command: "{{ sp_getpackage }} -g {{ sp_release }} -t {{ sp_target_release }} -u {{ sp_vault_url }} {{ '-d' if 'debug' in sp_roles else '' }}"
   changed_when: false

@@ -35,6 +35,7 @@ sp_valid_roles:
   - mgmt
   - bridge
   - iscsi
+  - debug
 # Systemd services
 sp_services:
   helper:
