@@ -3,11 +3,15 @@
   stat:
     path: /boot/efi/EFI/centos/grub.cfg
   register: sp_centos_efi
+  when:
+    - ansible_distribution_major_version != '6'
 
-- name: Update GRUB (CentOS/RHEL)
+- name: Update GRUB2 (CentOS/RHEL)
   shell: |
     /usr/sbin/grub2-mkconfig \
     -o {{ '/boot/efi/EFI/centos/grub.cfg' if sp_centos_efi.stat.exists else '$(readlink -f /etc/grub2.cfg)' }}
   changed_when: false
   tags:
     - skip_ansible_lint
+  when:
+    - ansible_distribution_major_version != '6'

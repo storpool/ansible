@@ -11,7 +11,7 @@ generic_deps:
   - chrony
   - mtr
   - numactl
-  - nvme-cli
+  - "{{ 'nvme-cli' if ansible_distribution_major_version != '6' else 'less' }}"
   - patch
   - logrotate
   - "{{ 'python' if (ansible_os_family == 'RedHat' and ansible_distribution_major_version == '6') or

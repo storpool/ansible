@@ -26,7 +26,7 @@
       not sp_slice.stat.exists | bool
 
 - name: Start/enable cgconfig
-  systemd:
+  ansible.builtin.service:
     name: cgconfig
     state: started
     enabled: yes
@@ -43,7 +43,7 @@
   changed_when: false
   ignore_errors: true
   when:
-    - sp_cgconfig.status.ActiveState == 'active' and
+    - (sp_cgconfig.state == 'started' or sp_cgconfig.status.ActiveState == 'active') and
       sp_slice.stat.exists
 
 - name: Cgconfig was active and SP cgroups did not exist - restarting cgconfig
@@ -52,7 +52,7 @@
     state: restarted
     enabled: yes
   when:
-    - sp_cgconfig.status.ActiveState == 'active' and
+    - (sp_cgconfig.state == 'started' or sp_cgconfig.status.ActiveState == 'active') and
       not sp_slice.stat.exists
 
 - name: Re-generate cgroups on Ubuntu with memsw enabled

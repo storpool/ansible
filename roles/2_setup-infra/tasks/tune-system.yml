@@ -39,9 +39,11 @@
     line: RuntimeMaxUse=64M
     insertbefore: RuntimeKeepFree
   notify: Restart journald service
+  when:
+      - ansible_distribution_major_version != '6'
 
 - name: Enable generic services
-  systemd:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: true
     state: started
@@ -53,7 +55,7 @@
     - "{{ generic_services }}"
 
 - name: Disable generic services
-  systemd:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: false
     state: stopped

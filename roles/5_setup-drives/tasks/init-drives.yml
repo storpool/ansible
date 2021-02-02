@@ -28,7 +28,7 @@
   register: sp_instances
 
 - name: Stop server instances
-  systemd:
+  ansible.builtin.service:
     name: "{{ item }}"
     state: stopped
     enabled: no
@@ -36,7 +36,7 @@
   with_items: "{{ sp_instances.stdout_lines }}"
 
 - name: Stop storpool_nvmed
-  systemd:
+  ansible.builtin.service:
     name: storpool_nvmed
     state: stopped
     enabled: no

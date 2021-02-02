@@ -8,8 +8,8 @@
       changed_when: false
       register: is_amd
     - name: Start and enable mcelog on boot (CentOS/RHEL)
-      systemd:
-        name: "mcelog.service"
+      ansible.builtin.service:
+        name: "mcelog"
         enabled: true
         state: started 
       register: mcelog_service_status
@@ -18,11 +18,11 @@
         - not ('Could not find the requested service' in mcelog_service_status.msg)
       when:
         - is_amd.rc == 1
-    
+
 - name: Configure tuned (CentOS/RHEL)
   block:
     - name: Start and enable tuned on boot (CentOS/RHEL)
-      systemd:
+      ansible.builtin.service:
         name: "tuned.service"
         enabled: true
         state: started 
@@ -65,6 +65,8 @@
       when:
         - sp_disable_fw is defined
         - not sp_disable_fw | bool
+  when:
+    - ansible_distribution_major_version != '6'
 
 - name: Disable NetworkManager (CentOS/RHEL)
   service:
@@ -76,7 +78,7 @@
     - nm_service_status is failed
     - not ('Could not find the requested service' in nm_service_status.msg)
   when:
-    - ansible_distribution_major_version != '8'
+    - ansible_distribution_major_version not in ['6', '8']
     - sp_disable_nm is defined
     - sp_disable_nm | bool
 
@@ -92,3 +94,4 @@
   when:
     - sp_selinux is defined 
     - sp_selinux in selinux_states
+    - ansible_distribution_major_version != '6'

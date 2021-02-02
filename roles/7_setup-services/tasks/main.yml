@@ -22,7 +22,7 @@
   when: sp_roles.server
 
 - name: Start/enable sp_systemd_services
-  systemd:
+  ansible.builtin.service:
     name: "{{ item }}"
     state: started
     enabled: yes
