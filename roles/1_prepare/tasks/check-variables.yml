@@ -136,7 +136,7 @@
           and drives for this node are
           properly defined in the inventory
       when:
-        - sp_roles.server
+        - sp_roles.server and not sp_testing_lab
     - name: Check and register drives information
       parted:
         device: "/dev/{{ item }}"
