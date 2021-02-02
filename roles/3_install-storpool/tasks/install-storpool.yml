@@ -12,6 +12,7 @@
       -g {{ sp_release | quote }}
       -r -w {{ sp_toolsdir | quote }}
       -m {{ sp_install_services | quote }}
+      --retry 2
     chdir: "{{ sp_toolsdir }}"
   async: 1000
   poll: 0
