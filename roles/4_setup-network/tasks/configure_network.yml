@@ -9,7 +9,6 @@
 
 - name: Init first interface
   shell: |
-    set -o pipefail
     {{ sp_showconf }} -n -e -- SP_IFACE1_CFG \
     | cut -d: -f3 \
     | xargs ifup
@@ -20,7 +19,6 @@
 
 - name: Init second interface
   shell: |
-    set -o pipefail
     {{ sp_showconf }} -n -e -- SP_IFACE2_CFG \
     | cut -d: -f3 \
     | xargs ifup
@@ -32,7 +30,6 @@
 
 - name: Init bond interfaces (if any)
   shell: |
-    set -o pipefail
     {{ sp_showconf }} -n -e -- SP_IFACE1_CFG \
     | cut -d: -f2 \
     | cut -d. -f1 \
@@ -45,7 +42,6 @@
 
 - name: Init iface1 VLANs (if any)
   shell: |
-    set -o pipefail
     {{ sp_showconf }} -n -e -- SP_IFACE1_CFG \
     | cut -d: -f2 \
     | xargs ifup
@@ -56,7 +52,6 @@
 
 - name: Init iface2 VLANs (if any)
   shell: |
-    set -o pipefail
     {{ sp_showconf }} -n -e -- SP_IFACE2_CFG \
     | cut -d: -f2 \
     | xargs ifup

@@ -19,7 +19,6 @@
 
 - name: Get {{ sp_bond.stdout }} slave interfaces (Ubuntu/Debian)
   shell: |
-    set -o pipefail
     {{ sp_showconf }} -n -e -- SP_IFACE1_CFG SP_IFACE2_CFG \
     | cut -d: -f3
   changed_when: false

@@ -57,7 +57,6 @@
 
 - name: Assign drives to servers
   shell: |
-    set -o pipefail
     {{ sp_multi_server_helper }} -i {{ sp_server_instances }} \
     | bash
   changed_when: false

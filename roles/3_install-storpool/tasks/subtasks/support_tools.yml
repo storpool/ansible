@@ -20,9 +20,8 @@
 
 - name: Perform mlc test (StorPool Support Tools)
   shell: >
-    set -o pipefail && \
-      [[ ! -d "/tmp/mlc/" ]] && mkdir -p /tmp/mlc/; \
-      [[ ! -f "/tmp/mlc/mlc.output" ]] && {{ sp_toolsdir }}/mlc/mlc > /tmp/mlc/mlc.output || /bin/true
+    [[ ! -d "/tmp/mlc/" ]] && mkdir -p /tmp/mlc/; \
+    [[ ! -f "/tmp/mlc/mlc.output" ]] && {{ sp_toolsdir }}/mlc/mlc > /tmp/mlc/mlc.output || /bin/true
   changed_when: false
   when:
     - sp_vm is defined and

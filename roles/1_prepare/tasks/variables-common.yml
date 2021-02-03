@@ -88,7 +88,6 @@
 
 - name: Get node drive sizes
   shell: |
-    set -o pipefail
     lsblk -ndo TYPE,NAME,SIZE \
     | grep ^disk \
     | awk '{print $2,$3}'
