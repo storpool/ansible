@@ -72,6 +72,7 @@ sp_libdir: "/usr/lib/storpool"
 sp_sed_conf: "/etc/storpool/sed.conf"
 sp_getpackage: "{{ sp_toolsdir }}/{{ sp_getpackage_name }}"
 sp_install_helper: "{{ sp_toolsdir }}/install_modules_helper.py"
+sp_reinstall: true
 sp_vault_url: "{{'http://buildvault.dhcp.vm.storpool.local/getpkg-internal.php' if (sp_testing_lab) else 'https://vault.storpool.com/getpkg.php'}}"
 sp_mlc: "{{ sp_toolsdir }}/mlc/mlc"
 sp_perform_memtest: "{{ sp_toolsdir }}/perform_memtest.sh"

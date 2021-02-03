@@ -10,7 +10,8 @@
     cmd: >-
       {{ sp_install_helper }}
       -g {{ sp_release | quote }}
-      -r -w {{ sp_toolsdir | quote }}
+      {{ '-r' if sp_reinstall else '' }}
+      -w {{ sp_toolsdir | quote }}
       -m {{ sp_install_services | quote }}
       --retry 2
     chdir: "{{ sp_toolsdir }}"
