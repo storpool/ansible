@@ -51,6 +51,9 @@
       failed_when:
         - fw_service_status is failed
         - not ('Could not find the requested service' in fw_service_status.msg)
+      when:
+        - sp_disable_fw is defined
+        - sp_disable_fw | bool
     - name: Add StorPool ports to firewall - 81,3749,47567/TCP (CentOS/RHEL)
       firewalld:
         port: "{{ item }}/tcp"
@@ -59,9 +62,9 @@
         state: enabled
       ignore_errors: true
       with_items: "{{ sp_fw_ports }}"
-  when:
-    - sp_disable_fw is defined
-    - not sp_disable_fw | bool
+      when:
+        - sp_disable_fw is defined
+        - not sp_disable_fw | bool
 
 - name: Disable NetworkManager (CentOS/RHEL)
   service:
