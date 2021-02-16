@@ -66,8 +66,6 @@
         - sp_disable_fw is defined
         - not sp_disable_fw | bool
   when:
-    - sp_disable_fw is defined
-    - not sp_disable_fw | bool
     - ansible_distribution_major_version != '6'
 
 - name: Disable NetworkManager (CentOS/RHEL)
