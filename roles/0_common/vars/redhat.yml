@@ -6,6 +6,7 @@ distro_deps:
   - mcelog
   - perf
   - perl-core
+  - python-requests
   - smartmontools
   - tuned
   - vim-enhanced
