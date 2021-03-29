@@ -8,5 +8,8 @@
     state: present
     update_cache: "{{ (ansible_pkg_mgr=='apt') | ternary('yes', omit) }}"
     cache_valid_time: "{{ (ansible_pkg_mgr=='apt') | ternary(cache_timeout, omit) }}"
+  until: result is success
+  retries: 5
+  delay: 10
   vars:
     dependencies: "{{ generic_deps + (distro_deps|default()) }}"

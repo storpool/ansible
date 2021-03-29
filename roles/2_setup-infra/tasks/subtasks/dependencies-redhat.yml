@@ -9,7 +9,7 @@
     name: "{{ epel_repo_url }}"
     state: present
   register: result
-  until: result is succeeded
+  until: result is success
   retries: 5
   delay: 10
   when:
@@ -27,6 +27,10 @@
   yum:
     name: "*"
     state: latest
+  register: result
+  until: result is succeeded
+  retries: 30
+  delay: 10
   when:
     - sp_update_system is defined and
       sp_update_system | bool
@@ -36,6 +40,6 @@
 - name: Install network-scripts (CentOS 8/RHEL 8)
   yum:
     name: network-scripts
-    state: present 
+    state: present
   when:
     - ansible_distribution_major_version == '8'
