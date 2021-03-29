@@ -11,7 +11,7 @@
       ansible.builtin.service:
         name: "mcelog"
         enabled: true
-        state: started 
+        state: started
       register: mcelog_service_status
       failed_when:
         - mcelog_service_status is failed
@@ -25,7 +25,7 @@
       ansible.builtin.service:
         name: "tuned.service"
         enabled: true
-        state: started 
+        state: started
       register: tuned_service_status
       failed_when:
         - tuned_service_status is failed
@@ -57,7 +57,7 @@
     - name: Add StorPool ports to firewall - 81,3749,47567/TCP (CentOS/RHEL)
       firewalld:
         port: "{{ item }}/tcp"
-        permanent: true 
+        permanent: true
         immediate: true
         state: enabled
       ignore_errors: true
@@ -70,7 +70,7 @@
 
 - name: Disable NetworkManager (CentOS/RHEL)
   service:
-    name: "NetworkManager.service" 
+    name: "NetworkManager.service"
     enabled: false
     state: stopped
   register: nm_service_status
@@ -92,6 +92,6 @@
       - permissive
       - disabled
   when:
-    - sp_selinux is defined 
+    - sp_selinux is defined
     - sp_selinux in selinux_states
     - ansible_distribution_major_version != '6'
