@@ -43,7 +43,7 @@
       - ansible_distribution_major_version != '6'
 
 - name: Enable generic services
-  ansible.builtin.service:
+  service:
     name: "{{ item }}"
     enabled: true
     state: started
@@ -55,7 +55,7 @@
     - "{{ generic_services }}"
 
 - name: Disable generic services
-  ansible.builtin.service:
+  service:
     name: "{{ item }}"
     enabled: false
     state: stopped

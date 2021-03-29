@@ -8,7 +8,7 @@
       changed_when: false
       register: is_amd
     - name: Start and enable mcelog on boot (CentOS/RHEL)
-      ansible.builtin.service:
+      service:
         name: "mcelog"
         enabled: true
         state: started
@@ -22,7 +22,7 @@
 - name: Configure tuned (CentOS/RHEL)
   block:
     - name: Start and enable tuned on boot (CentOS/RHEL)
-      ansible.builtin.service:
+      service:
         name: "tuned.service"
         enabled: true
         state: started
