@@ -26,7 +26,7 @@
       not sp_slice.stat.exists | bool
 
 - name: Start/enable cgconfig
-  ansible.builtin.service:
+  service:
     name: cgconfig
     state: started
     enabled: yes
