@@ -112,5 +112,5 @@ else
 	fi
 
 	udevadm settle
-	storpool_initdisk ${init} ${ssd} ${num} ${dev}1 || true
+	storpool_initdisk ${init} ${ssd} ${num} ${dev}1
 fi
