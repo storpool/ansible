@@ -4,3 +4,9 @@
     src: ifup-pre-local
     dest: /sbin
     mode: 0755
+
+- name: Enable network-scripts on CentOS 8
+  service:
+    name: network
+    enabled: true
+  when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'
