@@ -99,6 +99,7 @@ ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --limit
 | sp_multi_server_helper_enabled | Redistributes the disks on multiple server instances ***Defaults to True*** |
 | sp_config | Path to storpool.conf on the ansible host ***Defaults to the inventory directory (Where the ansible inventory file is located)*** |
 | sp_update_system | Perform OS update (yum/apt update/upgrade) on target hosts ***Defaults to True*** |
+| sp_retry_install | Retry StorPool installation to handle transient network errors ***Defaults to False*** |
 | sp_alternative_net_setup | Used for an alternative networking setup tooling during internal testing ***Defaults to False*** |
 | sp_configure_network | Automatically configure network interfaces based on storpool.conf variables ***Defaults to False*** |
 | sp_overwrite_iface_conf | Overwrite existing ineterface configuration files (iface-genconf -o). ***Defaults to False*** |

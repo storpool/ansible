@@ -13,7 +13,7 @@
       {{ '-r' if sp_reinstall else '' }}
       -w {{ sp_toolsdir | quote }}
       -m {{ sp_install_services | quote }}
-      --retry 2
+      {{ '--retry 2' if sp_retry_install else '' }}
     chdir: "{{ sp_toolsdir }}"
   async: 1000
   poll: 0

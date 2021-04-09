@@ -7,6 +7,7 @@ sp_multi_server_helper_enabled: true
 sp_single_iface: false
 sp_new_cluster: false
 sp_update_system: true
+sp_retry_install: false
 sp_selinux: "disabled"
 sp_summary_wait: true
 sp_node_roles: "client"

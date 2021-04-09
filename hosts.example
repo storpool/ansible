@@ -38,6 +38,9 @@
 # Perform OS update (yum/apt update/upgrade) on target hosts - Defaults to True
 # sp_update_system = True
 
+# Re-try StorPool install to handle transient network problems
+# sp_retry_install = False
+
 # Set to True if deploying on a machine with single NIC
 # sp_single_iface=False # Default
 
