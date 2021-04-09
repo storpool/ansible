@@ -19,6 +19,7 @@
     - mgmt
     - iscsi
     - bridge
+    - kubernetes
   when:
     - item in sp_roles_list
 
@@ -34,6 +35,7 @@
     - mgmt
     - iscsi
     - bridge
+    - kubernetes
 
 - name: Define StorPool services to install
   block:
@@ -50,6 +52,7 @@
         - iscsi
         - mgmt
         - bridge
+        - kubernetes
     - name: Cache sp_install_services fact 
       set_fact:
         sp_install_services: "@block cli {{services_to_install}}"
