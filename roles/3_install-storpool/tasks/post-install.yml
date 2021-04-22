@@ -13,6 +13,12 @@
   tags:
     - skip_ansible_lint
 
+- name: Enable IOMMU in GRUB config
+  command: /usr/lib/storpool/enable_grub_iommu
+  changed_when: false
+  tags:
+    - skip_ansible_lint
+
 - name: Include distro-specific tasks
   include_tasks: "subtasks/post_install_{{ ansible_os_family|lower }}.yml"
 
