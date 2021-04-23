@@ -43,3 +43,11 @@
     msg: "Not enough space available in / (found {{ root_gb_available }}GB, required {{ bootstrap_host_data_disk_min_size }}GB)"
   when:
     - (host_root_space_available_bytes | int) < (host_data_disk_min_size_bytes | int)
+
+- name: Check if node clock is correct
+  assert:
+    that:
+      - ((localhost_date_time.epoch | int) - (ansible_date_time.epoch | int) | abs) < ( 60 * 60 * 2)
+    fail_msg: "Clock of node {{ ansible_hostname }} is not correct"
+  vars:
+    localhost_date_time: "{{ hostvars['localhost'].ansible_date_time }}"
