@@ -7,9 +7,7 @@
 - name: Prepare environment for StorPool
   hosts: storpool
 #  strategy: linear
-  gather_subset:
-    - 'min'
-    - 'virtual'
+  gather_facts: false
   become: true
 
   pre_tasks:
