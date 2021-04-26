@@ -7,9 +7,7 @@
 - name: Prepare environment for StorPool
   hosts: storpool
 #  strategy: linear
-  gather_subset:
-    - 'min'
-    - 'virtual'
+  gather_facts: false
   become: true
 
   pre_tasks:
@@ -63,6 +61,11 @@
       when: not True in (systempython.results | selectattr('stat', 'defined') | map(attribute='stat.exists') | list | unique)
 
   tasks:
+    - name: Gather facts
+      setup:
+        gather_subset:
+          - 'min'
+          - 'virtual'
     - name: Define common variables
       import_role:
         name: 1_prepare
