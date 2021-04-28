@@ -1,0 +1,63 @@
+#!/usr/bin/env ansible-playbook
+---
+- name: Install StorPool python2 and python3 package
+  hosts: storpool
+  gather_facts: false
+  tasks: []
+
+- name: Gather localhost facts
+  hosts: localhost
+  tasks: []
+
+- name: Bootstrap nodes
+  gather_subset:
+    - min
+    - virtualization
+  hosts: storpool
+  roles:
+    - validate_config
+    - install_dependencies
+    - configure_node
+    - create_directories
+
+- name: Test hardware
+  hosts: storpool
+  roles:
+    - test_cpu
+    - test_memory
+    - test_drives
+
+- name: Download StorPool software
+  hosts: storpool
+  roles:
+    - download_storpool
+
+- name: Install management nodes
+  hosts: storpool_management
+  roles:
+    - install_software
+
+- name: Install server nodes
+  hosts: storpool_servers
+  roles:
+    - install_software
+
+- name: Install client nodes
+  hosts: storpool_clients
+  roles:
+    - install_software
+
+- name: Configure networking
+  hosts: storpool
+  roles:
+    - configure_network
+
+- name: Configure CGroups
+  hosts: storpool
+  roles:
+    - configure_cgroups
+
+- name: Initialize disks
+  hosts: storpool_servers
+  roles:
+    - initialize_disks
