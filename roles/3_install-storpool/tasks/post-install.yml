@@ -15,6 +15,7 @@
 
 - name: Enable IOMMU in GRUB config
   command: /usr/lib/storpool/enable_grub_iommu
+  when: sp_run_enable_grub_iommu | bool
   changed_when: false
   tags:
     - skip_ansible_lint
