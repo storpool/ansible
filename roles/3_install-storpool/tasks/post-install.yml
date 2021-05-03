@@ -1,6 +1,6 @@
 ---
 - name: Restart rsyslog
-  systemd:
+  service:
     name: rsyslog
     state: restarted
     enabled: yes
@@ -13,16 +13,14 @@
   tags:
     - skip_ansible_lint
 
-- name: Disable iommu
-  lineinfile:
-    state: present
-    dest: /etc/default/grub
-    backrefs: yes
-    regexp: '^(GRUB_CMDLINE_LINUX=(?!.\$GRUB_CMD)(?!.*iommu)\"[^\"]*)(\".*)'
-    line: '\1 amd_iommu=off\2'
+- name: Enable IOMMU in GRUB config
+  command: /usr/lib/storpool/enable_grub_iommu
   when:
-    - sp_vm is defined and
-      not sp_vm | bool
+    - not sp_vm | bool
+    - sp_run_enable_grub_iommu | bool
+  changed_when: false
+  tags:
+    - skip_ansible_lint
 
 - name: Include distro-specific tasks
   include_tasks: "subtasks/post_install_{{ ansible_os_family|lower }}.yml"

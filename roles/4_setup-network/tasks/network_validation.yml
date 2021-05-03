@@ -6,11 +6,12 @@
 
 - name: Get StorPool interfaces from storpool.conf
   shell: |
-    set -o pipefail
     {{ sp_showconf }} -n -e -- SP_IFACE1_CFG SP_IFACE2_CFG \
     | cut -d : -f 2,3 \
     | sed -e ':a;N;$!ba;s/\\n/:/g'
   changed_when: false
+  args:
+    executable: /bin/bash
   register: sp_ifaces
   tags:
     - skip_ansible_lint
@@ -23,10 +24,11 @@
 
 - name: Get StorPool IP addresses from storpool.conf
   shell: |
-    set -o pipefail
     {{ sp_showconf }} -n -e -- SP_IFACE1_CFG SP_IFACE2_CFG \
     | cut -d : -f 2,5
   changed_when: false
+  args:
+    executable: /bin/bash
   register: sp_conf_ips
   tags:
     - skip_ansible_lint

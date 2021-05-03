@@ -38,11 +38,18 @@
 # Perform OS update (yum/apt update/upgrade) on target hosts - Defaults to True
 # sp_update_system = True
 
+# Re-try StorPool install to handle transient network problems
+# sp_retry_install = False
+
 # Set to True if deploying on a machine with single NIC
 # sp_single_iface=False # Default
 
 # Automatically configure network interfaces based on storpool.conf vars - Defaults to False
 # sp_configure_network = False
+
+# Use an alternative network configuration setup tool, used in internal testing - Defaults to False
+# Implications: when configured, overrides the normal network configuration.
+# sp_alternative_net_setup = False # Default
 
 # Overwrite existing ineterface configuration files (iface-genconf -o) - Defaults to False
 # sp_overwrite_iface_conf = False

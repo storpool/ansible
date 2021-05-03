@@ -19,6 +19,7 @@
     - mgmt
     - iscsi
     - bridge
+    - debug
   when:
     - item in sp_roles_list
 
@@ -34,6 +35,7 @@
     - mgmt
     - iscsi
     - bridge
+    - debug
 
 - name: Define StorPool services to install
   block:
@@ -50,6 +52,7 @@
         - iscsi
         - mgmt
         - bridge
+        - debug
     - name: Cache sp_install_services fact 
       set_fact:
         sp_install_services: "@block cli {{services_to_install}}"
@@ -88,11 +91,12 @@
 
 - name: Get node drive sizes
   shell: |
-    set -o pipefail
     lsblk -ndo TYPE,NAME,SIZE \
     | grep ^disk \
     | awk '{print $2,$3}'
   changed_when: false
+  args:
+    executable: /bin/bash
   register: sp_node_drive_size
   when:
     - sp_roles.server

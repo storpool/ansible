@@ -1,7 +1,7 @@
 ---
 distro_deps:
   - cpupowerutils
-  - libcgroup-tools
+  - "{{ 'libcgroup-tools' if ansible_distribution_major_version != '6' else 'less' }}"
   - lz4
   - mcelog
   - perf

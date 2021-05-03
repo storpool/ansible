@@ -3,6 +3,10 @@
   apt:
     upgrade: full
     update_cache: true
+  register: result
+  until: result is success
+  retries: 30
+  delay: 10
   when:
     - sp_update_system is defined and
       sp_update_system | bool
