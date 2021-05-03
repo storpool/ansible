@@ -94,6 +94,7 @@ sp_generate_build_conf: "/usr/local/bin/generate-build-conf"
 sp_copytoservers: "/usr/local/bin/copytoservers-old"
 sp_showconf: "/usr/sbin/storpool_showconf"
 sp_cgtool: "/usr/sbin/storpool_cg"
+sp_ctl: "/usr/sbin/storpool_ctl"
 sp_python_executable: "/opt/storpool/python3/bin/python3"
 sp_cg_conf_extra: ""
 
