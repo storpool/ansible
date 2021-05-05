@@ -5,51 +5,46 @@
   failed_when: false
   register: has_python
 
-- name: Check if node is running RedHat
-  raw: stat /etc/redhat-release
+- name: Install python3
+  block:
+  - name: Check if node is running RedHat
+    raw: stat /etc/redhat-release
+    changed_when: false
+    failed_when: false
+    register: is_redhat
+
+  - name: Check if node is running CentOS
+    raw: stat /etc/centos-release
+    changed_when: false
+    failed_when: false
+    register: is_centos
+
+  - name: Check if node is running Debian
+    raw: stat /etc/debian_version
+    changed_when: false
+    failed_when: false
+    register: is_debian
+
+  - name: Check if node is running Ubuntu
+    raw: stat /etc/lsb-release
+    changed_when: false
+    failed_when: false
+    register: is_ubuntu
+
+  - name: Install python3 via yum
+    raw: yum install -y python3
+    register: yum_install_result
+    until: (yum_install_result is succeeded) and ('Failed' not in yum_install_result.stdout)
+    when:
+      - is_redhat.rc == 0 or is_centos.rc == 0
+
+  - name: Install python3 via apt
+    raw: apt-get install -y python3.*
+    register: apt_install_result
+    until: apt_install_result is succeeded
+    when:
+      - is_debian == 0 or is_ubuntu.rc == 0
+    
+  - name: Create symlink to python3 if python is not present
+    raw: ln -sf /usr/bin/python3 /usr/bin/python
   when: has_python.rc == 1
-  changed_when: false
-  failed_when: false
-  register: is_redhat
-
-- name: Check if node is running CentOS
-  raw: stat /etc/centos-release
-  when: has_python.rc == 1
-  changed_when: false
-  failed_when: false
-  register: is_centos
-
-- name: Check if node is running Debian
-  raw: stat /etc/debian_version
-  when: has_python.rc == 1
-  changed_when: false
-  failed_when: false
-  register: is_debian
-
-- name: Check if node is running Ubuntu
-  raw: stat /etc/lsb-release
-  when: has_python.rc == 1
-  changed_when: false
-  failed_when: false
-  register: is_debian
-
-- name: Install python3 via yum
-  raw: yum install -y python3
-  register: yum_install_result
-  until: (yum_install_result is succeeded) and ('Failed' not in result.stdout)
-  when:
-    - is_redhat.rc == 0 or is_centos.rc == 0
-    - has_python.rc == 1
-
-- name: Install python3 via apt
-  raw: apt-get install -y python3 python3-simplejson
-  register: apt_install_result
-  until: apt_install_result is succeeded
-  when:
-    - is_debian == 0 or is_ubuntu.rc == 0
-    - has_python.rc == 1
-
-- name: Create symlink to python3 if python is not present
-  raw: ln -sf /usr/bin/python3 /usr/bin/python
-  when:
-    - has_python.rc == 1
