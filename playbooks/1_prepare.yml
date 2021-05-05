@@ -4,19 +4,22 @@
   gather_subset: 'min'
   tasks: []
 
-- name: Prepare environment for StorPool
+- name: Ensure python is installed
   hosts: storpool
+  connection: paramiko_ssh
   gather_facts: false
   become: true
+  roles:
+    - ensure_python
+
+- name: Prepare environment for StorPool
+  hosts: storpool
+  connection: paramiko_ssh
+  gather_subset:
+    - 'min'
+    - 'virtual'
+  become: true
   tasks:
-    - name: Ensure python is installed
-      import_role:
-        name: ensure_python
-    - name: Gather facts
-      setup:
-        gather_subset:
-          - 'min'
-          - 'virtual'
     - name: Define common variables
       import_role:
         name: 1_prepare
