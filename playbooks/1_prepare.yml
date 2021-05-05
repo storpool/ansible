@@ -6,61 +6,12 @@
 
 - name: Prepare environment for StorPool
   hosts: storpool
-#  strategy: linear
   gather_facts: false
   become: true
-
-  pre_tasks:
-
-    - name: Check for python
-      stat:
-        path: "{{ item }}"
-      changed_when: false
-      failed_when: false
-      register: systempython
-      with_items:
-        - /usr/bin/python
-        - /usr/bin/python3
-        - /usr/libexec/platform-python
-
-    - block:
-
-        - name: Check for dnf (RedHat/CentOS) 
-          raw: stat /bin/dnf-3
-          changed_when: false
-          failed_when: false
-          register: stat_dnf
-
-        - name: Check for yum package manager (RedHat/CentOS)
-          raw: stat /bin/yum
-          changed_when: false
-          failed_when: false
-          register: stat_yum
-
-        - name: Check for apt (Debian/Ubuntu) 
-          raw: stat /usr/bin/apt-get
-          changed_when: false
-          failed_when: false
-          register: stat_apt
-
-        - name: install python (RedHat/CentOS)
-          raw: >
-            {{ 'dnf' if stat_dnf.rc == 0 else 'yum' }} -y install python3;
-            ln -sf /usr/bin/python3 /usr/bin/python
-            creates=/usr/bin/python
-          register: result
-          until: (result is succeeded) and ('Failed' not in result.stdout)
-          when: stat_dnf.rc == 0 or stat_yum.rc == 0
-
-        - name: Install python (Debian/Ubuntu) 
-          raw: apt-get -y install python-simplejson
-          register: result
-          until: result is succeeded
-          when: stat_apt.rc == 0
-
-      when: not True in (systempython.results | selectattr('stat', 'defined') | map(attribute='stat.exists') | list | unique)
-
   tasks:
+    - name: Ensure python is installed
+      import_role:
+        name: ensure_python
     - name: Gather facts
       setup:
         gather_subset:
