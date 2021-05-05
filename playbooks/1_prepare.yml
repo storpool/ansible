@@ -14,7 +14,6 @@
 
 - name: Prepare environment for StorPool
   hosts: storpool
-  connection: paramiko_ssh
   gather_subset:
     - 'min'
     - 'virtual'
