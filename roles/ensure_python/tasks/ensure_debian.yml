@@ -1,0 +1,7 @@
+---
+- name: Install python2 on Debian
+  raw: apt-get update && apt-get install -y python
+  changed_when: false
+  failed_when: false
+  register: apt_install_result
+  until: apt_install_result is succeeded
