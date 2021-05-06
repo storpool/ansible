@@ -1,0 +1,31 @@
+---
+- name: Install python
+  block:
+    - name: Determine node operating system
+      raw: cat /etc/os-release
+      register: os_release
+      changed_when: false
+      failed_when: false
+
+    - include_tasks: ensure_centos.yml
+      vars:
+        os_release: "{{ os_release }}"
+      when: '''ID="centos"'' in os_release.stdout_lines'
+
+    - include_tasks: ensure_debian.yml
+      when: '''ID="debian"'' in os_release.stdout_lines'
+
+    - include_tasks: ensure_ubuntu.yml
+      vars:
+        os_release: "{{ os_release }}"
+      when: '''ID="ubuntu"'' in os_release.stdout_lines'
+
+- name: Check if python is present
+  raw: stat /usr/bin/python
+  changed_when: false
+  failed_when: false
+  register: python_is_present
+
+- name: Create symlink to python3 if python is not present
+  raw: ln -s /usr/bin/python3 /usr/bin/python
+  when: python_is_present.rc == 1
