@@ -1,4 +1,7 @@
 ---
+- name: Add StorPool repository 
+  include_tasks: "add-storpool-repo.yml"
+
 - name: Include dependencies installation tasks (Setup Infrastructure)
   include_tasks: "dependencies.yml"
 

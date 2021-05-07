@@ -67,6 +67,7 @@ sp_getpackage_name: "{{ 'getpackage-py3.py' if (ansible_distribution_release == 
 sp_install_getpackage_url: "https://vault.storpool.com/{{ sp_getpackage_name }}"
 sp_install_helper_url: "https://vault.storpool.com/install_modules_helper.py"
 sp_vault_url: "{{'http://buildvault.dhcp.vm.storpool.local/getpkg-internal.php' if (sp_testing_lab) else 'https://vault.storpool.com/getpkg.php'}}"
+sp_add_storpool_repo_url: "https://repo.storpool.com/public/add-storpool-repo/add-storpool-repo.tar.gz"
 
 # StorPool paths 
 sp_config: "{{ inventory_dir }}/storpool.conf"
@@ -80,6 +81,8 @@ sp_mlc: "{{ sp_toolsdir }}/mlc/mlc"
 sp_init_drive: "{{ sp_toolsdir }}/init_drive.sh"
 sp_perform_memtest: "{{ sp_toolsdir }}/perform_memtest.sh"
 sp_perform_disk_test: "{{ sp_toolsdir }}/perform_disktest.sh"
+sp_add_storpool_repo: "{{ sp_toolsdir }}/add-storpool-repo/add-storpool-repo.sh"
+sp_storpool_variant: "{{ sp_toolsdir }}/add-storpool-repo/storpool_variant.sh"
 
 sp_enable_grub_iommu: "{{ sp_libdir }}/enable_grub_iommu"
 sp_expose_nvme_drives: "{{ sp_libdir }}/expose_nvme_drives"
