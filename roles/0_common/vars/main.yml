@@ -40,6 +40,8 @@ generic_deps:
   - perl
   - psmisc
   - pciutils
+  - sp-python3
+  - sp-python3-modules
 
 generic_services:
   - lldpd

@@ -1,0 +1,10 @@
+---
+- name: Get add_storpool_repo.tar.gz
+  unarchive:
+    src: "{{ sp_add_storpool_repo_url }}" 
+    dest: "{{ sp_toolsdir }}" 
+    remote_src: yes
+
+- name: Install the OS-specific repository definition files 
+  command: "{{ sp_add_storpool_repo }}"
+  changed_when: false
