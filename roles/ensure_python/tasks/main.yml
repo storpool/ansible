@@ -9,7 +9,7 @@
 
     - include_tasks: ensure_centos.yml
       vars:
-        os_release: "{{ os_release }}"
+        os_release_lines: "{{ os_release }}"
       when: '''ID="centos"'' in os_release.stdout_lines'
 
     - include_tasks: ensure_debian.yml
@@ -17,7 +17,7 @@
 
     - include_tasks: ensure_ubuntu.yml
       vars:
-        os_release: "{{ os_release }}"
+        os_release_lines: "{{ os_release }}"
       when: '''ID="ubuntu"'' in os_release.stdout_lines'
 
 - name: Check if python is present
