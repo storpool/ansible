@@ -19,13 +19,3 @@
       vars:
         os_release_lines: "{{ os_release }}"
       when: '''ID="ubuntu"'' in os_release.stdout_lines'
-
-- name: Check if python is present
-  raw: stat /usr/bin/python
-  changed_when: false
-  failed_when: false
-  register: python_is_present
-
-- name: Create symlink to python3 if python is not present
-  raw: ln -s /usr/bin/python3 /usr/bin/python
-  when: python_is_present.rc == 1
