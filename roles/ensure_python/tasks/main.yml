@@ -13,9 +13,9 @@
       when: '''ID="centos"'' in os_release.stdout_lines'
 
     - include_tasks: ensure_debian.yml
-      when: '''ID="debian"'' in os_release.stdout_lines'
+      when: '''ID=debian'' in os_release.stdout_lines'
 
     - include_tasks: ensure_ubuntu.yml
       vars:
         os_release_lines: "{{ os_release }}"
-      when: '''ID="ubuntu"'' in os_release.stdout_lines'
+      when: '''ID=ubuntu'' in os_release.stdout_lines'
