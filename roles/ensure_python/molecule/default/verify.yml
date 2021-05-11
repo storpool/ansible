@@ -1,0 +1,38 @@
+---
+- name: Verify python2 on Centos 7
+  hosts: centos_7
+  tasks:
+    - import_tasks: tasks/gather_packages.yml
+    - assert:
+        that:
+          - "'python' in ansible_facts.packages"
+          - "'libselinux-python' in ansible_facts.packages"
+
+- name: Verify python3 on Centos 8
+  hosts: centos_8
+  tasks:
+    - import_tasks: tasks/gather_packages.yml
+    - assert:
+        that:
+          - "'python36' in ansible_facts.packages"
+          - "'python3-libselinux' in ansible_facts.packages"
+
+- name: Verify python2 on Debian, Ubuntu 16.04 and Ubuntu 18.04
+  hosts: debian:ubuntu_16.04:ubuntu_18.04
+  tasks:
+    - apt:
+        name: python-apt
+    - import_tasks: tasks/gather_packages.yml
+    - assert:
+        that:
+          - "'python' in ansible_facts.packages"
+
+- name: Verify python3 on Ubuntu 20.04
+  hosts: ubuntu_20.04
+  tasks:
+    - apt:
+        name: python3-apt
+    - import_tasks: tasks/gather_packages.yml
+    - assert:
+        that:
+          - "'python3' in ansible_facts.packages"
