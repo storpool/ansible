@@ -1,5 +1,5 @@
 ---
-- name: Install python2 on Ubuntu 18.04
+- name: Install python2 on Ubuntu 18.04 and Ubuntu 16.04
   raw: apt-get update && apt-get install -y python
   changed_when: false
   failed_when: false
