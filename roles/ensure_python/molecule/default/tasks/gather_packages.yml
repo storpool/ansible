@@ -1,0 +1,4 @@
+---
+- name: Gather installed packages
+  package_facts:
+    manager: auto

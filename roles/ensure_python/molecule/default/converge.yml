@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  connection: paramiko_ssh
+  gather_facts: false
+  roles:
+    - ensure_python
