@@ -70,14 +70,6 @@
   when:
     - sp_new_cluster
 
-- name: Initial definition (sp_cg_conf_extra)
-  set_fact:
-    cacheable: true
-    sp_cg_conf_extra: "{{ sp_cg_conf_extra | upper }}"
-  when:
-    - sp_cg_conf_extra is defined
-    - sp_cg_conf_extra | length > 0
-
 - name: Decide if hyperconverged node (sp_cg_conf_extra)
   set_fact:
     cacheable: true
