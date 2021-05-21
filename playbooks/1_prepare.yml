@@ -6,7 +6,7 @@
 
 - name: Ensure python is installed
   hosts: storpool
-  connection: paramiko_ssh
+  connection: ssh
   gather_facts: false
   become: true
   roles:
