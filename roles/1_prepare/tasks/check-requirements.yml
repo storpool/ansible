@@ -18,7 +18,7 @@
 
 - name: Identify the space available in /
   shell: >
-    df -BK / | awk '!/^Filesystem/ {print $4}' | sed 's/K//'
+    df -P -BK / | awk '!/^Filesystem/ {print $4}' | sed 's/K//'
   environment:
     LC_ALL: en_US.UTF-8
   changed_when: false
