@@ -77,16 +77,16 @@ if [ "${dev#/dev/nvme}" != "${dev}" ]; then
 		fi
 
 		udevadm settle
-		storpool_initdisk ${init} -s ${num} ${dev}p${p} || true
+		storpool_initdisk ${init} --force-ssd y ${num} ${dev}p${p}
 
 		let p=${p}+1 || true
 	done
 else
 # drive init
 	if [ $(cat /sys/block/${dev#'/dev/'}/queue/rotational) -eq 0 ]; then
-		ssd='-s'
+		ssd='--force-ssd y'
 	else
-		ssd=
+		ssd='--force-ssd n'
 	fi
 	if [ -z "$ssd" ]; then
 		last=$(storpool_initdisk --list | grep -v SSD | awk '/diskId/ {print $3}' | tr -d , | sort -n | tail -n1)
