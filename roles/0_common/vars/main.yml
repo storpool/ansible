@@ -40,6 +40,7 @@ generic_deps:
   - perl
   - psmisc
   - pciutils
+  - tar
 
 generic_services:
   - lldpd
