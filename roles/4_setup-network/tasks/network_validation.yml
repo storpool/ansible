@@ -18,7 +18,7 @@
 
 - name: Validate StorPool interfaces
   fail:
-    msg: "interface {{ item }} is in storpool.conf, but does not exist"
+    msg: "Interface {{ item }} used in storpool.conf, but does not exist"
   when: item not in ansible_interfaces
   with_items: "{{ sp_ifaces.stdout.split(':')[0] }}"
 
@@ -33,6 +33,11 @@
   tags:
     - skip_ansible_lint
 
+- name: Debug StorPool IP addresses
+  debug:
+    msg: "StorPool IP addresses retrieved from stoprool.conf: {{ sp_conf_ips.stdout_lines }}"
+    verbosity: 2
+
 - name: Get secondary IPs on loopback - sp_lo_ips
   set_fact:
     sp_lo_ips: "{{ ansible_facts.lo.ipv4_secondaries | json_query('[].address') }}"
@@ -44,13 +49,12 @@
     sp_lo_ips: []
     cacheable: true
   when: ansible_facts.lo.ipv4_secondaries is not defined
-
+ 
 - name: Validate StorPool IP addresses
   fail:
     msg: "IP {{ item.split(':')[1] }} missing on node!"
   when:
-    - item.split(':')[1] not in sp_lo_ips and
-      ('ipv4' not in ansible_facts[item.split(':')[0]] or
-      ('ipv4' in ansible_facts[item.split(':')[0]] and
-      ansible_facts[item.split(':')[0]].ipv4.address != item.split(':')[1]))
+    - item.split(':')[1] not in sp_lo_ips
+    - ( ansible_facts.values() | selectattr("device", "defined") | selectattr("device", "eq", item.split(':')[0]) | selectattr("ipv4", "defined") | list | length == 0 ) or
+      ( (ansible_facts.values() | selectattr("device", "defined") | selectattr("device", "eq", item.split(':')[0]) | selectattr("ipv4", "defined") | first).ipv4.address != item.split(':')[1] )
   with_items: "{{ sp_conf_ips.stdout_lines }}"
