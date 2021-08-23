@@ -20,8 +20,8 @@
   ignore_errors: true
   with_items: "{{ sp_fw_ports }}"
   when:
-    - sp_disable_fw is defined and
-      not sp_disable_fw | bool
+    - sp_disable_fw is defined
+    - not sp_disable_fw | bool
 
 - name: Disable ondemand service (Ubuntu)
   systemd:

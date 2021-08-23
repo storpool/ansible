@@ -32,8 +32,8 @@
   retries: 30
   delay: 10
   when:
-    - sp_update_system is defined and
-      sp_update_system | bool
+    - sp_update_system is defined
+    - sp_update_system | bool
   tags:
     - skip_ansible_lint
 
