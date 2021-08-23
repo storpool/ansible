@@ -3,11 +3,10 @@
   hosts: storpool
   gather_facts: false
   become: true
-
-  tasks:
-    - name: System tuning
-      import_role:
-        name: 2_setup-infra
+  roles:
+    - 2_setup-infra
+    - add-storpool-repo
+    - install-sp-python
 
   tags:
     - setup-infrastructure
