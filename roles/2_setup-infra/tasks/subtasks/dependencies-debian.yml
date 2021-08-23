@@ -8,13 +8,13 @@
   retries: 30
   delay: 10
   when:
-    - sp_update_system is defined and
-      sp_update_system | bool
+    - sp_update_system is defined
+    - sp_update_system | bool
 
 - name: Install HV dependencies (Ubuntu/Debian)
   apt:
     name: systemd-container
     update_cache: true
   when:
-    - sp_roles.client is defined and
-      sp_roles.client | bool
+    - sp_roles.client is defined
+    - sp_roles.client | bool
