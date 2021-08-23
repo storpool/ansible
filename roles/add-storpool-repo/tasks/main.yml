@@ -1,0 +1,14 @@
+---
+- name: Downloading StorPool repo archive
+  get_url:
+    url: "{{ sp_repo_archvie_url }}"
+    dest: /tmp/
+
+- name: Extractring StorPool repo archive
+  unarchive:
+    src: /tmp/add-storpool-repo.tar.gz
+    remote_src: true
+    dest: /tmp/
+
+- name: Installing StorPool repo
+  shell: /tmp/add-storpool-repo/add-storpool-repo.sh
