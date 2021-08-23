@@ -1,0 +1,7 @@
+---
+- name: Installing sp-python
+  package:
+    name:
+      - sp-python3
+      - sp-python2
+    state: present

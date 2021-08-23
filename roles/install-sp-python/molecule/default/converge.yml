@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include install-sp-python"
+      include_role:
+        name: "install-sp-python"
