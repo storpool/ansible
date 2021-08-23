@@ -40,7 +40,7 @@
     insertbefore: RuntimeKeepFree
   notify: Restart journald service
   when:
-      - ansible_distribution_major_version != '6'
+    - ansible_distribution_major_version != '6'
 
 - name: Enable generic services
   service:
