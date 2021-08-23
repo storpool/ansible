@@ -6,4 +6,4 @@
       - sp-python3-modules
       - sp-python2
       - sp-python2-modules
-    state: present
+    state: latest
