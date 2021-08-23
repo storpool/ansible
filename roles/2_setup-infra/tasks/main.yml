@@ -1,9 +1,9 @@
 ---
 - name: Include dependencies installation tasks (Setup Infrastructure)
-  include_tasks: "dependencies.yml"
+  import_tasks: "dependencies.yml"
 
 - name: Include operating system tuning tasks (Setup Infrastructure)
-  include_tasks: "tune-system.yml"
+  import_tasks: "tune-system.yml"
 
 - name: Include distro-specific tasks (Setup Infrastructure)
   include_tasks: "subtasks/tune-system-{{ ansible_os_family | lower }}.yml"
