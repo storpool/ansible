@@ -3,6 +3,9 @@
   copy:
     src: install_modules_helper.py
     dest: "{{ sp_toolsdir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0755
 
 - name: Copy local release file to servers (Release from local)
   copy:
