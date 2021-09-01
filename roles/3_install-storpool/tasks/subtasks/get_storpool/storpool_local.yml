@@ -1,4 +1,9 @@
 ---
+- name: Copy install_modules_helper to node
+  copy:
+    src: install_modules_helper.py
+    dest: "{{ sp_toolsdir }}"
+
 - name: Copy local release file to servers (Release from local)
   copy:
     src: "{{ sp_release_file }}"
