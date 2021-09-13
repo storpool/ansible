@@ -17,17 +17,11 @@
 
 - name: Generating cgroup configuration files
   command:
-    argv:
-      - "{{ sp_cgtool_bin }}"
-      - "{{ 'conf' + ((' ' + cg_conf_extra) if cg_conf_extra is defined else '') }}"
-      - "SET_MEMSW={{ sp_cg_set_memsw }}"
+    cmd: "{{ sp_cgtool_bin }} conf {{ cg_conf_extra if cg_conf_extra is defined }} SET_MEMSW={{ sp_cg_set_memsw }}"
   when: not sp_slice_conf_file.stat.exists
   notify: "start cgconfig"
 
 - name: Migrating cgroup configuration
   command:
-    argv:
-      - "{{ sp_cgtool_bin }}"
-      - "{{ 'conf -M -E' + ((' ' + cg_conf_extra) if cg_conf_extra is defined else '') }}"
-      - "SET_MEMSW={{ sp_cg_set_memsw }}"
+    cmd: "{{ sp_cgtool_bin }} conf -M -E {{ cg_conf_extra if cg_conf_extra is defined }} SET_MEMSW={{ sp_cg_set_memsw }}"
   when: sp_slice_conf_file.stat.exists
