@@ -3,11 +3,10 @@
   hosts: storpool
   gather_facts: false
   become: true
-
-  tasks:
-    - name: Configure cgroups
-      import_role:
-        name: 6_setup-cgroups
+  roles:
+    - name: configure-cgroups
+      vars:
+        cg_conf_extra: "{{ sp_cg_conf_extra | default() }}"
 
   tags:
     - setup-cgroups
