@@ -9,6 +9,6 @@
 - name: Starting cgconfig
   service:
     name: cgconfig
-    state: started
+    state: restarted
   listen: "start cgconfig"
   when: start_cgconfig
