@@ -1,0 +1,8 @@
+---
+# handlers file for configure-cgroups
+- name: Starting cgconfig
+  service:
+    name: cgconfig
+    state: started
+    enabled: true
+  listen: "start cgconfig"
