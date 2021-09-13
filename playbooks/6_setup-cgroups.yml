@@ -6,8 +6,8 @@
   roles:
     - name: configure-cgroups
       vars:
-        cg_conf_extra: "{{ sp_cg_conf_extra | default('') }}"
-        start_cgconfig: "{{ sp_cg_start_cgconfig | default ('true') }}"
+        cg_conf_extra: "{{ sp_cg_conf_extra | default(omit) }}"
+        start_cgconfig: "{{ sp_cg_start_cgconfig | default('true') }}"
 
   tags:
     - setup-cgroups
