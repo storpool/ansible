@@ -20,7 +20,7 @@
     argv:
       - "{{ sp_cgtool_bin }}"
       - conf
-      - "{{ sp_cg_conf_extra }}"
+      - "{{ cg_conf_extra }}"
       - "SET_MEMSW={{ sp_cg_set_memsw }}"
   when: not sp_slice_conf_file.stat.exists
   notify: "start cgconfig"
@@ -30,6 +30,6 @@
     argv:
       - "{{ sp_cgtool_bin }}"
       - conf -M -E
-      - "{{ sp_cg_conf_extra }}"
+      - "{{ cg_conf_extra }}"
       - "SET_MEMSW={{ sp_cg_set_memsw }}"
   when: sp_slice_conf_file.stat.exists
