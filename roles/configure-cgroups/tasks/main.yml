@@ -15,6 +15,11 @@
     sp_cg_set_memsw: "{{ '1' if cgroup_memsw_file.stat.exists else '0' }}"
     cacheable: true
 
+- name: Dump cg_conf_extra value
+  debug:
+    var: cg_conf_extra
+    verbosity: 2
+
 - name: Generating cgroup configuration files
   command:
     cmd: "{{ sp_cgtool_bin }} conf {{ cg_conf_extra if cg_conf_extra is defined }} SET_MEMSW={{ sp_cg_set_memsw }}"

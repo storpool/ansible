@@ -1,4 +1,2 @@
 ---
 # vars file for configure-cgroups
-cg_conf_extra: ""
-start_cgconfig: true

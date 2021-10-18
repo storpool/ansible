@@ -1,3 +1,4 @@
 ---
 # defaults file for configure-cgroups
 sp_cgtool_bin: /usr/sbin/storpool_cg
+start_cgconfig: true
