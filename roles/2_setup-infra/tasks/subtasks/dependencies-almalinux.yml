@@ -1,0 +1,24 @@
+---
+- name: Install EPEL
+  yum:
+    name: epel-release
+    state: present
+
+- name: Upgrade all packages (AlmaLinux)
+  yum:
+    name: "*"
+    state: latest
+  register: result
+  until: result is succeeded
+  retries: 30
+  delay: 10
+  when:
+    - sp_update_system is defined
+    - sp_update_system | bool
+  tags:
+    - skip_ansible_lint
+
+- name: Install network-scripts (AlmaLinux)
+  yum:
+    name: network-scripts
+    state: present

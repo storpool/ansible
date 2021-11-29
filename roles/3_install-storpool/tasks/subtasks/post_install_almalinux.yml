@@ -1,0 +1,13 @@
+---
+- name: Check if booting via EFI (AlmaLinux)
+  stat:
+    path: /boot/efi/EFI/almalinux/grub.cfg
+  register: sp_alma_efi
+
+- name: Update GRUB2 (AlmaLinux)
+  shell: |
+    /usr/sbin/grub2-mkconfig \
+    -o {{ '/boot/efi/EFI/almalinux/grub.cfg' if sp_alma_efi.stat.exists else '$(readlink -f /etc/grub2.cfg)' }}
+  changed_when: false
+  tags:
+    - skip_ansible_lint
