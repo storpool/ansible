@@ -28,6 +28,8 @@
   file:
     path: '{{ disk_init_helper_discovery_file }}'
     state: absent
+  tags:
+    - initialize_disks
 
 - name: Discovering suitable disks
   command:
@@ -42,15 +44,29 @@
       - '--offsets {{ sp_ssd_disk_id_offset }},{{ sp_nvme_disk_id_offset }},{{ sp_hdd_disk_id_offset }}'
       - '--dump-file {{ disk_init_helper_discovery_file }}'
       - '{{ sp_discover_disk_pattern if sp_discover_disk_pattern is defined }}'
+  tags:
+    - initialize_disks
+
+- name: Testing discovered disks
+  command:
+    argv:
+      - '{{ sp_perform_disk_test }}'
+      - '{{ lookup("file", disk_init_helper_discovery_file) | from_json | map(attribute="disk") | join(' ') }}'
+  tags:
+    - initialize_disks
 
 - name: Setting self-booting disk flag
   set_fact:
     self_boot_flag: sp_new_cluster and inventory_hostname == groups["storpool"][0]["ansible_host"]
+  tags:
+    - initialize_disks
 
 - name: Debug self-booting disk
   debug:
     var: self_boot_flag
     level: 2
+  tags:
+    - initialize_disks
 
 - name: Initializing disks
   command:
@@ -58,4 +74,8 @@
       - '{{ disk_init_helper_script }}'
       - init
       - '{{ "--init" if self_boot_flag }}'
+      - '--ssd-args "--no-notify {{ sp_ssd_disk_init_args | join(" ") }}"'
+      - '--hdd-args "--no-notify {{ sp_hdd_disk_init_args | join(" ") }}"'
       - '{{ disk_init_helper_discovery_file }}'
+  tags:
+    - initialize_disks
