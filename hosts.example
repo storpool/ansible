@@ -11,6 +11,26 @@
 # ansible_user='root'		# defaults use ssh_config
 # ansible_port=22		# defaults use ssh_config
 
+[storpool]
+# Node hostnames and per-node variables
+# NOTE: If no variables are defined will use globals/defaults from above
+#
+# Examples:
+# sp-node.1  sp_node_roles='server:7,mgmt' sp_drive_size='2T,7T' sp_drives='sdb,sdc'
+# sp-node.2  sp_node_roles='server:7,mgmt' sp_drive_size='2T' sp_drive_model='SAMSUNG MZQLB7T6HMLA-00007'
+# sp-node.3  sp_node_roles='server:3,mgmt' sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8'
+# sp-node.4  sp_node_roles='server:4' sp_drives='nvme0n1,nvme1n1,nvme2n1,nvme3n1'
+# sp-node.5  sp_node_roles='server:4' sp_drive_size='4T'
+# sp-node.6  sp_node_roles='server:2' sp_drives='nvme0n1,nvme1n1'
+# sp-node.11 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
+# sp-node.12 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
+# sp-node.13 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
+# sp-node.21 sp_node_roles='client' sp_disable_fw=False
+# sp-node.22
+# sp-node.23
+# sp-node.31 sp_node_roles='bridge' sp_vm=True sp_configure_network=False
+# sp-node.32 sp_vm=True sp_configure_network=False sp_disable_nm=False
+
 [storpool:vars]
 # StorPool-specific variables
 
@@ -69,30 +89,6 @@
 # Generate a summary and pause after variable validation - Defaults to True
 # sp_summary_wait = True
 
-# Drive selection section
-#   - Values can be obtained by running 'lsblk -do NAME,SIZE,MODEL' on the nodes
-#   - Devices matching _any_ of the conditions below will get initialized
-#   - Larger NVME drives will be split into equally-sized partitions smaller than 4T
-#   - A matched device, already containing partitions, will trigger an error
-#     remove partitions manually or override with sp_drive_erase=True
-#
-# CAUTION: The drive_init procedure is not fully implemented yet
-#   - No RAID controller detection, and private case scenarios
-#   - Needs ability to specify storpool_initdisk parameters
-
-# Coma-separated list of devices to initialize
-# sp_drives='nvme0n1,nvme1n1,sdb,sdc'
-
-# Coma-separated list of sizes of devices to initialize
-# sp_drive_size='3.5T,1.8T,223.6G'
-
-# Coma-separated list of models of devices to initialize
-# sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8,SAMSUNG MZ7LH3T8'
-
-# Init the drives even if they contain partitions (use with caution) - Defaults to False
-# NOTE: StorPool partitions will never be touched regardless of this flag
-# sp_drive_erase=False
-
 # Comma-separated list of roles for the node(s) being deployed
 # NOTES:
 #   - All roles will get '@block cli' services installed
@@ -120,7 +116,34 @@
 #
 # Default otherwise
 # sp_cg_conf_extra=''
+
+[storpool:children]
+storpool_servers
+
+[storpool_servers]
+
+
+[storpool_servers:vars]
+# Drive selection section
+#   - Values can be obtained by running 'lsblk -do NAME,SIZE,MODEL' on the nodes
+#   - Devices matching _any_ of the conditions below will get initialized
+#   - Larger NVME drives will be split into equally-sized partitions smaller than 4T
+#   - A matched device, already containing partitions, will trigger an error
+#     remove partitions manually or override with sp_drive_erase=True
 #
+# CAUTION: The drive_init procedure is not fully implemented yet
+#   - No RAID controller detection, and private case scenarios
+#   - Needs ability to specify storpool_initdisk parameters
+
+# Coma-separated list of devices to initialize
+# sp_drives='nvme0n1,nvme1n1,sdb,sdc'
+
+# Coma-separated list of sizes of devices to initialize
+# sp_drive_size='3.5T,1.8T,223.6G'
+
+# Coma-separated list of models of devices to initialize
+# sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8,SAMSUNG MZ7LH3T8'
+
 # Offset to calculate diskid prefix (useful when sp_node_id >= 40)
 # diskid_prefix = sp_node_id - sp_diskid_offset
 # sp_diskid_offset=0	# Default
@@ -141,22 +164,3 @@
 # Path to the SED configuration file
 # sp_sed_conf='/etc/storpool/sed.conf'
 
-[storpool]
-# Node hostnames and per-node variables
-# NOTE: If no variables are defined will use globals/defaults from above
-#
-# Examples:
-# sp-node.1  sp_node_roles='server:7,mgmt' sp_drive_size='2T,7T' sp_drives='sdb,sdc'
-# sp-node.2  sp_node_roles='server:7,mgmt' sp_drive_size='2T' sp_drive_model='SAMSUNG MZQLB7T6HMLA-00007'
-# sp-node.3  sp_node_roles='server:3,mgmt' sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8'
-# sp-node.4  sp_node_roles='server:4' sp_drives='nvme0n1,nvme1n1,nvme2n1,nvme3n1'
-# sp-node.5  sp_node_roles='server:4' sp_drive_size='4T'
-# sp-node.6  sp_node_roles='server:2' sp_drives='nvme0n1,nvme1n1'
-# sp-node.11 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
-# sp-node.12 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
-# sp-node.13 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
-# sp-node.21 sp_node_roles='client' sp_disable_fw=False
-# sp-node.22
-# sp-node.23
-# sp-node.31 sp_node_roles='bridge' sp_vm=True sp_configure_network=False
-# sp-node.32 sp_vm=True sp_configure_network=False sp_disable_nm=False
