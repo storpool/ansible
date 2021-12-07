@@ -1,0 +1,11 @@
+---
+# defaults file for initialize_disks
+disk_init_helper_script: ''
+disk_init_helper_discovery_file: ''
+sp_min_disk_size: ''
+sp_min_nvme_size: ''
+sp_min_pmem_size: ''
+sp_max_disk_size: ''
+sp_nvme_disk_id_offset: 0
+sp_ssd_disk_id_offset: 10
+sp_hdd_disk_id_offset: 20
