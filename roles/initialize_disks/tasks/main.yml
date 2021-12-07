@@ -1,0 +1,61 @@
+---
+- name: Retrieving node ID from storpool.conf
+  command: storpool_showconf -n -e SP_OURID
+  register: retrieve_id_result
+  tags:
+    - check_configuration
+    - initialize_disks
+
+- name: Setting node ID as a fact
+  set_fact:
+    node_id: retrieve_id_result.stdout | int
+  tags:
+    - check_configuration
+    - initialize_disks
+
+- name: Verifying base disk ID
+  assert:
+    that:
+      - node_id - (sp_disk_offset|int) > 0
+    fail_msg: 'sp_disk_offest value ({{ sp_disk_offset }}) is too high for host {{ inventory_hostname }} with ID {{ node_id }}'
+  when:
+    - sp_disk_offset is defined
+  tags:
+    - check_configuration
+    - initialize_disks
+
+- name: Removing previous disk discovery configuration
+  file:
+    path: '{{ disk_init_helper_discovery_file }}'
+    state: absent
+
+- name: Discovering suitable disks
+  command:
+    argv:
+      - '{{ disk_init_helper_script }}'
+      - discover
+      - '--min-sata-size {{ sp_min_disk_size }}'
+      - '--min-nvme-size {{ sp_min_nvme_size }}'
+      - '--min-pmem-size {{ sp_min_pmem_size }}'
+      - '--max-sata-size {{ sp_max_disk_size }}'
+      - '--start {{ (node_id - (sp_disk_offset|default(0))) * 100 + 1 }}'
+      - '--offsets {{ sp_ssd_disk_id_offset }},{{ sp_nvme_disk_id_offset }},{{ sp_hdd_disk_id_offset }}'
+      - '--dump-file {{ disk_init_helper_discovery_file }}'
+      - '{{ sp_discover_disk_pattern if sp_discover_disk_pattern is defined }}'
+
+- name: Setting self-booting disk flag
+  set_fact:
+    self_boot_flag: sp_new_cluster and inventory_hostname == groups["storpool"][0]["ansible_host"]
+
+- name: Debug self-booting disk
+  debug:
+    var: self_boot_flag
+    level: 2
+
+- name: Initializing disks
+  command:
+    argv:
+      - '{{ disk_init_helper_script }}'
+      - init
+      - '{{ "--init" if self_boot_flag }}'
+      - '{{ disk_init_helper_discovery_file }}'
