@@ -9,3 +9,5 @@ sp_max_disk_size: ''
 sp_nvme_disk_id_offset: 0
 sp_ssd_disk_id_offset: 10
 sp_hdd_disk_id_offset: 20
+sp_ssd_disk_init_args: []
+sp_hdd_disk_init_args: []

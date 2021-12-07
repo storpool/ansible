@@ -3,17 +3,13 @@
   hosts: storpool
   gather_facts: false
   become: true
-
   pre_tasks:
-    - name: Prepare Variables 
-      include_role:
-        name: 5_setup-drives
-        tasks_from: prerequisites 
-
-  tasks:
-    - name: Configure StorPool drives
-      import_role:
-        name: 5_setup-drives
-
+    - name: Copying disk testing tools
+      copy:
+        src: "perform_disktest.sh"
+        dest: "{{ sp_toolsdir }}"
+        mode: 0755
+  roles:
+    - initialize_disks
   tags:
     - setup-drives

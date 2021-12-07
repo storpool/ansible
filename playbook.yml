@@ -4,7 +4,22 @@
 - import_playbook: playbooks/2_setup-infra.yml
 - import_playbook: playbooks/3_install-storpool.yml
 - import_playbook: playbooks/4_setup-network.yml
-- import_playbook: playbooks/5_setup-drives.yml
+
+- name: Configure Drives
+  hosts: storpool_servers
+  gather_facts: false
+  become: true
+  pre_tasks:
+    - name: Copying disk testing tools
+      copy:
+        src: "perform_disktest.sh"
+        dest: "{{ sp_toolsdir }}"
+        mode: 0755
+  roles:
+    - initialize_disks
+  tags:
+    - configure_drives
+
 - import_playbook: playbooks/6_setup-cgroups.yml
 - import_playbook: playbooks/7_setup-services.yml
 - import_playbook: playbooks/common_reboot.yml
