@@ -18,7 +18,7 @@
   roles:
     - initialize_disks
   tags:
-    - configure_drives
+    - initialize_disks
 
 - import_playbook: playbooks/6_setup-cgroups.yml
 - import_playbook: playbooks/7_setup-services.yml
