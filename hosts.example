@@ -7,9 +7,9 @@
 
 # Remote ssh variables for ansible
 # NOTE: If user!=root /etc/sudoers on nodes needs to be adjusted accordingly
-# ansible_user='storpool'	# defaults use ssh_config
-# ansible_user='root'		# defaults use ssh_config
-# ansible_port=22		# defaults use ssh_config
+# ansible_user='storpool'	        # defaults use ssh_config
+# ansible_user='root'		        # defaults use ssh_config
+# ansible_port=22		            # defaults use ssh_config
 
 [storpool]
 # Node hostnames and per-node variables
@@ -34,23 +34,23 @@
 [storpool:vars]
 # StorPool-specific variables
 
-# sp_cluster = 'ansible-test' # This is the top directory where Ansible configuration is saved
-# sp_custdir = '/home/cust' # The parent directory of sp_cluster
-# sp_toolsdir = '/root/storpool'  # Path on the target hosts where StorPool files will be stored - Defaults to /root/storpool
+# sp_cluster = 'ansible-test'       # This is the top directory where Ansible configuration is saved
+# sp_custdir = '/home/cust'         # The parent directory of sp_cluster
+# sp_toolsdir = '/root/storpool'    # Path on the target hosts where StorPool files will be stored - Defaults to /root/storpool
 
 # Where to get the StorPool release package from - Defaults to "web"
 # sp_release_file = '/path/storpool-...'  # Local .tgz release file stored on ansible deployment host
-# sp_release_file = 'web' # Download release from StorPool
+# sp_release_file = 'web'           # Download release from StorPool
 
 # StorPool version to be deployed (if sp_release_file='web') - Defaults to 19.01
 # sp_release = '19.01'
 
 # StorPool target release - release, pre-release or sp-lab
-# sp_target_release = 'release' # Default 
+# sp_target_release = 'release'     # Default
 
 # Deployment type - Defaults to False
-# sp_new_cluster = True	# New cluster deployment
-# sp_new_cluster = False	# Adding node(s) to existing cluster (default)
+# sp_new_cluster = True	            # New cluster deployment
+# sp_new_cluster = False	        # Adding node(s) to existing cluster (default)
 
 # Path to storpool.conf on the ansible host - Defaults to the inventory directory (Where this file is located)
 # sp_config = '/path/to/storpool.conf'
@@ -101,19 +101,19 @@
 # mgmt
 # bridge
 
-# sp_node_roles='client'	# Default
-# sp_node_roles='server,iscsi'	# Another Example
+# sp_node_roles='client'	        # Default
+# sp_node_roles='server,iscsi'	    # Another Example
 
 # List of arguments to pass to storpool_cg conf
 # NOTE: See 'storpool_cg conf -h' for all available arguments
-#
+
 # Examples:
 # sp_cg_conf_extra='CORES=2 NUMA_OVERFLOW=1 SP_COMMON_LIMIT=2G SP_ALLOC_LIMIT=2G'
 # sp_cg_conf_extra='SYSTEM_LIMIT=4G USER_LIMIT=2G MACHINE_LIMIT=4G'
-#
+
 # Default if client+server is defined in sp_node_roles
 # sp_cg_conf_extra='CONVERGED=1'
-#
+
 # Default otherwise
 # sp_cg_conf_extra=''
 
@@ -133,34 +133,38 @@ storpool_servers
 #
 # CAUTION: The drive_init procedure is not fully implemented yet
 #   - No RAID controller detection, and private case scenarios
-#   - Needs ability to specify storpool_initdisk parameters
 
-# Coma-separated list of devices to initialize
-# sp_drives='nvme0n1,nvme1n1,sdb,sdc'
+# Minimal size of SATA drives (SSD and HDD) below which drives won't be discovered to be used by StorPool
+# sp_min_disk_size='960GB'
 
-# Coma-separated list of sizes of devices to initialize
-# sp_drive_size='3.5T,1.8T,223.6G'
+# Maximal size of SATA drives (SSD and HDD) above which drives won't be discovered to be used by StorPool
+# sp_max_disk_size='14TB'
 
-# Coma-separated list of models of devices to initialize
-# sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8,SAMSUNG MZ7LH3T8'
+# Minimal size of NVMe drives below which drives won't be discovered to be used by StorPool
+# sp_min_nvme_size='960GB'
+
+# Minimal size of PMEM drives (SSD and HDD) below which drives won't be discovered to be used by StorPool
+# sp_min_pmem_size='1GB'
+
+# Disk glob pattern to discover disks by. Specify manufacturer model name, serial number.
+# sp_discover_disk_pattern=''
 
 # Offset to calculate diskid prefix (useful when sp_node_id >= 40)
-# diskid_prefix = sp_node_id - sp_diskid_offset
-# sp_diskid_offset=0	# Default
+# diskid_prefix = sp_node_id - sp_diskid_offset * 10
+# sp_diskid_offset=0	            # Default
 
 # Enable Self encrypting drives (SED)
 # sp_sed_enabled=False # Default
-#
+
 # If sp_sed_universal_password is set, all devices will be encrypted with the specified password.
 # Otherwise a random password will be set for each drive.
 # sp_sed_universal_password=''
-#
+
 # Enable ATA Security Feature Set for SATA SED devices
-# sp_sed_enable_atasf=False # Default
-#
+# sp_sed_enable_atasf=False         # Default
+
 # Enable OPAL encrypting for NVMe SED devices
-# sp_sed_enable_opal=False # Default
-#
+# sp_sed_enable_opal=False          # Default
+
 # Path to the SED configuration file
 # sp_sed_conf='/etc/storpool/sed.conf'
-
