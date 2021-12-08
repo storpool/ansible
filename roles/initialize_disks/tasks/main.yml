@@ -79,3 +79,10 @@
       - '{{ disk_init_helper_discovery_file }}'
   tags:
     - initialize_disks
+
+- name: Assigning disks to servers
+  shell: '{{ sp_multi_server_helper }} -i {{ sp_server_instances }} -j | bash'
+  args:
+    executable: /bin/bash
+  tags:
+    - initialize_disks
