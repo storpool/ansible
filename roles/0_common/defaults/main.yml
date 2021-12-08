@@ -3,7 +3,6 @@ sp_testing_lab: false
 sp_configure_network: false
 sp_alternative_net_setup: false
 sp_overwrite_iface_conf: false
-sp_multi_server_helper_enabled: true
 sp_single_iface: false
 sp_new_cluster: false
 sp_update_system: true
@@ -12,8 +11,6 @@ sp_reinstall: true
 sp_selinux: "disabled"
 sp_summary_wait: true
 sp_node_roles: "client"
-sp_drive_erase: false
-sp_diskid_offset: 0
 sp_sed_enable_opal: false
 sp_sed_enable_atasf: false
 # Defines if we should manage the rc.local on the targeted host
@@ -120,7 +117,5 @@ sp_dirs:
 
 sp_roles: {}
 sp_roles_list: "{{ sp_node_roles.split(',') }}"
-sp_server_instances: "0"
-sp_drive_list: []
 sp_poli: "{{ hostvars['localhost']['ansible_hostname'] == 'poli' }}"
 sp_vm: "{{ ansible_product_name == 'KVM' }}"
