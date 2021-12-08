@@ -11,3 +11,4 @@ sp_ssd_disk_id_offset: 10
 sp_hdd_disk_id_offset: 20
 sp_ssd_disk_init_args: []
 sp_hdd_disk_init_args: []
+sp_server_instances: 0

@@ -153,6 +153,12 @@ storpool_servers
 # diskid_prefix = sp_node_id - sp_diskid_offset * 10
 # sp_diskid_offset=0	            # Default
 
+# Extra arguments to be used to initialize HDD drives. See storpool_initdisk --help for a full list of options
+# sp_hdd_disk_init_args=[]
+
+# Extra arguments to be used to initialize SDD drives. See storpool_initdisk --help for a full list of options
+# sp_sdd_disk_init_args=[]
+
 # Enable Self encrypting drives (SED)
 # sp_sed_enabled=False # Default
 
