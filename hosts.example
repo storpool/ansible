@@ -111,9 +111,6 @@
 # sp_cg_conf_extra='CORES=2 NUMA_OVERFLOW=1 SP_COMMON_LIMIT=2G SP_ALLOC_LIMIT=2G'
 # sp_cg_conf_extra='SYSTEM_LIMIT=4G USER_LIMIT=2G MACHINE_LIMIT=4G'
 
-# Default if client+server is defined in sp_node_roles
-# sp_cg_conf_extra='CONVERGED=1'
-
 # Default otherwise
 # sp_cg_conf_extra=''
 

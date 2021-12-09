@@ -1,14 +1,16 @@
 ---
 # handlers file for configure-cgroups
 - name: Enabling cgconfig
+  become: true
   service:
     name: cgconfig
     enabled: true
   listen: "start cgconfig"
 
 - name: Starting cgconfig
+  become: true
   service:
     name: cgconfig
     state: restarted
   listen: "start cgconfig"
-  when: start_cgconfig
+  when: sp_cg_start_cgconfig
