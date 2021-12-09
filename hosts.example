@@ -163,6 +163,9 @@ storpool_servers
 # Extra arguments to be used to initialize SDD drives. See storpool_initdisk --help for a full list of options
 # sp_sdd_disk_init_args=[]
 
+# Number of server instances to spread disks over.
+# sp_server_instances
+
 # Enable Self encrypting drives (SED)
 # sp_sed_enabled=False
 
