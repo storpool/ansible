@@ -146,12 +146,16 @@ storpool_servers
 # Minimal size of PMEM drives (SSD and HDD) below which drives won't be discovered to be used by StorPool
 # sp_min_pmem_size='1GB'
 
+# Whether to run the discover phase of disk_init_helper. Set to false to use a pre-generated JSON file to be
+# used for disk initialization
+# sp_discover_disk_run=True
+
 # Disk glob pattern to discover disks by. Specify manufacturer model name, serial number.
 # sp_discover_disk_pattern=''
 
 # Offset to calculate diskid prefix (useful when sp_node_id >= 40)
-# diskid_prefix = sp_node_id - sp_diskid_offset * 10
-# sp_diskid_offset=0	            # Default
+# diskid_prefix = (sp_node_id - sp_diskid_offset) * 10
+# sp_diskid_offset=0
 
 # Extra arguments to be used to initialize HDD drives. See storpool_initdisk --help for a full list of options
 # sp_hdd_disk_init_args=[]
@@ -160,7 +164,7 @@ storpool_servers
 # sp_sdd_disk_init_args=[]
 
 # Enable Self encrypting drives (SED)
-# sp_sed_enabled=False # Default
+# sp_sed_enabled=False
 
 # If sp_sed_universal_password is set, all devices will be encrypted with the specified password.
 # Otherwise a random password will be set for each drive.
