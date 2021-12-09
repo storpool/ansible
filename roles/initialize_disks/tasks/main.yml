@@ -5,16 +5,25 @@
   tags:
     - check_configuration
 
-- name: Setting node ID as a fact
-  set_fact:
-    node_id: retrieve_id_result.stdout | int
+- name: Checking if host is defined in storpool.conf
+  assert:
+    that:
+      - retrieve_id_result.stdout | length > 0
+    fail_msg: 'Host {{ inventory_hostname }} cannot be found in /etc/storpool.conf'
   tags:
     - check_configuration
 
-- name: Verifying base disk ID
+- name: Setting node ID as a fact
+  set_fact:
+    node_id: "{{ retrieve_id_result.stdout }}"
+    cacheable: true
+  tags:
+    - check_configuration
+
+- name: Verifying disk ID offset
   assert:
     that:
-      - node_id - (sp_disk_offset|int) > 0
+      - node_id|int - sp_disk_offset|int > 0
     fail_msg: 'sp_disk_offest value ({{ sp_disk_offset }}) is too high for host {{ inventory_hostname }} with ID {{ node_id }}'
   when:
     - sp_disk_offset is defined
@@ -22,50 +31,82 @@
     - check_configuration
 
 - name: Removing previous disk discovery configuration
+  become: true
   file:
     path: '{{ disk_init_helper_discovery_file }}'
     state: absent
+  when:
+    - sp_discover_disk_run
 
 - name: Discovering suitable disks
-  command:
-    argv:
-      - '{{ disk_init_helper_script }}'
-      - discover
-      - '--min-sata-size {{ sp_min_disk_size }}'
-      - '--min-nvme-size {{ sp_min_nvme_size }}'
-      - '--min-pmem-size {{ sp_min_pmem_size }}'
-      - '--max-sata-size {{ sp_max_disk_size }}'
-      - '--start {{ (node_id - (sp_disk_offset|default(0))) * 100 + 1 }}'
-      - '--offsets {{ sp_ssd_disk_id_offset }},{{ sp_nvme_disk_id_offset }},{{ sp_hdd_disk_id_offset }}'
-      - '--dump-file {{ disk_init_helper_discovery_file }}'
-      - '{{ sp_discover_disk_pattern if sp_discover_disk_pattern is defined }}'
+  become: true
+  command: >-
+    {{ disk_init_helper_script }}
+    discover
+    --minimum-sata-size {{ sp_min_disk_size }}
+    --minimum-nvme-size {{ sp_min_nvme_size }}
+    --minimum-pmem-size {{ sp_min_pmem_size }}
+    --maximum-sata-size {{ sp_max_disk_size }}
+    --offsets {{ sp_ssd_disk_id_offset }},{{ sp_nvme_disk_id_offset }},{{ sp_hdd_disk_id_offset }}
+    --start {{ (node_id|int - (sp_disk_offset|default(0))) * 100 + 1 }}
+    --dump-file {{ disk_init_helper_discovery_file }}
+    {{ sp_discover_disk_pattern if sp_discover_disk_pattern is defined }}
+  when:
+    - sp_discover_disk_run
+
+- name: Copying disk testing tools
+  copy:
+    src: perform_disktest.sh
+    dest: '{{ sp_toolsdir }}'
+    mode: 0755
+
+- name: Reading the disk discover json file
+  become: true
+  slurp:
+    src: '{{ disk_init_helper_discovery_file }}'
+  register: disk_discover_json_b64encoded
+  when:
+    - sp_discover_disk_run
+
+- name: Generating a list of disks to be tested
+  set_fact:
+    disks_to_be_tested: '{{ disk_discover_json_b64encoded["content"] | b64decode | from_json | dict2items | map(attribute="value") | map(attribute="disk") | list }}'
+  when:
+    - sp_discover_disk_run
 
 - name: Testing discovered disks
+  become: true
   command:
     argv:
-      - '{{ sp_perform_disk_test }}'
-      - '{{ lookup("file", disk_init_helper_discovery_file) | from_json | map(attribute="disk") | join(' ') }}'
+      - '{{ sp_toolsdir }}/perform_disktest.sh'
+      - '{{ disks_to_be_tested | join(" ") }}'
+  when:
+    - sp_discover_disk_run
+    - disks_to_be_tested | length >= 1
 
 - name: Setting self-booting disk flag
   set_fact:
-    self_boot_flag: sp_new_cluster and inventory_hostname == groups["storpool"][0]["ansible_host"]
+    self_boot_flag: '{{ sp_new_cluster and inventory_hostname == groups["storpool_servers"][0] }}'
 
 - name: Debug self-booting disk
   debug:
     var: self_boot_flag
-    level: 2
+    verbosity: 2
 
 - name: Initializing disks
-  command:
-    argv:
-      - '{{ disk_init_helper_script }}'
-      - init
-      - '{{ "--init" if self_boot_flag }}'
-      - '--ssd-args "--no-notify {{ sp_ssd_disk_init_args | join(" ") }}"'
-      - '--hdd-args "--no-notify {{ sp_hdd_disk_init_args | join(" ") }}"'
-      - '{{ disk_init_helper_discovery_file }}'
+  become: true
+  command: >-
+    {{ disk_init_helper_script }}
+    init
+    {{ "--init" if self_boot_flag }}
+    --ssd-args "--no-notify {{ sp_ssd_disk_init_args | join(" ") }}"
+    --hdd-args "--no-notify {{ sp_hdd_disk_init_args | join(" ") }}"
+    {{ disk_init_helper_discovery_file }}
 
 - name: Assigning disks to servers
+  become: true
   shell: '{{ sp_multi_server_helper }} -i {{ sp_server_instances }} -j | bash'
   args:
     executable: /bin/bash
+  when:
+    - sp_server_instances > 1

@@ -8,13 +8,6 @@
 - name: Configure Drives
   hosts: storpool_servers
   gather_facts: false
-  become: true
-  pre_tasks:
-    - name: Copying disk testing tools
-      copy:
-        src: "perform_disktest.sh"
-        dest: "{{ sp_toolsdir }}"
-        mode: 0755
   roles:
     - initialize_disks
   tags:
