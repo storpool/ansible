@@ -1,16 +1,5 @@
 ---
-- name: Assign StorPool server role 
-  set_fact:
-    cacheable: true
-    sp_roles: "{{ sp_roles | combine([{'server': true}]) }}"
-    sp_server_instances: "{{ item.split(':')
-                          | length == 2 and
-                          item.split(':')[1] or 1 }}"
-  with_items: "{{ sp_roles_list }}"
-  when:
-    - "'server' in item.split(':')"
-
-- name: Assign other StorPool roles
+- name: Assign StorPool roles
   set_fact:
     cacheable: true
     sp_roles: "{{ sp_roles | combine([{item: true}]) }}"
@@ -30,7 +19,6 @@
   when:
     - item not in sp_roles.keys()
   with_items:
-    - server
     - client
     - mgmt
     - iscsi
@@ -41,14 +29,13 @@
   block:
     - name: Initial definition of services_to_install
       set_fact:
-        services_to_install:
+        services_to_install: "{{ 'server' if inventory_hostname in groups['storpool_servers'] }}"
     - name: Validate and define services_to_install variable
       set_fact:
         services_to_install: "{{item}} {{services_to_install}}"
       when:
         - sp_roles[item]
       with_items:
-        - server
         - iscsi
         - mgmt
         - bridge
@@ -57,99 +44,3 @@
       set_fact:
         sp_install_services: "@block cli {{services_to_install}}"
         cacheable: true
-
-- name: Pick server node for initial disk
-  run_once: true
-  set_fact:
-    cacheable: true
-    sp_init_node: "{{ ansible_play_hosts
-                   | map('extract', hostvars)
-                   | list
-                   | json_query('[?sp_roles.server].ansible_fqdn
-                   | [0]') }}"
-  when:
-    - sp_new_cluster
-
-- name: Decide if hyperconverged node (sp_cg_conf_extra)
-  set_fact:
-    cacheable: true
-    sp_cg_conf_extra: "CONVERGED=1 {{ sp_cg_conf_extra }}"
-  vars:
-    converged: "CONVERGED"
-  when:
-    - sp_roles.server
-    - sp_roles.client
-    - converged not in sp_cg_conf_extra
-
-- name: Get node drive sizes
-  shell: |
-    lsblk -ndo TYPE,NAME,SIZE \
-    | grep ^disk \
-    | awk '{print $2,$3}'
-  changed_when: false
-  args:
-    executable: /bin/bash
-  register: sp_node_drive_size
-  when:
-    - sp_roles.server
-    - sp_drive_size is defined
-  tags:
-    - skip_ansible_lint
-
-- name: "sp_drive_list: populate by name/model"
-  set_fact:
-    cacheable: true
-    sp_drive_list: "{{ sp_drive_list + [ item.key ] }}"
-  with_dict: "{{ ansible_devices }}"
-  when:
-    - sp_roles.server
-    - item.key not in sp_drive_list
-    - ((sp_drives is defined and
-      item.key in sp_drives.split(',')) or
-      (sp_drive_model is defined and
-      item.value.model in sp_drive_model.split(',')))
-
-- name: "sp_drive_list: populate by size"
-  set_fact:
-    cacheable: true
-    sp_drive_list: "{{ sp_drive_list + [ item.split()[0] ] }}"
-  with_items: "{{ sp_node_drive_size.stdout_lines }}"
-  when:
-    - sp_roles.server
-    - sp_drive_size is defined
-    - item.split()[0] not in sp_drive_list
-    - item.split()[1] in sp_drive_size.split(',')
-
-- name: "check for nvme drives"
-  set_fact:
-    cacheable: true
-    sp_roles: "{{ sp_roles | combine([{'nvme': true}]) }}"
-  when:
-    - sp_roles.server
-    - (sp_drive_list
-      | select('match', '^nvme')
-      | list
-      | count > 0)
-
-- name: "no nvme drives found"
-  set_fact:
-    cacheable: true
-    sp_roles: "{{ sp_roles | combine([{'nvme': false}]) }}"
-  when: sp_roles.nvme is not defined
-
-- name: "sp_systemd_services: initial definition"
-  set_fact:
-    cacheable: true
-    sp_systemd_services: "{{ sp_services.common }} + {{ sp_services.helper }}"
-
-- name: "sp_systemd_services: add services"
-  set_fact:
-    cacheable: true
-    sp_systemd_services: "{{ sp_systemd_services }} + {{ sp_services[item] }}"
-  when: "sp_roles[item]"
-  with_items:
-    - mgmt
-    - nvme
-    - server
-    - iscsi
-    - bridge
