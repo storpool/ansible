@@ -105,55 +105,6 @@
           Defined role {{ item | quote }}
           is valid StorPool role.
       with_items: "{{ sp_roles_list }}"
-    - name: >-
-        Check if there are no servers specified,
-        but the cluster is defined as new
-      assert:
-        that:
-          - sp_init_node | length > 0
-        fail_msg: >-
-          New cluster deployment,
-          but no server nodes
-        success_msg: >-
-          New cluster deployment,
-          and there are server nodes properly defined
-          in the ansible inventory
-      when:
-        - sp_new_cluster
-
-- name: >-
-    Check if targeted drives 
-    are meeting StorPool's requirements
-  block:
-    - name: Check if we have drives for the StorPool servers
-      assert:
-        that: sp_drive_list | length > 0
-        fail_msg: >-
-          Node declared as a server,
-          but no drives found to initialize
-        success_msg: >-
-          Node declared as a server,
-          and drives for this node are
-          properly defined in the inventory
-      when:
-        - sp_roles.server and not sp_testing_lab
-    - name: Check and register drives information
-      parted:
-        device: "/dev/{{ item }}"
-        unit: MiB
-      register: info
-      loop: "{{ sp_drive_list }}"
-    - name: Fail when disk has partitions and sp_drive_erase is not set
-      assert:
-        that:
-          - item.1.num == ""
-        msg: >-
-          Drive "{{ item.0.disk.dev }}" contains "{{ item.1.num }}" partition/s.
-          Please remove them or set "sp_drive_erase" to "True".
-      loop: "{{ info.results | subelements('partitions') }}"
-      when:
-        - sp_roles.server
-        - not sp_drive_erase | bool
 
 - name: Test boolean variables
   assert:
@@ -175,7 +126,6 @@
     - sp_disable_nm
     - sp_disable_fw
     - sp_vm
-    - sp_drive_erase
     - sp_summary_wait
 
 - name: Validate if sp_selinux value is valid
