@@ -13,7 +13,14 @@
   tags:
     - initialize_disks
 
-- import_playbook: playbooks/6_setup-cgroups.yml
+- name: Configure StorPool CGroups
+  hosts: storpool
+  gather_facts: false
+  roles:
+    - configure-cgroups
+  tags:
+    - setup-cgroups
+
 - import_playbook: playbooks/7_setup-services.yml
 - import_playbook: playbooks/common_reboot.yml
 - import_playbook: playbooks/8_tests.yml
