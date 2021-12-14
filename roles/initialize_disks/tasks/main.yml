@@ -50,7 +50,7 @@
     --offsets {{ sp_ssd_disk_id_offset }},{{ sp_nvme_disk_id_offset }},{{ sp_hdd_disk_id_offset }}
     --start {{ (node_id|int - (sp_disk_offset|default(0))) * 100 + 1 }}
     --dump-file {{ disk_init_helper_discovery_file }}
-    {{ sp_discover_disk_pattern if sp_discover_disk_pattern is defined }}
+    {{ sp_discover_disk_pattern if sp_discover_disk_pattern is defined else '' }}
   when:
     - sp_discover_disk_run
 
