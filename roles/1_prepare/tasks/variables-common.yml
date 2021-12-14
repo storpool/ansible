@@ -29,7 +29,7 @@
   block:
     - name: Initial definition of services_to_install
       set_fact:
-        services_to_install: "{{ 'server' if inventory_hostname in groups['storpool_servers'] }}"
+        services_to_install: "{{ 'server' if inventory_hostname in groups['storpool_servers'] else '' }}"
     - name: Validate and define services_to_install variable
       set_fact:
         services_to_install: "{{item}} {{services_to_install}}"
