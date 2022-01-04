@@ -125,11 +125,10 @@ storpool_servers
 #   - Values can be obtained by running 'lsblk -do NAME,SIZE,MODEL' on the nodes
 #   - Devices matching _any_ of the conditions below will get initialized
 #   - Larger NVME drives will be split into equally-sized partitions smaller than 4T
-#   - A matched device, already containing partitions, will trigger an error
-#     remove partitions manually or override with sp_drive_erase=True
-#
+#   - A matched device, already containing partitions, will be omitted as a safety precaution
+#     Please, remove partitions manually before running the playbook
 # CAUTION: The drive_init procedure is not fully implemented yet
-#   - No RAID controller detection, and private case scenarios
+#   - No RAID controller detection
 
 # Minimal size of SATA drives (SSD and HDD) below which drives won't be discovered to be used by StorPool
 # sp_min_disk_size='960GB'
@@ -148,6 +147,8 @@ storpool_servers
 # sp_discover_disk_run=True
 
 # Disk glob pattern to discover disks by. Specify manufacturer model name, serial number.
+# By default it will match all disks that fall in the criteria specified above.
+# For more concrete example see https://kb.storpool.com/user_guides/19.01/user_guide_19.01.html#disk-init-helper
 # sp_discover_disk_pattern=''
 
 # Offset to calculate diskid prefix (useful when sp_node_id >= 40)
@@ -161,7 +162,7 @@ storpool_servers
 # sp_sdd_disk_init_args=[]
 
 # Number of server instances to spread disks over.
-# sp_server_instances
+# sp_server_instances=1
 
 # Enable Self encrypting drives (SED)
 # sp_sed_enabled=False
