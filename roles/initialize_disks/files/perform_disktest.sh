@@ -55,9 +55,6 @@ for i in $*; do
 done
 
 if [ -f drives.txt ]; then
-	for d in `cat drives.txt`; do
-		parted -s /dev/${d} mklabel msdos
-	done
 	/usr/sbin/disk_tester
 	for i in `cat serials.txt`; do
 		touch "/etc/storpool/${i}.tested"
