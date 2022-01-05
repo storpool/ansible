@@ -2,23 +2,11 @@
 - name: Retrieving node ID from storpool.conf
   command: storpool_showconf -n -e SP_OURID
   register: retrieve_id_result
-  tags:
-    - check_configuration
-
-- name: Checking if host is defined in storpool.conf
-  assert:
-    that:
-      - retrieve_id_result.stdout | length > 0
-    fail_msg: 'Host {{ inventory_hostname }} cannot be found in /etc/storpool.conf'
-  tags:
-    - check_configuration
 
 - name: Setting node ID as a fact
   set_fact:
     node_id: "{{ retrieve_id_result.stdout }}"
     cacheable: true
-  tags:
-    - check_configuration
 
 - name: Verifying disk ID offset
   assert:
@@ -27,8 +15,6 @@
     fail_msg: 'sp_disk_offest value ({{ sp_disk_offset }}) is too high for host {{ inventory_hostname }} with ID {{ node_id }}'
   when:
     - sp_disk_offset is defined
-  tags:
-    - check_configuration
 
 - name: Removing previous disk discovery configuration
   become: true
