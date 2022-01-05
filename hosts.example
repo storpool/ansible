@@ -3,7 +3,7 @@
 # NOTE: all boolean values must be declared as True/False (capital first letter only!)
 
 [all:vars]
-# Global variables for all roles
+# Global variables for all hosts
 
 # Remote ssh variables for ansible
 # NOTE: If user!=root /etc/sudoers on nodes needs to be adjusted accordingly
@@ -12,24 +12,19 @@
 # ansible_port=22		            # defaults use ssh_config
 
 [storpool]
-# Node hostnames and per-node variables
-# NOTE: If no variables are defined will use globals/defaults from above
+# Node hostnames that are accessible via SSH
+# Host variables may be added to override the default values of the variables defined below
 #
 # Examples:
-# sp-node.1  sp_node_roles='server:7,mgmt' sp_drive_size='2T,7T' sp_drives='sdb,sdc'
-# sp-node.2  sp_node_roles='server:7,mgmt' sp_drive_size='2T' sp_drive_model='SAMSUNG MZQLB7T6HMLA-00007'
-# sp-node.3  sp_node_roles='server:3,mgmt' sp_drive_model='ST2000NM003A,INTEL SSDPE2KX080T8'
-# sp-node.4  sp_node_roles='server:4' sp_drives='nvme0n1,nvme1n1,nvme2n1,nvme3n1'
-# sp-node.5  sp_node_roles='server:4' sp_drive_size='4T'
-# sp-node.6  sp_node_roles='server:2' sp_drives='nvme0n1,nvme1n1'
-# sp-node.11 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
-# sp-node.12 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
-# sp-node.13 sp_node_roles='server,iscsi,bridge' sp_drives='sdb,sdc'
-# sp-node.21 sp_node_roles='client' sp_disable_fw=False
-# sp-node.22
-# sp-node.23
-# sp-node.31 sp_node_roles='bridge' sp_vm=True sp_configure_network=False
-# sp-node.32 sp_vm=True sp_configure_network=False sp_disable_nm=False
+# sp-node.1
+# sp-node.2  sp_vm=True sp_configure_network=False sp_disable_nm=False
+# sp-node.3  sp_node_roles='mgmt'
+# sp-node.4  sp_node_roles='mgmt' sp_vm=True sp_configure_network=False
+# sp-node.5  sp_node_roles='bridge'
+# sp-node.6  sp_node_roles='iscsi'
+# sp-node.11 sp_node_roles='mgmt,iscsi'
+# sp-node.12 sp_node_roles='mgmt,iscsi,bridge'
+# sp-node.21 sp_node_roles='bridge'
 
 [storpool:vars]
 # StorPool-specific variables
@@ -52,7 +47,7 @@
 # sp_new_cluster = True	            # New cluster deployment
 # sp_new_cluster = False	        # Adding node(s) to existing cluster (default)
 
-# Path to storpool.conf on the ansible host - Defaults to the inventory directory (Where this file is located)
+# Path to storpool.conf on the ansible control host - Defaults to the inventory directory (Where this file is located)
 # sp_config = '/path/to/storpool.conf'
 
 # Perform OS update (yum/apt update/upgrade) on target hosts - Defaults to True
@@ -92,17 +87,15 @@
 # Comma-separated list of roles for the node(s) being deployed
 # NOTES:
 #   - All roles will get '@block cli' services installed
-#   - Defining 'server' and 'client' will treat the node as hyperconverged
 #
 # Available roles:
-# client	# client hypervisor node
-# server[:N]	# N - max instances (1 if omitted)
+# client	                        # client hypervisor node
 # iscsi
 # mgmt
 # bridge
 
 # sp_node_roles='client'	        # Default
-# sp_node_roles='server,iscsi'	    # Another Example
+# sp_node_roles='mgmt,iscsi'	    # Another Example
 
 # List of arguments to pass to storpool_cg conf
 # NOTE: See 'storpool_cg conf -h' for all available arguments
@@ -118,14 +111,17 @@
 storpool_servers
 
 [storpool_servers]
-
+# Hosts defined here will have the server module installed
+# Example
+# sp-node.1
+# sp-node.2 sp_min_disk_size='2TB'
+# sp-node.3 sp_min_disk_size='2TB' sp_cg_hyperconverged=True
 
 [storpool_servers:vars]
 # Drive selection section
-#   - Values can be obtained by running 'lsblk -do NAME,SIZE,MODEL' on the nodes
 #   - Devices matching _any_ of the conditions below will get initialized
 #   - Larger NVME drives will be split into equally-sized partitions smaller than 4T
-#   - A matched device, already containing partitions, will be omitted as a safety precaution
+#   - A matched device, already containing partitions, will be omitted as a safety precaution.
 #     Please, remove partitions manually before running the playbook
 # CAUTION: The drive_init procedure is not fully implemented yet
 #   - No RAID controller detection
@@ -147,6 +143,7 @@ storpool_servers
 # sp_discover_disk_run=True
 
 # Disk glob pattern to discover disks by. Specify manufacturer model name, serial number.
+# Values can be obtained by running 'lsblk -do NAME,SIZE,MODEL' on the nodes
 # By default it will match all disks that fall in the criteria specified above.
 # For more concrete example see https://kb.storpool.com/user_guides/19.01/user_guide_19.01.html#disk-init-helper
 # sp_discover_disk_pattern=''
@@ -163,6 +160,9 @@ storpool_servers
 
 # Number of server instances to spread disks over.
 # sp_server_instances=1
+
+# Whether the host will be hyper-converged, i.e. host virtual machines and act a storage node
+# sp_cg_hyperconverged=False
 
 # Enable Self encrypting drives (SED)
 # sp_sed_enabled=False
