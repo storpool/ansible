@@ -39,6 +39,8 @@
       {{ sp_cgtool_bin }}
       conf -M -E
       converged={{ "1" if sp_cg_hyperconverged else "0" }}
-      {{ sp_cg_conf_extra if sp_cg_conf_extra | length > 0 }}
+      {% if sp_cg_conf_extra | length > 0 %}
+      {{ sp_cg_conf_extra }}
+      {% endif %}
       SET_MEMSW={{ sp_cg_set_memsw }}
   when: sp_slice_conf_file.stat.exists
