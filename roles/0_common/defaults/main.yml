@@ -109,11 +109,6 @@ sp_fw_ports:
   - 81
   - 3749
   - 47567
-sp_dirs:
-  - "/etc/storpool"
-  - "/etc/storpool.conf.d"
-  - "/usr/lib/storpool"
-  - "{{ sp_toolsdir }}"
 
 sp_roles: {}
 sp_roles_list: "{{ sp_node_roles.split(',') }}"

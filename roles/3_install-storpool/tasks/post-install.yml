@@ -1,5 +1,6 @@
 ---
 - name: Restart rsyslog
+  become: true
   service:
     name: rsyslog
     state: restarted
@@ -7,6 +8,7 @@
   changed_when: false
 
 - name: Reload sysctl entries
+  become: true
   shell: |
     `which sysctl` --system
   changed_when: false
@@ -14,6 +16,7 @@
     - skip_ansible_lint
 
 - name: Enable IOMMU in GRUB config
+  become: true
   command: /usr/lib/storpool/enable_grub_iommu
   when:
     - not sp_vm | bool
@@ -23,7 +26,7 @@
     - skip_ansible_lint
 
 - name: Include distro-specific tasks
-  include_tasks: "subtasks/post_install_{{ ansible_os_family|lower }}.yml"
+  import_tasks: "subtasks/post_install_{{ ansible_os_family|lower }}.yml"
 
 - name: Test Memory - check on async task
   async_status:
@@ -33,13 +36,7 @@
   retries: 200
   delay: 30
   when:
-    - sp_vm is defined and
-      not sp_vm | bool and
-      memory_test_sleeper is defined and
-      memory_test_sleeper.ansible_job_id is defined
-
-- name: Make sure the node exists in storpool.conf
-  shell: '[ -n "$(storpool_showconf -n -e SP_OURID)" ]'
-  changed_when: false
-  tags:
-    - skip_ansible_lint
+    - sp_vm is defined
+    - not sp_vm | bool
+    - memory_test_sleeper is defined
+    - memory_test_sleeper.ansible_job_id is defined

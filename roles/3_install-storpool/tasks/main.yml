@@ -1,6 +1,6 @@
 ---
 - name: Include pre-installation tasks (Install Storpool)
-  include_tasks: "pre-install.yml"
+  import_tasks: "pre-install.yml"
 
 - name: Include installation tasks (Install Storpool) 
   include_tasks: "install-storpool.yml"

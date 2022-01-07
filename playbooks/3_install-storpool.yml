@@ -2,12 +2,7 @@
 - name: Start StorPool installation
   hosts: storpool
   gather_facts: false
-  become: true
-
-  tasks:
-    - name: Install StorPool
-      import_role:
-        name: 3_install-storpool
-
+  roles:
+    - 3_install-storpool
   tags:
     - install

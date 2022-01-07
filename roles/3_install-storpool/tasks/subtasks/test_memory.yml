@@ -10,6 +10,7 @@
 
 - name: Perform memory tests (Test Memory)
   command: "{{ sp_perform_memtest }} {{ sp_toolsdir }}"
+  become: true
   async: 6000
   poll: 0
   register: memory_test_sleeper

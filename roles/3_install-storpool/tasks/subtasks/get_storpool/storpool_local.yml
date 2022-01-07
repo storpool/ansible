@@ -8,6 +8,7 @@
     mode: 0755
 
 - name: Copy local release file to servers (Release from local)
+  become: true
   copy:
     src: "{{ sp_release_file }}"
     dest: "{{ sp_toolsdir }}"
