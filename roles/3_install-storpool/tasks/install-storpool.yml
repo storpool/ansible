@@ -24,6 +24,7 @@
   changed_when: false
 
 - name: Install StorPool modules - check on async task
+  become: true
   async_status:
     jid: "{{ storpool_modules_sleeper.ansible_job_id }}"
   register: job_result
