@@ -54,7 +54,8 @@
     localhost_date_time: "{{ hostvars['localhost'].ansible_date_time }}"
 
 - name: Searching for host in storpool.conf
-  command: "grep {{ inventory_hostname }} /etc/storpool.conf"
+  command: "grep {{ inventory_hostname }} {{ sp_config }}"
+  delegate_to: localhost
   register: configuration_host_search
 
 - name: Checking if host is defined in storpool.conf
