@@ -22,6 +22,7 @@
     df -P -BK / | awk '!/^Filesystem/ {print $4}' | sed 's/K//'
   environment:
     LC_ALL: en_US.UTF-8
+  become: true
   changed_when: false
   register: root_space_available
   tags:
@@ -49,7 +50,7 @@
   assert:
     that:
       - ((localhost_date_time.epoch | int) - (ansible_date_time.epoch | int) | abs) < ( 60 * 60 * 2)
-    fail_msg: "Clock of node {{ ansible_hostname }} is not correct"
+    fail_msg: "Clock of node {{ inventory_hostname }} is not correct"
   vars:
     localhost_date_time: "{{ hostvars['localhost'].ansible_date_time }}"
 
@@ -62,4 +63,4 @@
   assert:
     that:
       - configuration_host_search.stdout_lines | length > 0
-    fail_msg: 'Host {{ inventory_hostname }} cannot be found in /etc/storpool.conf'
+    fail_msg: 'Host {{ inventory_hostname }} cannot be found in storpool.conf'

@@ -1,12 +1,12 @@
 ---
 - name: Include common facts gathering tasks (Prepare Deployment)
-  include_tasks: variables-common.yml
+  import_tasks: variables-common.yml
 
 - name: Validate deployment variables (Prepare Deployment)
-  include_tasks: check-variables.yml
+  import_tasks: check-variables.yml
 
 - name: Validate that target hosts are covering StorPool requirements (Prepare Deployment)
-  include_tasks: check-requirements.yml
+  import_tasks: check-requirements.yml
 
 - name: Preview deployment summary (Prepare Deployment)
   include_tasks: summary.yml
