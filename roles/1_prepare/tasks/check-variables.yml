@@ -1,12 +1,9 @@
 ---
 - name: Checks related to the ansible bastion
   block:
-    - name: >-
-        Get storpool.conf file status
-        on the ansible bastion machine
+    - name: Get storpool.conf file status on the ansible bastion machine
       delegate_to: localhost
       run_once: true
-      become: false
       stat:
         path: "{{ sp_config }}"
       register: sp_config_exists
@@ -39,7 +36,6 @@
     - name: Check cluster directory
       delegate_to: localhost
       run_once: true
-      become: false
       stat:
         path: "{{ sp_custdir }}/{{ sp_cluster }}"
       register: sp_cluster_dir
@@ -63,7 +59,6 @@
     - name: Get file status (sp_release_file)
       delegate_to: localhost
       run_once: true
-      become: false
       stat:
         path: "{{ sp_release_file }}"
       register: sp_release_file_exists

@@ -17,11 +17,7 @@
   gather_subset:
     - 'min'
     - 'virtual'
-  become: true
-  tasks:
-    - name: Define common variables
-      import_role:
-        name: 1_prepare
-
+  roles:
+    - 1_prepare
   tags:
     - prerequisites
