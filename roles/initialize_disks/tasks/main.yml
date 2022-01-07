@@ -1,6 +1,8 @@
 ---
 - name: Retrieving node ID from storpool.conf
-  command: /usr/sbin/storpool_showconf -n -e SP_OURID
+  shell: |
+    export PATH=$PATH:/usr/sbin
+    /usr/sbin/storpool_showconf -n -e SP_OURID
   register: retrieve_id_result
 
 - name: Setting node ID as a fact
