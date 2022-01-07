@@ -29,6 +29,7 @@
   include_tasks: "subtasks/post_install_{{ ansible_os_family|lower }}.yml"
 
 - name: Test Memory - check on async task
+  become: true
   async_status:
     jid: "{{ memory_test_sleeper.ansible_job_id }}"
   register: job_result
