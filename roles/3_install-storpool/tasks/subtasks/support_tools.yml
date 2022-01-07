@@ -1,8 +1,6 @@
 ---
 - name: Install (StorPool Support Tools)
   delegate_to: localhost
-  run_once: false
-  become: false
   command:
     chdir: "{{ sp_custdir }}/{{ sp_cluster }}"
     cmd: "{{ sp_installtools }} {{ inventory_hostname }}"
@@ -19,6 +17,7 @@
       not sp_vm | bool
 
 - name: Perform mlc test (StorPool Support Tools)
+  become: true
   shell: >
     [[ ! -d "/tmp/mlc/" ]] && mkdir -p /tmp/mlc/; \
     [[ ! -f "/tmp/mlc/mlc.output" ]] && {{ sp_toolsdir }}/mlc/mlc > /tmp/mlc/mlc.output || /bin/true
@@ -35,8 +34,6 @@
 
 - name: Collect inventory (StorPool Support Tools)
   delegate_to: localhost
-  run_once: false
-  become: false
   command:
     chdir: "{{ sp_custdir }}/{{ sp_cluster }}"
     cmd: "{{ sp_collect_inventory }} {{ inventory_hostname }}"

@@ -1,5 +1,6 @@
 ---
-- name: Copy storpool.conf
+- name: Copying storpool.conf
+  become: true
   copy:
     src: "{{ sp_config }}"
     dest: /etc/
@@ -7,10 +8,10 @@
     - copy-storpool-conf
 
 - name: Create dirs
-  include_tasks: "subtasks/create_directories.yml"
+  import_tasks: "subtasks/create_directories.yml"
 
 - name: Install support tools
-  include_tasks: "subtasks/support_tools.yml"
+  import_tasks: "subtasks/support_tools.yml"
   when:
     - sp_poli is defined and
       sp_poli | bool
@@ -18,7 +19,7 @@
     - install_support_tools
 
 - name: Test memory
-  include_tasks: "subtasks/test_memory.yml"
+  import_tasks: "subtasks/test_memory.yml"
   when:
     - sp_vm is defined and
       not sp_vm | bool

@@ -1,8 +1,16 @@
 ---
-- name: Create StorPool directories
+- name: Creating StorPool tools directory
+  file:
+    path: "{{ sp_toolsdir }}"
+    state: directory
+
+- name: Creating StorPool system directories
+  become: true
   file:
     path: "{{ item }}"
     state: directory
-  with_items:
-    - "{{ sp_dirs }}"
-    - "/etc/cgconfig.d"
+  loop:
+    - /etc/storpool
+    - /etc/storpool.conf.d
+    - /etc/cgconfig.d
+    - /usr/lib/storpool
