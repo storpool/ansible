@@ -14,3 +14,4 @@ sp_ssd_disk_init_args: []
 sp_hdd_disk_init_args: []
 sp_server_instances: 1
 sp_multi_server_helper: '/usr/lib/storpool/multi-server-helper.py'
+sp_new_cluster: false
