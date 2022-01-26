@@ -1,6 +1,7 @@
 ---
 # tasks file for configure-cgroups
 - name: Checking if StorPool cgroup configuration exists
+  become: true
   stat:
     path: /etc/cgconfig.d/storpool.slice.conf
   register: sp_slice_conf_file
