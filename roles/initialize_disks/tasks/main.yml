@@ -60,6 +60,7 @@
   set_fact:
     disks_to_be_tested: '{{ disk_discover_json_b64encoded["content"] | b64decode | from_json | dict2items | map(attribute="value") | map(attribute="disk") | list }}'
   when:
+    - sp_test_discovered_disks
     - sp_discover_disk_run
 
 - name: Testing discovered disks
@@ -69,6 +70,7 @@
       - '{{ sp_toolsdir }}/perform_disktest.sh'
       - '{{ disks_to_be_tested | join(" ") }}'
   when:
+    - sp_test_discovered_disks
     - sp_discover_disk_run
     - disks_to_be_tested | length >= 1
 
