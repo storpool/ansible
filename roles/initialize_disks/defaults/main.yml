@@ -15,6 +15,7 @@ sp_hdd_disk_init_args: []
 sp_server_instances: 1
 sp_multi_server_helper: '/usr/lib/storpool/multi-server-helper.py'
 sp_new_cluster: false
+sp_test_discovered_disks: true
 
 # This hack-fix sets the same default value that 1_prepare uses. It will be removed once the playbook is reworked
 sp_toolsdir: "/root/storpool"
