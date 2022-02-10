@@ -41,6 +41,31 @@
     {{ sp_discover_disk_pattern if sp_discover_disk_pattern is defined else '' }}
   when:
     - sp_discover_disk_run
+  register: disk_discovery
+
+- name: Generate timestamp for saving disk_init_helper runs
+  set_fact:
+    discover_disk_ts: '{{ ansible_date_time.epoch }}'
+  when:
+    - sp_discover_disk_run
+    - sp_backup_disk_init_config
+
+- name: Save disk discovery command with timestamp
+  copy:
+    content: '{{ disk_discovery.cmd }}'
+    dest: '{{ disk_init_helper_discovery_file | dirname }}/.discover-cmd_{{ discover_disk_ts }}'
+  when:
+    - sp_discover_disk_run
+    - sp_backup_disk_init_config
+
+- name: Save disk discovery JSON dump with timestamp
+  copy:
+    src: '{{ disk_init_helper_discovery_file }}'
+    remote_src: yes
+    dest: '{{ disk_init_helper_discovery_file | dirname }}/.discover-json_{{ discover_disk_ts }}'
+  when:
+    - sp_discover_disk_run
+    - sp_backup_disk_init_config
 
 - name: Copying disk testing tools
   copy:
@@ -94,6 +119,15 @@
     --ssd-args "--no-notify {{ sp_ssd_disk_init_args | join(" ") }}"
     --hdd-args "--no-notify {{ sp_hdd_disk_init_args | join(" ") }}"
     {{ disk_init_helper_discovery_file }}
+  register: disk_init
+
+- name: Save disk initialization command with timestamp
+  copy:
+    content: '{{ disk_init.cmd }}'
+    dest: '{{ disk_init_helper_discovery_file | dirname }}/.init-cmd_{{ discover_disk_ts }}'
+  when:
+    - sp_discover_disk_run
+    - sp_backup_disk_init_config
 
 - name: Assigning disks to servers
   become: true
