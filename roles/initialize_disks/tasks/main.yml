@@ -52,7 +52,7 @@
 
 - name: Save disk discovery command with timestamp
   copy:
-    content: '{{ disk_discovery.cmd | join(" ") }}'
+    content: '{{ disk_discovery.cmd }}'
     dest: '{{ disk_init_helper_discovery_file | dirname }}/.discover-cmd_{{ discover_disk_ts }}'
   when:
     - sp_discover_disk_run
@@ -123,7 +123,7 @@
 
 - name: Save disk initialization command with timestamp
   copy:
-    content: '{{ disk_init.cmd | join(" ") }}'
+    content: '{{ disk_init.cmd }}'
     dest: '{{ disk_init_helper_discovery_file | dirname }}/.init-cmd_{{ discover_disk_ts }}'
   when:
     - sp_discover_disk_run
