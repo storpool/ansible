@@ -48,7 +48,7 @@
     discover_disk_ts: '{{ ansible_date_time.epoch }}'
   when:
     - sp_discover_disk_run
-    - sp_testing_lab
+    - sp_backup_disk_init_config
 
 - name: Save disk discovery command with timestamp
   copy:
@@ -56,7 +56,7 @@
     dest: '{{ disk_init_helper_discovery_file | dirname }}/.discover-cmd_{{ discover_disk_ts }}'
   when:
     - sp_discover_disk_run
-    - sp_testing_lab
+    - sp_backup_disk_init_config
 
 - name: Save disk discovery JSON dump with timestamp
   copy:
@@ -65,7 +65,7 @@
     dest: '{{ disk_init_helper_discovery_file | dirname }}/.discover-json_{{ discover_disk_ts }}'
   when:
     - sp_discover_disk_run
-    - sp_testing_lab
+    - sp_backup_disk_init_config
 
 - name: Copying disk testing tools
   copy:
@@ -127,7 +127,7 @@
     dest: '{{ disk_init_helper_discovery_file | dirname }}/.init-cmd_{{ discover_disk_ts }}'
   when:
     - sp_discover_disk_run
-    - sp_testing_lab
+    - sp_backup_disk_init_config
 
 - name: Assigning disks to servers
   become: true
