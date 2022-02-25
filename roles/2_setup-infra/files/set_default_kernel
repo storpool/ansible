@@ -1,0 +1,143 @@
+#!/bin/bash
+
+if [[ -z "$*" ]]; then
+    cat <<EOUSAGE
+    Usage: $(basename -- "$0") <kernel_version or 0>
+EOUSAGE
+    exit 1
+fi
+kernel_version="$1"
+now="$(date +"%Y-%m-%d_%H-%M-%S")"
+
+DISTRO_REGEX="CentOS|Red Hat Enterprise Linux Server|AlmaLinux|Debian|Ubuntu"
+
+function set_grub_default {
+    local default="${1}"
+    local grub_cfg="${2}"
+    if [[ -z "${grub_cfg}" ]]; then
+        echo "Usage: set_grub_default GRUB_DEFAULT_VALUE /path/to/grub.conf" 1>&2
+        exit 1
+    fi
+
+    if command -v grub2-mkconfig >/dev/null; then
+        GRUB_UPDATE="grub2-mkconfig"
+    elif command -v grub-mkconfig >/dev/null; then
+        GRUB_UPDATE="grub-mkconfig"
+    else
+        echo "Cannot find GRUB update tool!" 1>&2
+        exit 1
+    fi
+
+    if ! sed -i."$now" "s/^GRUB_DEFAULT=.*$/GRUB_DEFAULT=$default/g" /etc/default/grub ; then
+        echo "Failed to update /etc/default/grub" 1>&2
+        exit 1
+    fi
+
+    if ! "$GRUB_UPDATE" -o "$grub_cfg"; then
+        echo "Failed to update $grub_cfg" 1>&2
+        exit 1
+    fi
+}
+
+function parse_grub_cfg {
+    local grub_cfg="$1"
+    if [[ -z "$grub_cfg" ]]; then
+        echo "Usage: parse_grub_cfg /path/to/grub.cfg" 1>&2
+        exit 1
+    fi
+    if [[ ! -r "$grub_cfg" ]]; then
+        echo "GRUB config $grub_cfg is not readable or does not exist" 1>&2
+        return
+    fi
+    echo "Using GRUB config $grub_cfg" 1>&2
+
+    local source
+    source="$(mktemp)"
+    trap 'rm -f "$source"' EXIT QUIT
+
+    rm -f "$source"
+    grep -E -i -w --regexp="^submenu|^menuentry|^[[:space:]]{1,}submenu|^[[:space:]]{1,}menuentry" "$grub_cfg" > "$source"
+    local first=""
+    local second=""
+    while IFS= read -r line ; do
+        if  echo "$line" | grep -E -i -w --regexp="^menuentry" > /dev/null ; then
+            first=$(echo "$line" | cut -d "'" -f2)
+            if echo "$line" | grep -E -i -w --regexp="$DISTRO_REGEX" | grep -E -i -w "$kernel_version" | \
+                grep -E -i -ve "(recovery mode)|rescue" > /dev/null; then
+                break
+            fi
+        fi
+        if echo "$line" | grep -E -i -w --regexp="^submenu" > /dev/null; then
+            first=$(echo "$line" | cut -d "'" -f2)
+            second=""
+            continue
+        fi
+        if echo "$line" | grep -E -i -w --regexp="^[[:space:]]{1,}submenu" > /dev/null ; then
+            echo "Submenu nesting is not supported" 1>&2
+            exit 1
+        fi
+        if echo "$line" | grep -E -i -w --regexp="^[[:space:]]{1,}menuentry" > /dev/null; then
+            second=$(echo "$line" | cut -d "'" -f2)
+            if echo "$line" | grep -E -i -w --regexp="$DISTRO_REGEX" | \
+                grep -E -i -w "$kernel_version" | grep -E -i -v "(recovery mode)|rescue" > /dev/null; then
+                break
+            fi
+        fi
+    done < "$source"
+
+    if [[ -z "$first" ]]; then
+        return
+    else
+        if [[ -z "$second" ]]; then
+            echo "\"$first\"" | sed 's/\//\\\//g'
+        else
+            echo "\"$first>$second\"" | sed 's/\//\\\//g'
+        fi
+    fi
+}
+
+function parse_boot_loader_entries {
+    if [[ ! -d "/boot/loader/entries" ]]; then
+        echo "The /boot/loader/entries directory does not exist, skipping" 1>&2
+        return
+    fi
+
+    local conf_file
+    # shellcheck disable=SC2012
+    conf_file=$(ls -1t /boot/loader/entries/*"${kernel_version}"*.conf 2>/dev/null| head -n1)
+    if [[ -z "$conf_file" ]]; then
+        echo "No configuration file found for $kernel_version, bailing" 1>&2
+        return
+    fi
+
+    local title
+    title=$(grep -E '^title' "$conf_file" | sed -nre 's/title (.*)$/\1/p')
+    if [[ -z "$title" ]]; then
+        echo "No 'title' section in $conf_file, bailing" 1>&2
+        return
+    fi
+
+    echo "\"$title\""
+}
+
+if [[ "$1" == "0" ]]; then
+    set_grub_default 0
+    exit 0
+fi
+
+for cfg in "/boot/grub/grub.cfg" "/boot/grub2/grub.cfg"; do
+    new_default=$(parse_grub_cfg "$cfg")
+    if [[ -n "$new_default" ]]; then
+        set_grub_default "$new_default" "$cfg"
+        exit 0
+    fi
+done
+
+new_default=$(parse_boot_loader_entries)
+if [[ -n "$new_default" ]]; then
+    set_grub_default "$new_default" "$(find /boot/efi/EFI -type f -name grub.cfg | head -n1)"
+    exit 0
+fi
+
+echo "Could not find specified kernel" 1>&2
+exit 1
