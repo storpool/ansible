@@ -18,6 +18,17 @@
   tags:
     - skip_ansible_lint
 
+- name: Install specified kernel
+  yum:
+    pkg: "kernel-{{ sp_kernel_version }}"
+    update_cache: yes
+  when:
+    - sp_kernel_version is defined
+    - not ansible_kernel | regex_search("^" + sp_kernel_version)
+
+- name: Include tasks for setting default kernel
+  include_tasks: "kernel.yml"
+
 - name: Install network-scripts (CentOS 8/RHEL 8)
   yum:
     name: network-scripts
