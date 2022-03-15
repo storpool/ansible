@@ -40,15 +40,8 @@
 
 - name: Get secondary IPs on loopback - sp_lo_ips
   set_fact:
-    sp_lo_ips: "{{ ansible_facts.lo.ipv4_secondaries | json_query('[].address') }}"
+    sp_lo_ips: "{{ ansible_facts.lo.ipv4_secondaries | map(attribute='address') | list if ansible_facts.lo.ipv4_secondaries is defined else [] }}"
     cacheable: true
-  when: ansible_facts.lo.ipv4_secondaries is defined
-
-- name: No secondary IPs on loopback
-  set_fact:
-    sp_lo_ips: []
-    cacheable: true
-  when: ansible_facts.lo.ipv4_secondaries is not defined
  
 - name: Validate StorPool IP addresses
   fail:
