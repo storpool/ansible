@@ -116,8 +116,8 @@
     {% if self_boot_flag %}
     --init
     {% endif %}
-    --ssd-args "--no-notify {{ sp_ssd_disk_init_args | join(" ") }}"
-    --hdd-args "--no-notify {{ sp_hdd_disk_init_args | join(" ") }}"
+    --ssd-args "no-notify,{{ sp_ssd_disk_init_args | join(",") }}"
+    --hdd-args "no-notify,{{ sp_hdd_disk_init_args | join(",") }}"
     {{ disk_init_helper_discovery_file }}
   register: disk_init
 
