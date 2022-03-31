@@ -3,10 +3,12 @@
 if [[ -z $* ]]; then
     cat <<EOUSAGE
     Usage: $(basename -- "$0") <kernel_version or 0>
+    set FORCE_KEXEC=1 in the environment to always run 'kexec -fe'
 EOUSAGE
     exit 1
 fi
 kernel_version="$1"
+[[ -z $FORCE_KEXEC ]] && FORCE_KEXEC=0
 now="$(date +"%Y-%m-%d_%H-%M-%S")"
 
 DISTRO_REGEX="CentOS|Red Hat Enterprise Linux Server|AlmaLinux|Debian|Ubuntu"
@@ -141,11 +143,17 @@ prepare_kexec_reboot() {
         reboot
     fi
 
-    logger --stderr -t sp_prepare_kexec "Rebooting into loaded kernel using kexec"
-    if [[ -f "/usr/bin/systemctl" ]]; then
-        /usr/bin/systemctl kexec
+    if [[ $FORCE_KEXEC -eq 1 ]]; then
+        logger --stderr -t sp_prepare_kexec "Rebooting into loaded kernel with forced kexec"
+        kexec -fe
     else
-        kexec -e
+        if [[ -f "/usr/bin/systemctl" ]]; then
+            logger --stderr -t sp_prepare_kexec "Rebooting into loaded kernel using systemctl kexec"
+            /usr/bin/systemctl kexec
+        else
+            logger --stderr -t sp_prepare_kexec "Rebooting into loaded kernel using regular kexec"
+            kexec -e
+        fi
     fi
 
     logger --stderr -t sp_prepare_kexec "Rebooting with kexec has failed, rebooting normally"
