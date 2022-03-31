@@ -17,9 +17,11 @@
     - ansible_distribution != "Ubuntu"
 
 - name: Prepare new kernel and run forced kexec
-  command: "FORCE_KEXEC=1 /tmp/sp_prepare_kexec {{ sp_kernel_version }}"
+  command: "/tmp/sp_prepare_kexec {{ sp_kernel_version }}"
   async: 1
   poll: 0
+  environment:
+    FORCE_KEXEC: 1
   when:
     - sp_kernel_version is defined
     - not ansible_kernel | regex_search("^" + sp_kernel_version)
