@@ -133,7 +133,7 @@ storpool_servers
 # sp_max_disk_size='14TB'
 
 # Minimal size of NVMe drives below which drives won't be discovered to be used by StorPool
-# sp_min_nvme_size='960GB'
+# sp_min_nvme_size='80GB'
 
 # Minimal size of PMEM drives (SSD and HDD) below which drives won't be discovered to be used by StorPool
 # sp_min_pmem_size='1GB'

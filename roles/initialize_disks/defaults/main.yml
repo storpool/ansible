@@ -4,7 +4,7 @@ disk_init_helper_script: '/usr/sbin/disk_init_helper'
 disk_init_helper_discovery_file: '/var/spool/storpool/disk-init-discovery.json'
 sp_discover_disk_run: true
 sp_min_disk_size: '960GB'
-sp_min_nvme_size: '100GB'
+sp_min_nvme_size: '80GB'
 sp_min_pmem_size: '1GB'
 sp_max_disk_size: '14TB'
 sp_nvme_disk_id_offset: 0
