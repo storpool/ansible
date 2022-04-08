@@ -9,8 +9,6 @@
 
 - name: Starting cgconfig
   become: true
-  service:
-    name: cgconfig
-    state: restarted
+  command: "CGCONFIG_FORCE_STARTUP=1 systemctl restart cgconfig"
   listen: "start cgconfig"
   when: sp_cg_start_cgconfig
