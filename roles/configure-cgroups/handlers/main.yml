@@ -7,8 +7,22 @@
     enabled: true
   listen: "start cgconfig"
 
-- name: Starting cgconfig
+- name: Restarting cgconfig on EL systems
   become: true
-  command: "CGCONFIG_FORCE_STARTUP=1 systemctl restart cgconfig"
+  systemd:
+    name: cgconfig
+    state: restarted
   listen: "start cgconfig"
-  when: sp_cg_start_cgconfig
+  when:
+    - sp_cg_start_cgconfig
+    - ansible_os_family == "RedHat"
+
+- name: Restarting cgconfig on Debian-based systems
+  become: true
+  command: "/usr/bin/cgconfig-startup-systemd start"
+  environment:
+    CGCONFIG_FORCE_STARTUP: 1
+  listen: "start cgconfig"
+  when:
+    - sp_cg_start_cgconfig
+    - ansible_os_family == "Debian"
