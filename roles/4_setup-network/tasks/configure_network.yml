@@ -8,7 +8,18 @@
   when: sp_alternative_net_setup
 
 - name: Generate StorPool net interfaces configuration
-  command: "/usr/sbin/iface-genconf -a {{ '-o' if sp_overwrite_iface_conf else '' }} {{ '--nettype 0' if sp_single_iface else '' }}"
+  command:
+    cmd: >-
+      /usr/sbin/iface-genconf -a
+      {% if sp_overwrite_iface_conf %}
+      -o
+      {% endif %}
+      {% if sp_single_iface %}
+      --nettype 0
+      {% endif %}
+      {% if disable_nm is defined and disable_nm %}
+      --nm-controlled
+      {% endif %}
   register: iface_genconf
   when: not sp_alternative_net_setup
   changed_when: false

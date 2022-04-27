@@ -68,20 +68,6 @@
   when:
     - ansible_distribution_major_version != '6'
 
-- name: Disable NetworkManager (CentOS/RHEL)
-  service:
-    name: "NetworkManager.service"
-    enabled: false
-    state: stopped
-  register: nm_service_status
-  failed_when:
-    - nm_service_status is failed
-    - not ('Could not find the requested service' in nm_service_status.msg)
-  when:
-    - ansible_distribution_major_version not in ['6', '8']
-    - sp_disable_nm is defined
-    - sp_disable_nm | bool
-
 - name: Configure SELinux (CentOS/RHEL)
   selinux:
     state: "{{ sp_selinux | default('disabled') }}"
