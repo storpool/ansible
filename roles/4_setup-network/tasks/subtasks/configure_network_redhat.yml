@@ -12,7 +12,7 @@
   systemd:
     name: NetworkManager
     state: "{{ disable_nm | ternary ('stopped', 'started') }}"
-    enabled: "{{ disable_nm | not }}"
+    enabled: "{{ not disable_nm }}"
 
 - name: Installing network-scripts (CentOS 8/RHEL 8)
   yum:
