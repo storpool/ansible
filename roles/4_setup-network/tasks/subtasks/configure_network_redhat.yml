@@ -12,7 +12,7 @@
 
 - name: Determining whether to disable NetworkManager
   set_fact:
-    disable_nm: "{{ sp_disable_nm | bool if sp_disable_nm is defined else (redhat_disable_nm_map | dict2items(key_name='version', value_name='value') | selectattr('version', 'eq', ansible_distribution_major_version) | first).value | bool }}"
+    disable_nm: "{{ sp_disable_nm | bool if sp_disable_nm is defined else lookup('vars', 'redhat_' + ansible_distribution_major_version + '_disable_nm') | bool }}"
 
 - name: Configuring the NetworkManager service
   systemd:
