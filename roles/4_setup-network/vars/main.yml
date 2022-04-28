@@ -1,2 +1,2 @@
-redhat_7_disable_nm_map: false
-redhat_8_disable_nm_map: false
+redhat_7_disable_nm: true
+redhat_8_disable_nm: false
