@@ -17,7 +17,7 @@
       {% if sp_single_iface %}
       --nettype 0
       {% endif %}
-      {% if disable_nm is defined and disable_nm %}
+      {% if disable_nm is defined and not disable_nm %}
       --nm-controlled
       {% endif %}
   register: iface_genconf
