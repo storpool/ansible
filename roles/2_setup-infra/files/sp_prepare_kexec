@@ -16,8 +16,14 @@ DISTRO_REGEX="CentOS|Red Hat Enterprise Linux Server|AlmaLinux|Debian|Ubuntu"
 set_grub_default() {
     local default="${1}"
     local grub_cfg="${2}"
+
     if [[ -z $grub_cfg ]]; then
-        logger --stderr -t sp_prepare_kexec "Usage: set_grub_default GRUB_DEFAULT_VALUE /path/to/grub.conf"
+        if command -v grub2-set-default >/dev/null; then
+            grub2-set-default "$default"
+            return
+        fi
+        logger --stderr -t sp_prepare_kexec "Usage: set_grub_default GRUB_DEFAULT_VALUE [/path/to/grub.conf]"
+        logger --stderr -t sp_prepare_kexec "grub.conf path required when grub2-set-default is not available!"
         exit 1
     fi
 
