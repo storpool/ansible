@@ -13,4 +13,4 @@
   failed_when: false
   register: dnf_install_result
   until: (dnf_install_result is succeeded) and ('Failed' not in dnf_install_result.stdout)
-  when: '''VERSION_ID="8"'' in os_release_lines'
+  when: '''PLATFORM_ID="platform:el8"'' in os_release_lines'
