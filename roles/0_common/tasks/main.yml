@@ -1,8 +1,6 @@
 ---
 - name: update facts
   setup:
-  delegate_to: '{{item}}'
-  delegate_facts: yes
   when: hostvars[item]["ansible_all_ipv4_addresses"] is not defined
   with_items: '{{groups["storpool"]}}'
   tags:
