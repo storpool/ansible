@@ -1,5 +1,45 @@
 ---
 # tasks file for configure-cgroups
+- name: Check kernel cmdline
+  command:
+    argv:
+      - "/usr/lib/storpool/kernel_cmdline_check"
+      - "--exit-code"
+      - "2"
+  ignore_errors: true
+  register: kernel_cmdline_check
+
+- name: Reboot to apply kernel parameters
+  become: true
+  command: reboot
+  async: 1
+  poll: 0
+  when:
+    - sp_kernel_params_reboot is defined
+    - sp_kernel_params_reboot | bool
+    - kernel_cmdline_check.rc == 2
+
+- name: Waiting for host to get back from reboot
+  wait_for_connection:
+    connect_timeout: 5
+    delay: 15
+    sleep: 2
+    timeout: 600
+  when:
+    - sp_kernel_params_reboot is defined
+    - sp_kernel_params_reboot | bool
+    - kernel_cmdline_check.rc == 2
+
+- name: Fail due to kernel parameters not being configured
+  fail:
+    msg: >-
+      Missing kernel parameters (see /usr/lib/storpool/kernel_cmdline_check),
+      reboot manually or set the sp_kernel_params_reboot variable to True
+      so the playbook can handle the reboot automatically.
+  when:
+    - sp_kernel_params_reboot is not defined or not sp_kernel_params_reboot | bool
+    - kernel_cmdline_check.rc == 2
+
 - name: Checking if StorPool cgroup configuration exists
   become: true
   stat:

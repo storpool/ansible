@@ -10,6 +10,7 @@ sp_retry_install: false
 sp_reinstall: true
 sp_selinux: "disabled"
 sp_summary_wait: true
+sp_kernel_params_reboot: false
 sp_node_roles: "client"
 sp_sed_enable_opal: false
 sp_sed_enable_atasf: false
