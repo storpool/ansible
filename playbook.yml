@@ -13,6 +13,12 @@
   tags:
     - initialize_disks
 
+- name: Reboot to apply new kernel or kernel parameters if needed
+  hosts: storpool
+  gather_facts: false
+  roles:
+    - kernel-check-reboot
+
 - name: Configure StorPool CGroups
   hosts: storpool
   gather_facts: false

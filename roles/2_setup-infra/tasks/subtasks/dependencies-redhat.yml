@@ -26,9 +26,6 @@
     - sp_kernel_version is defined
     - not ansible_kernel | regex_search("^" + sp_kernel_version)
 
-- name: Include tasks for setting default kernel
-  include_tasks: "boot-specified-kernel.yml"
-
 - name: Install network-scripts (CentOS 8/RHEL 8)
   yum:
     name: network-scripts

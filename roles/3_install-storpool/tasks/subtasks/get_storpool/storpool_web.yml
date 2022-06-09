@@ -11,4 +11,5 @@
 - name: Get the release archive from vault (Release from web)
   become: true
   command: "{{ sp_getpackage }} -g {{ sp_release }} -t {{ sp_target_release }} -u {{ sp_vault_url }} {{ '-d' if 'debug' in sp_roles else '' }}"
+  register: getpackage_result
   changed_when: false
