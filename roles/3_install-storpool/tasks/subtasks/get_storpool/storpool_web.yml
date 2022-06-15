@@ -10,6 +10,6 @@
 
 - name: Get the release archive from vault (Release from web)
   become: true
-  command: "{{ sp_getpackage }} -g {{ sp_release }} -t {{ sp_target_release }} -u {{ sp_vault_url }} {{ '-d' if 'debug' in sp_roles else '' }}"
+  command: "{{ sp_getpackage }} -g {{ sp_release }} -t {{ sp_target_release }} -u {{ sp_vault_url }} {{ '-d' if 'debug' in sp_roles else '' }} {% if sp_kernel_version is defined %} --kernel {{ sp_kernel_version }} {% endif %}"
   register: getpackage_result
   changed_when: false

@@ -18,34 +18,14 @@ log() {
 
 set_grub_default() {
     local default="${1}"
-    local grub_cfg="${2}"
 
-    if [[ -z $grub_cfg ]]; then
-        if command -v grub2-set-default >/dev/null; then
-            grub2-set-default "$default"
-            return
-        fi
-        log "Usage: set_grub_default GRUB_DEFAULT_VALUE [/path/to/grub.conf]"
-        log "grub.conf path required when grub2-set-default is not available!"
-        exit 1
-    fi
-
-    if command -v grub2-mkconfig >/dev/null; then
-        GRUB_UPDATE="grub2-mkconfig"
-    elif command -v grub-mkconfig >/dev/null; then
-        GRUB_UPDATE="grub-mkconfig"
-    else
-        log "Cannot find GRUB update tool!"
+    if [[ -z $default ]]; then
+        log "Usage: set_grub_default GRUB_DEFAULT_VALUE"
         exit 1
     fi
 
     if ! sed -i."$now" "s/^GRUB_DEFAULT=.*$/GRUB_DEFAULT=$default/g" /etc/default/grub ; then
         log "Failed to update /etc/default/grub"
-        exit 1
-    fi
-
-    if ! "$GRUB_UPDATE" -o "$grub_cfg" 1>&2; then
-        log "Failed to update $grub_cfg"
         exit 1
     fi
 }
@@ -134,14 +114,14 @@ parse_boot_loader_entries() {
 for cfg in "/boot/grub/grub.cfg" "/boot/grub2/grub.cfg"; do
     new_default="$(parse_grub_cfg "$cfg")"
     if [[ -n $new_default ]]; then
-        set_grub_default "$new_default" "$cfg"
+        set_grub_default "$new_default"
         exit 0
     fi
 done
 
 new_default="$(parse_boot_loader_entries)"
 if [[ -n $new_default ]]; then
-    set_grub_default "$new_default" "$(find /boot/efi/EFI -type f -name grub.cfg | head -n1)"
+    set_grub_default "$new_default"
     exit 0
 fi
 
