@@ -1,0 +1,37 @@
+---
+- name: Reboot to apply kernel parameters
+  become: true
+  command: reboot
+  async: 1
+  poll: 0
+  listen: "reboot and verify kernel"
+
+- name: Waiting for host to get back from reboot
+  wait_for_connection:
+    connect_timeout: 5
+    delay: 15
+    sleep: 2
+    timeout: 600
+  listen: "reboot and verify kernel"
+
+- name: Gather facts anew after reboot
+  gather_facts:
+    parallel: yes
+  listen: "reboot and verify kernel"
+
+- name: Verify we are using the specified kernel
+  assert:
+    that:
+      - ansible_kernel | regex_search("^" + sp_kernel_version)
+    success_msg: "Running expected kernel {{ sp_kernel_version }}"
+    fail_msg: "Running unexpected kernel {{ ansible_kernel }}"
+  when: sp_kernel_version is defined
+  listen: "reboot and verify kernel"
+
+- name: Verify kernel parameters are applied
+  command:
+    argv:
+      - "/usr/lib/storpool/kernel_cmdline_check"
+      - "--exit-code"
+      - "2"
+  listen: "reboot and verify kernel"
