@@ -111,7 +111,7 @@ parse_boot_loader_entries() {
     echo "\"$title\""
 }
 
-for cfg in "/boot/grub/grub.cfg" "/boot/grub2/grub.cfg"; do
+for cfg in "/boot/grub/grub.cfg" "/boot/grub2/grub.cfg" $(find /boot -name grub.cfg); do
     new_default="$(parse_grub_cfg "$cfg")"
     if [[ -n $new_default ]]; then
         set_grub_default "$new_default"

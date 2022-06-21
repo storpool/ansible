@@ -25,20 +25,13 @@
   tags:
     - skip_ansible_lint
 
-- name: Copy script to set default kernel
-  copy:
-    src: "files/sp_set_kernel"
-    dest: "/tmp/sp_set_kernel"
-    mode: 0755
-  when:
-    - sp_kernel_version is defined
-    - not ansible_kernel | regex_search("^" + sp_kernel_version)
-
 - name: Set default kernel
-  command: "/tmp/sp_set_kernel {{ sp_kernel_version }}"
+  script:
+    cmd: "files/sp_set_kernel {{ sp_kernel_version }}"
   when:
     - sp_kernel_version is defined
     - not ansible_kernel | regex_search("^" + sp_kernel_version)
+  notify: "reboot and verify kernel"
 
 - name: Check kernel cmdline
   command:
@@ -46,19 +39,13 @@
       - "/usr/lib/storpool/kernel_cmdline_check"
       - "--exit-code"
       - "2"
-  ignore_errors: true
   register: kernel_cmdline_check
-
-- name: Check if reboot is needed to apply new kernel or parameters
-  set_fact:
-    needs_reboot_kernel: true
-  when: >
-    (
-      sp_kernel_version is defined
-      and (not ansible_kernel | regex_search("^" + sp_kernel_version))
-    )
-    or
-    kernel_cmdline_check.rc == 2
+  ignore_errors: true
+  changed_when: kernel_cmdline_check.rc == 2
+  # Workaround for the case described
+  # in https://github.com/ansible/ansible/issues/14877
+  failed_when: kernel_cmdline_check.rc == 0
+  notify: "reboot and verify kernel"
 
 - name: Test Memory - check on async task
   become: true
@@ -76,44 +63,3 @@
 
 - name: Include distro-specific tasks
   include_tasks: "subtasks/post_install_{{ ansible_os_family|lower }}.yml"
-
-- name: Reboot to apply kernel parameters
-  become: true
-  command: reboot
-  async: 1
-  poll: 0
-  when:
-    - needs_reboot_kernel is defined
-    - needs_reboot_kernel | bool 
-
-- name: Waiting for host to get back from reboot
-  wait_for_connection:
-    connect_timeout: 5
-    delay: 15
-    sleep: 2
-    timeout: 600
-  when:
-    - needs_reboot_kernel is defined
-    - needs_reboot_kernel | bool 
-
-- name: Gather facts anew after reboot
-  gather_facts:
-    parallel: yes
-  when:
-    - needs_reboot_kernel is defined
-    - needs_reboot_kernel | bool 
-
-- name: Verify we are using the specified kernel
-  assert:
-    that:
-      - ansible_kernel | regex_search("^" + sp_kernel_version)
-    success_msg: "Running expected kernel {{ sp_kernel_version }}"
-    fail_msg: "Running unexpected kernel {{ ansible_kernel }}"
-  when: sp_kernel_version is defined
-
-- name: Verify kernel parameters are applied
-  command:
-    argv:
-      - "/usr/lib/storpool/kernel_cmdline_check"
-      - "--exit-code"
-      - "2"
