@@ -31,7 +31,7 @@
   when:
     - sp_kernel_version is defined
     - not ansible_kernel | regex_search("^" + sp_kernel_version)
-  notify: "reboot and verify kernel"
+  notify: "reload kernel"
 
 - name: Check kernel cmdline
   command:
@@ -45,7 +45,7 @@
   # Workaround for the case described
   # in https://github.com/ansible/ansible/issues/14877
   failed_when: kernel_cmdline_check.rc == 0
-  notify: "reboot and verify kernel"
+  notify: "reload kernel"
 
 - name: Test Memory - check on async task
   become: true

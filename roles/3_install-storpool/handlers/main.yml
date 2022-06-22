@@ -4,7 +4,7 @@
   command: reboot
   async: 1
   poll: 0
-  listen: "reboot and verify kernel"
+  listen: "reload kernel"
 
 - name: Waiting for host to get back from reboot
   wait_for_connection:
@@ -12,12 +12,12 @@
     delay: 15
     sleep: 2
     timeout: 600
-  listen: "reboot and verify kernel"
+  listen: "reload kernel"
 
 - name: Gather facts anew after reboot
   gather_facts:
     parallel: yes
-  listen: "reboot and verify kernel"
+  listen: "reload kernel"
 
 - name: Verify we are using the specified kernel
   assert:
@@ -26,7 +26,7 @@
     success_msg: "Running expected kernel {{ sp_kernel_version }}"
     fail_msg: "Running unexpected kernel {{ ansible_kernel }}"
   when: sp_kernel_version is defined
-  listen: "reboot and verify kernel"
+  listen: "reload kernel"
 
 - name: Verify kernel parameters are applied
   command:
@@ -34,4 +34,4 @@
       - "/usr/lib/storpool/kernel_cmdline_check"
       - "--exit-code"
       - "2"
-  listen: "reboot and verify kernel"
+  listen: "reload kernel"
