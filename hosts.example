@@ -56,18 +56,95 @@
 # Re-try StorPool install to handle transient network problems
 # sp_retry_install = False
 
-# Set to True if deploying on a machine with single NIC
-# sp_single_iface=False # Default
-
 # Automatically configure network interfaces based on storpool.conf vars - Defaults to False
 # sp_configure_network = False
+
+# Interfaces for the storage and/or iSCSI as a space separated names, required.
+# Default empty, Example: ens1 ens2 enp2s0f0 enp2s0f1 (the order is important)
+# interfaces
+
+# Mode for StorPool interfaces
+# Choices: bridge-active-backup-bond, bridge-mlag-bond, active-backup-bond, exclusive-ifaces, mlag-bond
+# sp_mode
+
+# Vlan for StorPool configuration (Default if unspecified 0), only single vlan for both network supported.
+# vlan
+
+# The network for StorPool storage interface address(es). This network is used
+# to automatically generate the address for the bond or the interfaces
+# underneath based on the SP_OURID. In case no addresses are provided for an
+# active-backup bond config the other nodes in the cluster are used to generate
+# the IP addresses used for the arp IP monitor in the bond.
+# sp_network
+
+# Mode for iSCSI interfaces (required when there are four interfaces configured)
+# Choices: bridge-active-backup-bond, bridge-mlag-bond, active-backup-bond, exclusive-ifaces, mlag-bond
+# iscsi_mode
+
+# bond name for the storage interfaces (required for bond modes, default spbond0)
+# sp_bond_name SP_BOND_NAME
+
+# bond name for the iscsi interfaces (required for iSCSI bond modes, default spbond1)
+# iscsi_bond_name
+
+# The name of the bridge interface in case of bridge modes (default: br-storage)
+# sp_bridge_name
+
+# The name of the iSCSI bridge interface in case of bridge modes(default: br-iscsi)
+iscsi_bridge_name
+
+# Use network-manager, which is still experimental (Default: False for CentOS7, True for Alma8/Rocky8/RHEL8)
+# nm_controlled
+
+# Disable hardware acceleration (Default and highly recommended: False)
+# no_hwacc
+
+# Specify different MTU for StorPool interfaces (Default and highly recommended: 9000)
+# sp_mtu
+
+# Specify different MTU for StorPool interfaces (Default and highly recommended: 9000)
+# iscsi_mtu
+
+# Comma separated list of addresses for the ARP ip targets (arp_ip_target). Needed
+# with active-backup bond mode. Useful when the bond is not used for API traffic
+# only. Default is all the addresses on the same interface for all other voting
+# nodes.
+# arp_ip_targets
+
+# Same as arp_ip_targets, but for the iSCSI network, provided that its mode is
+# an active-backup bond (Default: None/autodetect)
+# iscsi_arp_ip_targets
+
+# Offset the address of this node, i.e. offset + ourid (Default: 0)
+# sp_address_offset
+
+# Bump the address of the IPs on the additional networks provided with
+# add_iface_net with this offset. The default if not provided is the same as
+# sp_address_offset
+# sp_addnet_address_offset
+
+# Offset the iSCSI addresses of this node, i.e. iscsi offset + ourid (Default: 0)
+# sp_iscsi_address_offset
+
+# An additional space-separated vlan interfaces on top of the first net resolve
+# interface, i.e. 1200,10.1.200.0/24 will generate a resolve interface with
+# tagged vlan 1200 and 10.1.200.(SP_OURID + sp_addnet_address_offset) address.
+# IMPORTANT: addresses are NOT being offset by the sp_address_offset option!
+# add_iface_net
+
+# Additional vlan, IP network on the iSCSI interfaces.
+# Example with configuration 0,10.1.1.0/24 translates to vlan 0, IP address
+# 10.1.1.(SP_OURID+sp_iscsi_address_offset) and /24 network prefix
+# (net prefix /24 is the default if omitted).
+# For dual networks (multipath) use the : separator (ex.):
+# 1,10.1.1.0/24:2,10.1.2.0/24
+# with a first network with VLAN ID 1 with 10.1.1.0/24
+# and a second with vlan ID 2 and 10.1.2.0/24.
+# iscsicfg_net
 
 # Use an alternative network configuration setup tool, used in internal testing - Defaults to False
 # Implications: when configured, overrides the normal network configuration.
 # sp_alternative_net_setup = False # Default
-
-# Overwrite existing ineterface configuration files (iface-genconf -o) - Defaults to False
-# sp_overwrite_iface_conf = False
 
 # Set SELinux state (valid options are "permissive" or "disabled") - Defaults to disabled
 # sp_selinux = 'disabled'

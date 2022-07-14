@@ -7,77 +7,30 @@
   register: preconfignet
   when: sp_alternative_net_setup
 
-- name: Generate StorPool net interfaces configuration
-  command: "/usr/sbin/iface-genconf -a {{ '-o' if sp_overwrite_iface_conf else '' }} {{ '--nettype 0' if sp_single_iface else '' }}"
-  register: iface_genconf
+- name: Execute net_helper genconfig with provided parameters
+- name: Generate config files
+  shell: |
+   net_helper genconfig \
+    {{ interfaces }} \ # this needs to be multiple parameters...
+    --sp-mode "{{ sp_mode }}" \
+    --vlan {{ vlan if vlan else 0 }}
+    --sp-network {{ sp_network }} \ # below are optional (if provided)
+    "{{ '--iscsi-mode {{ iscsi_mode }}' if iscsi_mode else '' }}" \
+    TODO all the other options, some of which are multi
+  register: genconfig_output
   when: not sp_alternative_net_setup
   changed_when: false
 
-- name: Init first interface
+- name: TODO check whether there are changes to be applied
   shell: |
-    {{ sp_showconf }} -n -e -- SP_IFACE1_CFG \
-    | cut -d: -f3 \
-    | xargs ifup
-  register: iface1_init
+    net_helper check --compare /path/to/the/collected/above.conf
   args:
     executable: /bin/bash
   changed_when: false
-  tags:
-    - skip_ansible_lint
   when: not sp_alternative_net_setup
 
-- name: Init second interface
+- name: TODO execute applyifcfg if necessary
   shell: |
-    {{ sp_showconf }} -n -e -- SP_IFACE2_CFG \
-    | cut -d: -f3 \
-    | xargs ifup
-  register: iface2_init
-  args:
-    executable: /bin/bash
-  changed_when: false
-  ignore_errors: "{{ sp_single_iface | ternary (true, false) }}"
-  tags:
-    - skip_ansible_lint
-  when: not sp_alternative_net_setup
-
-- name: Init bond interfaces (if any)
-  shell: |
-    {{ sp_showconf }} -n -e -- SP_IFACE1_CFG \
-    | cut -d: -f2 \
-    | cut -d. -f1 \
-    | xargs ifup
-  register: bond_init
-  args:
-    executable: /bin/bash
-  changed_when: false
-  ignore_errors: "{{ sp_single_iface | ternary (true, false) }}"
-  tags:
-    - skip_ansible_lint
-  when: not sp_alternative_net_setup
-
-- name: Init iface1 VLANs (if any)
-  shell: |
-    {{ sp_showconf }} -n -e -- SP_IFACE1_CFG \
-    | cut -d: -f2 \
-    | xargs ifup
-  register: iface1_vlan_init
-  args:
-    executable: /bin/bash
-  changed_when: false
-  tags:
-    - skip_ansible_lint
-  when: not sp_alternative_net_setup
-
-- name: Init iface2 VLANs (if any)
-  shell: |
-    {{ sp_showconf }} -n -e -- SP_IFACE2_CFG \
-    | cut -d: -f2 \
-    | xargs ifup
-  register: iface2_vlan_init
-  args:
-    executable: /bin/bash
-  changed_when: false
-  ignore_errors: "{{ sp_single_iface | ternary (true, false) }}"
-  tags:
-    - skip_ansible_lint
+    net_helper applyifcfg --from-config /etc/storpool/autonets.conf
+  changed_when: false # this shouldn't be false, I guess
   when: not sp_alternative_net_setup
