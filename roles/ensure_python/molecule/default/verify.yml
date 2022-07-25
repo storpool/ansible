@@ -17,8 +17,8 @@
           - "'python36' in ansible_facts.packages"
           - "'python3-libselinux' in ansible_facts.packages"
 
-- name: Verify python2 on Debian, Ubuntu 16.04 and Ubuntu 18.04
-  hosts: debian:ubuntu_16.04:ubuntu_18.04
+- name: Verify python2 on Debian and Ubuntu 18.04
+  hosts: debian:ubuntu_18.04
   tasks:
     - apt:
         name: python-apt
@@ -27,8 +27,8 @@
         that:
           - "'python' in ansible_facts.packages"
 
-- name: Verify python3 on Ubuntu 20.04
-  hosts: ubuntu_20.04
+- name: Verify python3 on Ubuntu 20.04 and Ubuntu 22.04
+  hosts: ubuntu_20.04:ubuntu_22.04
   tasks:
     - apt:
         name: python3-apt
