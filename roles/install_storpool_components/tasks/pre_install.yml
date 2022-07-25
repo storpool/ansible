@@ -13,15 +13,14 @@
 - name: Install support tools
   import_tasks: "subtasks/support_tools.yml"
   when:
-    - sp_poli is defined and
-      sp_poli | bool
+    - sp_poli is defined
+    - sp_poli | bool
   tags:
-    - install_support_tools
+    - install-support-tools
 
 - name: Test memory
-  import_tasks: "subtasks/test_memory.yml"
+  import_tasks: "test_memory.yml"
   when:
-    - sp_vm is defined and
-      not sp_vm | bool
+    - not sp_vm | bool
   tags:
-    - test_memory
+    - test-memory

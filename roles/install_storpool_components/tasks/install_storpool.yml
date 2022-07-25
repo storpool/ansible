@@ -1,0 +1,39 @@
+---
+- name: Checking if a valid installation method is set
+  ansible.builtin.assert:
+    that:
+      - sp_install_method in supported_installation_methods
+    fail_msg: "Unsupported installation method: {{ sp_install_method }}"
+
+- name: Downloading StorPool packages
+  import_tasks: "install_modules_{{ sp_install_method }}.yml"
+
+- name: Installing StorPool modules
+  become: true
+  command:
+    cmd: >-
+      {{ sp_install_helper_path }}
+      -g {{ sp_release | quote }}
+      {% if sp_reinstall %}
+      -r
+      {% endif %}
+      -w {{ sp_tools_directory | quote }}
+      -m {{ sp_install_services | quote }}
+      {% if sp_retry_install %}
+      --retry 2
+      {% endif %}
+    chdir: "{{ sp_tools_directory }}"
+  async: 1000
+  poll: 0
+  register: storpool_modules_sleeper
+  changed_when: false
+
+- name: Install StorPool modules - check on async task
+  become: true
+  async_status:
+    jid: "{{ storpool_modules_sleeper.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 100
+  delay: 5
+  changed_when: false

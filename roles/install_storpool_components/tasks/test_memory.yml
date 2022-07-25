@@ -1,15 +1,15 @@
 ---
-- name: Copy memtester tools (Test Memory)
+- name: Copying memtester tools
   copy:
     src: "{{ item }}"
-    dest: "{{ sp_toolsdir }}"
+    dest: "{{ sp_tools_directory }}"
     mode: 0755
   with_items:
     - "memtester"
     - "perform_memtest.sh"
 
-- name: Perform memory tests (Test Memory)
-  command: "{{ sp_perform_memtest }} {{ sp_toolsdir }}"
+- name: Starting memory test in the background
+  command: "{{ sp_tools_directory }}/perform_memtest.sh {{ sp_tools_directory }}"
   become: true
   async: 6000
   poll: 0

@@ -1,32 +1,26 @@
 ---
-- name: Restart rsyslog
+- name: Restarting rsyslog
   become: true
-  service:
+  ansible.builtin.systemd:
     name: rsyslog
     state: restarted
     enabled: yes
-  changed_when: false
 
-- name: Reload sysctl entries
+- name: Reloading sysctl entries
   become: true
-  shell: |
-    `which sysctl` --system
+  ansible.builtin.command: /sbin/sysctl --system
   changed_when: false
-  tags:
-    - skip_ansible_lint
 
-- name: Enable IOMMU in GRUB config
+- name: Enabling IOMMU in GRUB config
   become: true
   command: /usr/lib/storpool/enable_grub_iommu
   when:
     - not sp_vm | bool
     - sp_run_enable_grub_iommu | bool
   changed_when: false
-  tags:
-    - skip_ansible_lint
 
 - name: Include distro-specific tasks
-  include_tasks: "subtasks/post_install_{{ ansible_os_family|lower }}.yml"
+  include_tasks: "post_install_{{ ansible_os_family | lower }}.yml"
 
 - name: Test Memory - check on async task
   become: true
@@ -37,7 +31,6 @@
   retries: 200
   delay: 30
   when:
-    - sp_vm is defined
     - not sp_vm | bool
     - memory_test_sleeper is defined
     - memory_test_sleeper.ansible_job_id is defined

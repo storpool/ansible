@@ -1,3 +1,24 @@
+sp_tools_directory: "{{ ansible_user_dir }}/storpool"
+
 sp_configuration_path: "{{ inventory_dir }}/storpool.conf"
-sp_tools_directory: "{{ ansible_user_dir }}/storpool/"
+
+sp_getpackage_url: https://vault.storpool.com/getpackage.py
+sp_install_helper_url: https://vault.storpool.com/install_modules_helper.py
+sp_vault_url: https://vault.storpool.com/getpkg.php
+
+sp_target_release: release
+sp_getpackage_path: "{{ sp_tools_directory }}/getpackage.py"
+
+sp_install_method: web
+sp_install_helper_path: "{{ sp_tools_directory }}/install_modules_helper.py"
+
+sp_reinstall: False
+
+sp_install_block_on_servers: True
+
+sp_run_enable_grub_iommu: True
+sp_patchkdumptools_path: /usr/lib/storpool/patchkdumptools
+
 sp_vm: "{{ ansible_virtualization_role == 'guest' }}"
+
+get_debug_packages: False

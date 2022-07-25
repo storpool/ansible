@@ -1,7 +1,7 @@
 ---
 - name: Creating StorPool tools directory
   file:
-    path: "{{ sp_toolsdir }}"
+    path: "{{ sp_tools_directory }}"
     state: directory
 
 - name: Creating StorPool system directories

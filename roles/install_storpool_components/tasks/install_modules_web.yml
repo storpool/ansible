@@ -1,0 +1,33 @@
+---
+- name: Checking if StorPool release version is set
+  ansible.builtin.assert:
+    that:
+      - sp_release is defined
+    fail_msg: "StorPool release version is not defined"
+
+- name: Checking if the release target is valid
+  ansible.builtin.assert:
+    that:
+      - sp_target_release in supported_release_targets
+    fail_msg: "Unsupported release method set: {{ sp_target_release }}"
+
+- name: Downloading required tools
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+  with_items:
+    - { url: "{{ sp_getpackage_url }}", dest: "{{ sp_tools_directory }}" }
+    - { url: "{{ sp_install_helper_url }}", dest: "{{ sp_tools_directory }}" }
+
+- name: Download the release archive from the vault
+  become: true
+  command: >- 
+    {{ sp_getpackage_path }} 
+    -g {{ sp_release }} 
+    -t {{ sp_target_release }} 
+    -u {{ sp_vault_url }} 
+    {% if get_debug_packages %}
+    -d
+    {% endif %}
+  changed_when: false
