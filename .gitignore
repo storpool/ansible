@@ -2,3 +2,4 @@ facts/
 ansible.log
 playbook.retry
 roles/custom_*
+roles/storpool.*

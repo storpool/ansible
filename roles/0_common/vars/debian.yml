@@ -1,9 +1,0 @@
----
-## Distribution packages to install (Debian-specific)
-distro_deps:
-  - "{{ 'less' if ansible_distribution_release == 'focal' else 'cgroup-bin' }}"
-  - cgroup-tools
-  - ifenslave
-  - liblz4-tool
-  - "{{ 'less' if ansible_distribution_release == 'focal' else 'python-selinux' }}"
-  - vlan

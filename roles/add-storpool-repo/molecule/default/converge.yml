@@ -1,7 +1,0 @@
----
-- name: Converge
-  hosts: all
-  tasks:
-    - name: "Include add-storpool-repo"
-      include_role:
-        name: "add-storpool-repo"

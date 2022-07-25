@@ -1,0 +1,20 @@
+---
+- name: Checking if the host is defined in storpool.conf
+  ansible.builtin.assert:
+    that:
+      - host_sp_ourid != ""
+    fail_msg: "Cannot determine SP_OURID from configuration"
+  vars:
+    host_sp_ourid: lookup('ansible.builtin.ini', 'SP_OURID', section=ansible_hostname, file=sp_configuration_path)
+
+- name: Include pre-installation tasks (Install Storpool)
+  import_tasks: "pre-install.yml"
+
+- name: Include installation tasks (Install Storpool) 
+  include_tasks: "install-storpool.yml"
+
+- name: Include post-installation tasks (Install Storpool) 
+  include_tasks: "post-install.yml"
+
+- name: Flush handlers
+  meta: flush_handlers

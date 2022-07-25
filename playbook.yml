@@ -1,8 +1,39 @@
 #!/usr/bin/env ansible-playbook
 ---
-- import_playbook: playbooks/1_prepare.yml
-- import_playbook: playbooks/2_setup-infra.yml
-- import_playbook: playbooks/3_install-storpool.yml
+- name: Gather localhost's facts
+  hosts: localhost
+  gather_subset: 'min'
+  tasks: []
+  tags:
+    - always
+
+- name: Ensure Python is installed
+  hosts: storpool
+  connection: ssh
+  gather_facts: false
+  become: true
+  roles:
+    - ensure_python
+  tags:
+    - always
+
+- name: Configuring hosts
+  hosts: storpool
+  become: true
+  roles:
+    - storpool.bootstrap_node
+    - storpool.install_sp_python
+  tags:
+    - bootstrap-hosts
+
+- name: Installing StorPool components
+  hosts: storpool
+  gather_facts: false
+  roles:
+    - install_storpool_components
+  tags:
+    - install-storpool-components
+
 - import_playbook: playbooks/4_setup-network.yml
 
 - name: Configure Drives
@@ -22,6 +53,5 @@
     - setup-cgroups
 
 - import_playbook: playbooks/7_setup-services.yml
-- import_playbook: playbooks/common_reboot.yml
 - import_playbook: playbooks/8_tests.yml
 - import_playbook: playbooks/9_sed.yml

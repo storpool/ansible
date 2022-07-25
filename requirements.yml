@@ -1,0 +1,6 @@
+---
+roles:
+  - src: https://github.com/storpool/ansible-role-install-sp-python.git
+    name: storpool.install_sp_python
+  - src: https://github.com/storpool/ansible-role-storpool-bootstrap-node.git
+    name: storpool.bootstrap_node

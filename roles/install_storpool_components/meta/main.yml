@@ -1,6 +1,6 @@
 galaxy_info:
   author: StorPool Operations
-  description: Ansibe role to execute StorPool post-installation tasks tasks
+  description: Ansible role for StorPool installation
   company: StorPool
   license: Apache
   platforms:

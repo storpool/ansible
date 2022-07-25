@@ -5,9 +5,6 @@
 - name: Validate deployment variables (Prepare Deployment)
   import_tasks: check-variables.yml
 
-- name: Validate that target hosts are covering StorPool requirements (Prepare Deployment)
-  import_tasks: check-requirements.yml
-
 - name: Preview deployment summary (Prepare Deployment)
   include_tasks: summary.yml
   when:
