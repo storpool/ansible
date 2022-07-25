@@ -1,2 +1,3 @@
 sp_configuration_path: "{{ inventory_dir }}/storpool.conf"
 sp_tools_directory: "{{ ansible_user_dir }}/storpool/"
+sp_vm: "{{ ansible_virtualization_role == 'guest' }}"
