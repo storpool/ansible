@@ -17,12 +17,24 @@
   when:
     - not sp_vm | bool
     - sp_run_enable_grub_iommu | bool
-  changed_when: false
+  notify: Update GRUB configuration
 
-- name: Include distro-specific tasks
-  include_tasks: "post_install_{{ ansible_os_family | lower }}.yml"
+- name: Increasing crashkernel size (Debian/Ubuntu)
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub.d/kdump-tools.cfg
+    create: yes
+    line: GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT crashkernel=512M"
+  notify: Update GRUB configuration
+  when:
+    - ansible_os_family == "Debian"
 
-- name: Test Memory - check on async task
+- name: Running patchkdumptools (Debian/Ubuntu)
+  become: true
+  command: "{{ sp_patchkdumptools_path }}"
+  notify: Update GRUB configuration
+
+- name: Waiting for memory tests to complete
   become: true
   async_status:
     jid: "{{ memory_test_sleeper.ansible_job_id }}"

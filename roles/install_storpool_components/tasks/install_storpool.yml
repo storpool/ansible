@@ -5,8 +5,23 @@
       - sp_install_method in supported_installation_methods
     fail_msg: "Unsupported installation method: {{ sp_install_method }}"
 
+- name: Generating a list of StorPool services to be installed
+  ansible.builtin.set_fact:
+    service_list: "{{ group_names | select('contains', 'storpool_') }}"
+
+- name: Checking if the host has any service designated to be installed
+  ansible.builtin.assert:
+    that:
+      - service_list | length > 0
+    fail_msg: "No StorPool service is configured. Add the host to the corresponding storpool_<service_name> group."
+
 - name: Downloading StorPool packages
   import_tasks: "install_modules_{{ sp_install_method }}.yml"
+
+- name: Setting list of modules to be installed
+  ansible.builtin.set_fact:
+    install_modules_list: "@cli bindings-py cgtool common beacon kmod update {{ service_list | map('split', 'storpool_') | map('last') | join(' ') }}"
+    extra_block_module: "{{ (sp_install_block_on_non_clients and inventory_hostname not in groups['storpool_block']) | ternary(' block', '') }}"
 
 - name: Installing StorPool modules
   become: true
@@ -18,7 +33,7 @@
       -r
       {% endif %}
       -w {{ sp_tools_directory | quote }}
-      -m {{ sp_install_services | quote }}
+      -m {{ (install_modules_list + extra_block_module) | quote }}
       {% if sp_retry_install %}
       --retry 2
       {% endif %}

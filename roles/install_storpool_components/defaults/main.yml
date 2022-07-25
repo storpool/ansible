@@ -13,8 +13,9 @@ sp_install_method: web
 sp_install_helper_path: "{{ sp_tools_directory }}/install_modules_helper.py"
 
 sp_reinstall: False
+sp_retry_install: True
 
-sp_install_block_on_servers: True
+sp_install_block_on_non_clients: True
 
 sp_run_enable_grub_iommu: True
 sp_patchkdumptools_path: /usr/lib/storpool/patchkdumptools

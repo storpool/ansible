@@ -1,0 +1,25 @@
+- name: Rebuilding GRUB configuration on Debian-based OS
+  become: true
+  ansible.builtin.command: /usr/sbin/update-grub2
+  listen: Update GRUB configuration
+  when:
+    - ansible_os_family == 'Debian'
+
+- name: Checking if the host boots via EFI
+  become: true
+  stat:
+    path: "/boot/efi/EFI/{{ ansible_distribution | lower }}/grub.cfg"
+  register: grub_efi_configuration
+  listen: Update GRUB configuration
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: Rebuilding GRUB configuration on RHEL-based OS
+  become: true
+  shell: |
+    /usr/sbin/grub2-mkconfig \
+    -o {{ '/boot/efi/EFI/{{ ansible_distribution | lower }}/grub.cfg' if grub_efi_configuration.stat.exists else '$(readlink -f /etc/grub2.cfg)' }}
+  changed_when: false
+  listen: Update GRUB configuration
+  when:
+    - ansible_os_family == 'RedHat'
