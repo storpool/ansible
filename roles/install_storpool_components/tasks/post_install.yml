@@ -13,10 +13,15 @@
 
 - name: Enabling IOMMU in GRUB config
   become: true
-  command: /usr/lib/storpool/enable_grub_iommu
+  command: /usr/lib/storpool/enable_grub_iommu --no-change-exit-status 254
+  register: enable_grub_iommu_result
   when:
     - not sp_vm | bool
     - sp_run_enable_grub_iommu | bool
+  changed_when: enable_grub_iommu_result.rc == 0
+  failed_when:
+    - enable_grub_iommu_result.rc != 0
+    - enable_grub_iommu_result.rc != 254
   notify: Update GRUB configuration
 
 - name: Increasing crashkernel size (Debian/Ubuntu)
@@ -29,10 +34,17 @@
   when:
     - ansible_os_family == "Debian"
 
-- name: Running patchkdumptools (Debian/Ubuntu)
+- name: Running patchkdumptools on Debian-based OS
   become: true
-  command: "{{ sp_patchkdumptools_path }}"
+  command: /usr/lib/storpool/patchkdumptools --no-change-exit-status 254
+  register: patch_kdump_tools_result
+  changed_when: patch_kdump_tools_result.rc == 0
+  failed_when:
+    - patch_kdump_tools_result.rc != 0
+    - patch_kdump_tools_result.rc != 254
   notify: Update GRUB configuration
+  when:
+    - ansible_os_family == "Debian"
 
 - name: Waiting for memory tests to complete
   become: true
