@@ -7,10 +7,6 @@
   vars:
     host_sp_ourid: lookup('ansible.builtin.ini', 'SP_OURID', section=ansible_hostname, file=sp_configuration_path)
 
-- name: Checking if the playbook is executed on the bastion host
-  ansible.builtin.set_fact:
-    is_bastion_host: "{{ hostvars['localhost'].ansible_hostname == 'poli' | bool }}"
-
 - name: Executing pre-installation tasks
   import_tasks: "pre_install.yml"
 

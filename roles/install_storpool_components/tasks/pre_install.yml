@@ -10,14 +10,6 @@
 - name: Creating directories
   import_tasks: "create_directories.yml"
 
-- name: Install support tools
-  import_tasks: "subtasks/support_tools.yml"
-  when:
-    - sp_poli is defined
-    - sp_poli | bool
-  tags:
-    - install-support-tools
-
 - name: Test memory
   import_tasks: "test_memory.yml"
   when:
