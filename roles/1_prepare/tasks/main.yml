@@ -1,7 +1,4 @@
 ---
-- name: Include common facts gathering tasks (Prepare Deployment)
-  import_tasks: variables-common.yml
-
 - name: Validate deployment variables (Prepare Deployment)
   import_tasks: check-variables.yml
 

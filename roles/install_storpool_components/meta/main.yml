@@ -4,8 +4,11 @@ galaxy_info:
   company: StorPool
   license: Apache
   platforms:
-    - name: CentOS
+    - name: EL
+      versions:
+        - 7
+        - 8
     - name: Debian
     - name: Ubuntu
-  min_ansible_version: 2.7
+  min_ansible_version: 2.10
   galaxy_tags: []
