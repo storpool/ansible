@@ -12,5 +12,6 @@
   loop:
     - /etc/storpool
     - /etc/storpool.conf.d
+    - /etc/storpool/mlc
     - /etc/cgconfig.d
     - /usr/lib/storpool
