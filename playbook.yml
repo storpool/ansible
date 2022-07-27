@@ -19,7 +19,6 @@
 
 - name: Configuring hosts
   hosts: storpool
-  become: true
   roles:
     - storpool.bootstrap_node
     - storpool.install_sp_python
@@ -33,7 +32,12 @@
   tags:
     - install-storpool-components
 
-- import_playbook: playbooks/4_setup-network.yml
+- name: Configuring Networking
+  hosts: storpool
+  roles:
+    - configure_networking
+  tags:
+    - configure-networking
 
 - name: Configure Drives
   hosts: storpool_servers

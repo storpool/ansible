@@ -1,0 +1,13 @@
+---
+- name: Configuring network setup
+  include_tasks: "configure_network.yml"
+  when:
+  - sp_configure_network | bool
+
+- name: Validate Network
+  import_tasks: "network_validation.yml"
+
+- name: Generating VF configuration
+  command: "{{ sp_vf_genconf }}"
+  when:
+    - not sp_vm | bool

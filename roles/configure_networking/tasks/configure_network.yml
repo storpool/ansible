@@ -1,0 +1,151 @@
+- name: Checking if raw interfaces are defined
+  ansible.builtin.assert:
+    that: sp_raw_interfaces is defined
+    fail_msg: "Host doesn't have any raw interfaces configured"
+
+- name: Creating a list of raw interfaces names
+  ansible.builtin.set_fact:
+    raw_interfaces_names: sp_raw_interfaces | split (" ")
+
+- name: Checking if atleast two interfaces are set
+  ansible.builtin.assert:
+    that: raw_interfaces_names | length >= 2
+    fail_msg: "Not enough raw interfaces set, currently set {{ raw_interfaces_names | length }}"
+
+- name: Checking if raw interface exists on the host
+  ansible.builtin.assert:
+    that: interface_name in ansible_interfaces
+    fail_msg: "Interface {{ interface_name }} not found on host"
+  loop: "{{ raw_interfaces_names }}"
+  loop_control:
+    loop_var: interface_name
+
+- name: Checking if resolve network is defined
+  ansible.builtin.assert:
+    that: sp_network is defined
+    fail_msg: "Resolve network is not configured"
+
+- name: Creating temporary configuration file
+  ansible.builtin.tempfile:
+    suffix: net_helper
+  register: temporary_genconfig_parameters
+
+- name: Execute net_helper genconfig with provided parameters
+  ansible.builtin.shell: >-
+    {{ net_helper_path }} genconfig
+    {{ sp_raw_interfaces }}
+    --sp-network {{ sp_network }}
+    --sp-mode {{ sp_network_mode | quote }}
+    --nm-controlled {{ nm_controlled }}
+    {% if sp_vlan is defined and (sp_vlan | int) != 0 %}
+    --vlan {{ sp_vlan }}
+    {% endif %}
+    {% if sp_mtu is defined %}
+    --sp-mtu {{ sp_mtu }}
+    {% endif %}
+    {% if defined(sp_bond_name) %}
+    --sp-bond-name {{ sp_bond_name }}
+    {% endif %}
+    {% if defined(sp_bridge_name) %}
+    --sp-bridge-name {{ sp_bridge_name }}
+    {% endif %}
+    {% if defined(arp_ip_targets) %}
+    --arp-ip-targets {{ arp_ip_targets }}
+    {% endif %}
+    {% if no_hwacc %}
+    --no-hwacc
+    {% endif %}
+    {% if defined(sp_address_offset) %}
+    --sp-address-offset {{ sp_address_offset }}
+    {% endif %}
+    {% if defined(sp_addnet_address_offset) %}
+    --sp-addnet-address-offset {{ sp_addnet_address_offset }}
+    {% endif %}
+    {% if defined(add_iface_net) %}
+    {% for net in add_iface_net %}
+    --add-iface-net {{ net }}
+    {% endfor %}
+    {% endif %}
+    {% if defined(iscsi_mode) %}
+    --iscsi-mode {{ iscsi_mode }}
+    {% endif %}
+    --iscsi-mtu {{ iscsi_mtu }}
+    {% if defined(iscsi_bond_name) %}
+    --iscsi-bond-name {{ iscsi_bond_name }}
+    {% endif %}
+    {% if defined(iscsi_bridge_name) %}
+    --iscsi-bridge-name {{ iscsi_bridge_name }}
+    {% endif %}
+    {% if defined(iscsi_arp_ip_targets) %}
+    --iscsi-arp-ip-targets {{ iscsi_arp_ip_targets }}
+    {% endif %}
+    {% if defined(sp_iscsi_address_offset) %}
+    --sp-iscsi-address-offset {{ sp_iscsi_address_offset }}
+    {% endif %}
+    {% if defined(iscsicfg_net) %}
+    {% for iscsi_net in iscsicfg_net %}
+    --iscsicfg-net {{ iscsi_net }}
+    {% endfor %}
+    {% endif %}
+    > {{ temporary_genconfig_parameters }}
+  register: genconfig_output
+
+- name: Checking if net_helper configuration exists
+  become: yes
+  ansible.builtin.stat:
+    path: "{{ genconfig_path }}"
+  register: genconfig_file
+
+- name: Generating diff output for current and new network configuration
+  ansible.builtin.command: "/usr/bin/diff -u {{ genconfig_path }} {{ temporary_genconfig_parameters }}"
+  register: network_configuration_diff
+  failed_when: network_configuration_diff.rc == 2
+  changed_when: false
+  when:
+    - genconfig_file.stat.exists
+
+- name: Reconfiguring network
+  block:
+    - name: Gathering running services
+      ansible.builtin.service_facts:
+      when:
+        - not force_network_reconfiguration
+
+    - name: Checking if storpool services are running
+      ansible.builtin.assert:
+        that: "{{ services | selectattr('name', 'contains', 'storpool') | selectattr('state', 'eq', 'running') | length > 0 }}"
+        fail_msg: "StorPool services are running, please stop them prior to changing network configuration"
+      when:
+        - not force_network_reconfiguration
+
+    - name: Cleaning up previous configuration
+      become: yes
+      ansible.builtin.command: >-
+        net_helper cleanup
+        {% if force_network_reconfiguration %}
+        --stop-services
+        {% endif %}
+  when:
+    - genconfig_file.stat.exists
+    - network_configuration_diff.rc == 1
+
+- name: Moving temporary network configuration to persistent
+  become: true
+  ansible.builtin.copy:
+    path: "{{ temporary_genconfig_parameters }}"
+    dest: "{{ genconfig_path }}"
+    remote_src: yes
+  when:
+    - network_configuration_diff.rc == 1
+
+- name: Checking if interface configuration changes are required
+  ansible.builtin.command: >-
+    net_helper check --from-config {{ genconfig_path }}
+  register: interface_configuration_check
+
+- name: Applying network configuration
+  ansible.builtin.command: >-
+    net_helper applyifcfg --from-config {{ genconfig_path }}
+  changed_when: network_configuration_diff.rc == 1
+  when:
+    - interface_configuration_check.rc == 1 or not genconfig_file.stat.exists
