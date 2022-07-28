@@ -19,3 +19,5 @@
   when:
     - sp_vm is defined and
       not sp_vm | bool
+  tags:
+    - perform-vf-configuration
