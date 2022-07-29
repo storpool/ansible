@@ -159,8 +159,13 @@
 - name: Checking if interface configuration changes are required
   become: yes
   ansible.builtin.command: >-
-    net_helper check --from-config {{ genconfig_path }}
+    net_helper check --from-config {{ genconfig_path }} --exit-status 254
   register: interface_configuration_check
+  changed_when:
+    - interface_configuration_check.rc == 254
+  failed_when:
+    - interface_configuration_check.rc != 0
+    - interface_configuration_check.rc != 254
   when:
     - storpool_network_interface_configuration.stat.exists
 
@@ -173,3 +178,9 @@
     - interface_configuration_check.rc == 1
   when:
     - (interface_configuration_check.rc is defined and interface_configuration_check.rc == 1) or not genconfig_file.stat.exists or not storpool_network_interface_configuration.stat.exists
+
+- name: Bringing up network interfaces
+  become: yes
+  ansible.builtin.command: net_helper up
+  when:
+    - sp_bring_up_network
