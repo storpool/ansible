@@ -5,7 +5,7 @@
 
 - name: Creating a list of raw interfaces names
   ansible.builtin.set_fact:
-    raw_interfaces_names: sp_raw_interfaces | split (" ")
+    raw_interfaces_names: "{{ sp_raw_interfaces | split (' ') }}"
 
 - name: Checking if atleast two interfaces are set
   ansible.builtin.assert:
@@ -25,6 +25,13 @@
     that: sp_network is defined
     fail_msg: "Resolve network is not configured"
 
+- name: Configuring /etc/network/interfaces on Ubuntu 18.04
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /etc/network/interfaces
+    line: source-directory interfaces.d
+    state: present
+
 - name: Creating temporary configuration file
   ansible.builtin.tempfile:
     suffix: net_helper
@@ -36,59 +43,64 @@
     {{ sp_raw_interfaces }}
     --sp-network {{ sp_network }}
     --sp-mode {{ sp_network_mode | quote }}
-    --nm-controlled {{ nm_controlled }}
     {% if sp_vlan is defined and (sp_vlan | int) != 0 %}
     --vlan {{ sp_vlan }}
     {% endif %}
     {% if sp_mtu is defined %}
     --sp-mtu {{ sp_mtu }}
     {% endif %}
-    {% if defined(sp_bond_name) %}
-    --sp-bond-name {{ sp_bond_name }}
+    {% if (sp_nm_controlled is defined and sp_nm_controlled | bool) or (ansible_os_family == 'RedHat' and (ansible_distribution_major_version | int) >= 8) %}
+    --nm-controlled
     {% endif %}
-    {% if defined(sp_bridge_name) %}
-    --sp-bridge-name {{ sp_bridge_name }}
-    {% endif %}
-    {% if defined(arp_ip_targets) %}
-    --arp-ip-targets {{ arp_ip_targets }}
-    {% endif %}
-    {% if no_hwacc %}
+    {% if (sp_disable_hw_acceleration is defined and sp_disable_hw_acceleration | bool) or ansible_virtualization_role == 'guest' %}
     --no-hwacc
     {% endif %}
-    {% if defined(sp_address_offset) %}
+    {% if sp_bond_name is defined %}
+    --sp-bond-name {{ sp_bond_name }}
+    {% endif %}
+    {% if sp_bridge_name is defined %}
+    --sp-bridge-name {{ sp_bridge_name }}
+    {% endif %}
+    {% if sp_arp_ip_targets is defined %}
+    --arp-ip-targets {{ sp_arp_ip_targets }}
+    {% endif %}
+    {% if sp_address_offset is defined %}
     --sp-address-offset {{ sp_address_offset }}
     {% endif %}
-    {% if defined(sp_addnet_address_offset) %}
+    {% if sp_addnet_address_offset is defined %}
     --sp-addnet-address-offset {{ sp_addnet_address_offset }}
     {% endif %}
-    {% if defined(add_iface_net) %}
+    {% if add_iface_net is defined %}
     {% for net in add_iface_net %}
     --add-iface-net {{ net }}
     {% endfor %}
     {% endif %}
-    {% if defined(iscsi_mode) %}
-    --iscsi-mode {{ iscsi_mode }}
+    {% if sp_iscsi_network_mode is defined %}
+    --iscsi-mode {{ sp_iscsi_network_mode }}
     {% endif %}
+    {% if iscsi_mtu is defined %}
     --iscsi-mtu {{ iscsi_mtu }}
-    {% if defined(iscsi_bond_name) %}
+    {% endif %}
+    {% if iscsi_bond_name is defined %}
     --iscsi-bond-name {{ iscsi_bond_name }}
     {% endif %}
-    {% if defined(iscsi_bridge_name) %}
+    {% if iscsi_bridge_name is defined %}
     --iscsi-bridge-name {{ iscsi_bridge_name }}
     {% endif %}
-    {% if defined(iscsi_arp_ip_targets) %}
+    {% if iscsi_arp_ip_targets is defined %}
     --iscsi-arp-ip-targets {{ iscsi_arp_ip_targets }}
     {% endif %}
-    {% if defined(sp_iscsi_address_offset) %}
+    {% if sp_iscsi_address_offset is defined %}
     --sp-iscsi-address-offset {{ sp_iscsi_address_offset }}
     {% endif %}
-    {% if defined(iscsicfg_net) %}
+    {% if iscsicfg_net is defined %}
     {% for iscsi_net in iscsicfg_net %}
     --iscsicfg-net {{ iscsi_net }}
     {% endfor %}
     {% endif %}
-    > {{ temporary_genconfig_parameters }}
+    > {{ temporary_genconfig_parameters.path }}
   register: genconfig_output
+  changed_when: false
 
 - name: Checking if net_helper configuration exists
   become: yes
@@ -96,8 +108,14 @@
     path: "{{ genconfig_path }}"
   register: genconfig_file
 
+- name: Checking if StorPool network interface configuration exists
+  become: true
+  ansible.builtin.stat:
+    path: /etc/storpool.conf.d/net_helper.conf
+  register: storpool_network_interface_configuration
+
 - name: Generating diff output for current and new network configuration
-  ansible.builtin.command: "/usr/bin/diff -u {{ genconfig_path }} {{ temporary_genconfig_parameters }}"
+  ansible.builtin.command: "/usr/bin/diff -u {{ genconfig_path }} {{ temporary_genconfig_parameters.path }}"
   register: network_configuration_diff
   failed_when: network_configuration_diff.rc == 2
   changed_when: false
@@ -130,22 +148,28 @@
     - network_configuration_diff.rc == 1
 
 - name: Moving temporary network configuration to persistent
-  become: true
+  become: yes
   ansible.builtin.copy:
-    path: "{{ temporary_genconfig_parameters }}"
+    src: "{{ temporary_genconfig_parameters.path }}"
     dest: "{{ genconfig_path }}"
     remote_src: yes
   when:
-    - network_configuration_diff.rc == 1
+    - not genconfig_file.stat.exists or (network_configuration_diff is defined and network_configuration_diff.rc == 1)
 
 - name: Checking if interface configuration changes are required
+  become: yes
   ansible.builtin.command: >-
     net_helper check --from-config {{ genconfig_path }}
   register: interface_configuration_check
+  when:
+    - storpool_network_interface_configuration.stat.exists
 
 - name: Applying network configuration
+  become: yes
   ansible.builtin.command: >-
     net_helper applyifcfg --from-config {{ genconfig_path }}
-  changed_when: network_configuration_diff.rc == 1
+  changed_when:
+    - interface_configuration_check.rc is defined
+    - interface_configuration_check.rc == 1
   when:
-    - interface_configuration_check.rc == 1 or not genconfig_file.stat.exists
+    - (interface_configuration_check.rc is defined and interface_configuration_check.rc == 1) or not genconfig_file.stat.exists or not storpool_network_interface_configuration.stat.exists
