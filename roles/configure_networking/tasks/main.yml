@@ -6,8 +6,3 @@
 
 - name: Validating network configuration
   import_tasks: "validate_network.yml"
-
-- name: Generating VF configuration
-  command: "{{ sp_vf_genconf }}"
-  when:
-    - not sp_vm | bool

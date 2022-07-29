@@ -122,31 +122,6 @@
   when:
     - genconfig_file.stat.exists
 
-- name: Reconfiguring network
-  block:
-    - name: Gathering running services
-      ansible.builtin.service_facts:
-      when:
-        - not force_network_reconfiguration
-
-    - name: Checking if storpool services are running
-      ansible.builtin.assert:
-        that: "{{ services | selectattr('name', 'contains', 'storpool') | selectattr('state', 'eq', 'running') | length > 0 }}"
-        fail_msg: "StorPool services are running, please stop them prior to changing network configuration"
-      when:
-        - not force_network_reconfiguration
-
-    - name: Cleaning up previous configuration
-      become: yes
-      ansible.builtin.command: >-
-        net_helper cleanup
-        {% if force_network_reconfiguration %}
-        --stop-services
-        {% endif %}
-  when:
-    - genconfig_file.stat.exists
-    - network_configuration_diff.rc == 1
-
 - name: Moving temporary network configuration to persistent
   become: yes
   ansible.builtin.copy:
@@ -169,18 +144,46 @@
   when:
     - storpool_network_interface_configuration.stat.exists
 
+- name: Reconfiguring network
+  block:
+    - name: Gathering running services
+      ansible.builtin.service_facts:
+      when:
+        - not force_network_reconfiguration
+
+    - name: Checking if storpool services are running
+      ansible.builtin.assert:
+        that: "{{ services | selectattr('name', 'contains', 'storpool') | selectattr('state', 'eq', 'running') | length > 0 }}"
+        fail_msg: "StorPool services are running, please stop them prior to changing network configuration"
+      when:
+        - not force_network_reconfiguration
+
+    - name: Bringing down network interfaces
+      become: yes
+      ansible.builtin.command: net_helper up
+      when:
+        - force_network_reconfiguration
+
+    - name: Cleaning up previous configuration
+      become: yes
+      ansible.builtin.command: >-
+        net_helper cleanup
+        {% if force_network_reconfiguration %}
+        --stop-services
+        {% endif %}
+  when:
+    - interface_configuration_check.changed
+
 - name: Applying network configuration
   become: yes
   ansible.builtin.command: >-
     net_helper applyifcfg --from-config {{ genconfig_path }}
-  changed_when:
-    - interface_configuration_check.rc is defined
-    - interface_configuration_check.rc == 1
   when:
-    - (interface_configuration_check.rc is defined and interface_configuration_check.rc == 1) or not genconfig_file.stat.exists or not storpool_network_interface_configuration.stat.exists
+    - interface_configuration_check.changed
 
 - name: Bringing up network interfaces
   become: yes
   ansible.builtin.command: net_helper up
   when:
     - sp_bring_up_network
+    - interface_configuration_check.changed
