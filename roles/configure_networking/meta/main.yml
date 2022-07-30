@@ -1,11 +1,19 @@
 galaxy_info:
-  author: StorPool Operations
+  author: Kaloyan Kotlarski
+  namespace: storpool
+  role_name: configure_node
   description: Ansible role for setup, configuration and validation of StorPool networking
-  company: StorPool
-  license: Apache
+  company: StorPool Storage AD
+  license: Apache-2.0
   platforms:
-    - name: CentOS
-    - name: Debian
+    - name: EL
+      versions:
+        - 7
+        - 8
     - name: Ubuntu
-  min_ansible_version: 2.7
+      versions:
+        - bionic
+        - focal
+        - jammy
+  min_ansible_version: 2.12
   galaxy_tags: []
