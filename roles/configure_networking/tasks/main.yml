@@ -1,4 +1,8 @@
 ---
+- name: Figuring out whether to disable network acceleration
+  ansible.builtin.set_fact:
+    disable_network_acceleration: "{{ (sp_disable_hw_acceleration is defined and sp_disable_hw_acceleration | bool) or ansible_virtualization_role == 'guest' }}"
+
 - name: Configuring network setup
   include_tasks: "configure_network.yml"
   when:
@@ -6,3 +10,18 @@
 
 - name: Validating network configuration
   import_tasks: "validate_network.yml"
+
+- name: Generating VF configuration
+  become: yes
+  ansible.builtin.commnad: >-
+    /usr/lib/storpool/vf-genconf
+    {% if sp_mtu is defined %}
+    --mtu {{ sp_mtu }}
+    {% endif %}
+    {% if disable_network_acceleration %}
+    --disable-hw-acceleration
+    {% endif %}
+  when:
+    - not sp_configure_network | bool
+  tags:
+    - perform-vf-configuration0

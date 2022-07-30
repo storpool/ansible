@@ -52,7 +52,7 @@
     {% if (sp_nm_controlled is defined and sp_nm_controlled | bool) or (ansible_os_family == 'RedHat' and (ansible_distribution_major_version | int) >= 8) %}
     --nm-controlled
     {% endif %}
-    {% if (sp_disable_hw_acceleration is defined and sp_disable_hw_acceleration | bool) or ansible_virtualization_role == 'guest' %}
+    {% if disable_network_acceleration %}
     --no-hwacc
     {% endif %}
     {% if sp_bond_name is defined %}
