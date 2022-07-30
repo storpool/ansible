@@ -1,3 +1,7 @@
+- name: Setting if host will run StorPool iSCSI service
+  ansible.builtin.set_fact:
+    is_iscsi_host: inventory_hostname in groups['storpool_iscsi']
+
 - name: Checking if raw interfaces are defined
   ansible.builtin.assert:
     that: sp_raw_interfaces is defined
@@ -15,7 +19,7 @@
 - name: Checking if raw interface exists on the host
   ansible.builtin.assert:
     that: interface_name in ansible_interfaces
-    fail_msg: "Interface {{ interface_name }} not found on host"
+    fail_msg: "StorPool raw interface {{ interface_name }} not found on host."
   loop: "{{ raw_interfaces_names }}"
   loop_control:
     loop_var: interface_name
@@ -25,7 +29,31 @@
     that: sp_network is defined
     fail_msg: "Resolve network is not configured"
 
-- name: Configuring /etc/network/interfaces on Ubuntu 18.04
+- name: Checking if two raw iSCSI interfaces are defined
+  ansible.builtin.assert:
+    that: iscsi_raw_interfaces_names | split (' ') | length == 2
+    fail_msg: "{{ iscsi_raw_interfaces_names | split (' ') | length }} interfaces defined as iSCSI raw interfaces, two are required"
+  when:
+    - is_iscsi_host
+
+- name: Checking if raw iSCSI interfaces exist on host
+  ansible.builtin.assert:
+    that: interface_name in ansible_interfaces
+    fail_msg: "StorPool iSCSI raw interface {{ interface_name }} not found on host."
+  loop: "{{ iscsi_raw_interfaces_names | split (' ') }}"
+  loop_control:
+    loop_var: interface_name
+  when:
+    - is_iscsi_host
+
+- name: Adjusting /etc/network/interfaces
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /etc/network/interfaces
+    regexp: ^source /etc/network/interfaces.d
+    state: absent
+
+- name: Configuring /etc/network/interfaces
   become: yes
   ansible.builtin.lineinfile:
     path: /etc/network/interfaces
@@ -75,25 +103,25 @@
     --add-iface-net {{ net }}
     {% endfor %}
     {% endif %}
-    {% if sp_iscsi_network_mode is defined %}
+    {% if is_iscsi_host and sp_iscsi_network_mode is defined %}
     --iscsi-mode {{ sp_iscsi_network_mode }}
     {% endif %}
-    {% if iscsi_mtu is defined %}
+    {% if is_iscsi_host and iscsi_mtu is defined %}
     --iscsi-mtu {{ iscsi_mtu }}
     {% endif %}
-    {% if iscsi_bond_name is defined %}
+    {% if is_iscsi_host and iscsi_bond_name is defined %}
     --iscsi-bond-name {{ iscsi_bond_name }}
     {% endif %}
-    {% if iscsi_bridge_name is defined %}
+    {% if is_iscsi_host and iscsi_bridge_name is defined %}
     --iscsi-bridge-name {{ iscsi_bridge_name }}
     {% endif %}
-    {% if iscsi_arp_ip_targets is defined %}
+    {% if is_iscsi_host and iscsi_arp_ip_targets is defined %}
     --iscsi-arp-ip-targets {{ iscsi_arp_ip_targets }}
     {% endif %}
-    {% if sp_iscsi_address_offset is defined %}
+    {% if is_iscsi_host and sp_iscsi_address_offset is defined %}
     --sp-iscsi-address-offset {{ sp_iscsi_address_offset }}
     {% endif %}
-    {% if iscsicfg_net is defined %}
+    {% if is_iscsi_host and iscsicfg_net is defined %}
     {% for iscsi_net in iscsicfg_net %}
     --iscsicfg-net {{ iscsi_net }}
     {% endfor %}
