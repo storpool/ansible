@@ -29,10 +29,17 @@
     that: sp_network is defined
     fail_msg: "Resolve network is not configured"
 
+- name: Checking if iSCSI interfaces are defined
+  ansible.builtin.assert:
+    that: sp_iscsi_raw_interfaces is defined
+    fail_msg: "Host {{ inventory_hostname }} has StorPool iSCSI service configured, but doesn't have any iSCSI interfaces configured."
+  when:
+    - is_iscsi_host
+
 - name: Checking if two raw iSCSI interfaces are defined
   ansible.builtin.assert:
-    that: iscsi_raw_interfaces_names | split (' ') | length == 2
-    fail_msg: "{{ iscsi_raw_interfaces_names | split (' ') | length }} interfaces defined as iSCSI raw interfaces, two are required"
+    that: sp_iscsi_raw_interfaces | split (' ') | length == 2
+    fail_msg: "{{ sp_iscsi_raw_interfaces | split (' ') | length }} interfaces defined as iSCSI raw interfaces, two are required"
   when:
     - is_iscsi_host
 
@@ -40,9 +47,16 @@
   ansible.builtin.assert:
     that: interface_name in ansible_interfaces
     fail_msg: "StorPool iSCSI raw interface {{ interface_name }} not found on host."
-  loop: "{{ iscsi_raw_interfaces_names | split (' ') }}"
+  loop: "{{ sp_iscsi_raw_interfaces | split (' ') }}"
   loop_control:
     loop_var: interface_name
+  when:
+    - is_iscsi_host
+
+- name: Checking if iSCSI interface mode is defined
+  ansible.builtin.assert:
+    that: sp_iscsi_network_mode is defined
+    fail_msg: "No iSCSI network mode defined, generating network configuration will fail"
   when:
     - is_iscsi_host
 
@@ -68,7 +82,11 @@
 - name: Execute net_helper genconfig with provided parameters
   ansible.builtin.shell: >-
     {{ net_helper_path }} genconfig
+    {% if is_iscsi_host %}
+    {{ sp_raw_interfaces + ' ' + sp_iscsi_raw_interfaces }}
+    {% else %}
     {{ sp_raw_interfaces }}
+    {% endif %}
     --sp-network {{ sp_network }}
     --sp-mode {{ sp_network_mode | quote }}
     {% if sp_vlan is defined and (sp_vlan | int) != 0 %}
@@ -208,11 +226,11 @@
   ansible.builtin.command: >-
     net_helper applyifcfg --from-config {{ genconfig_path }}
   when:
-    - interface_configuration_check.changed
+    - interface_configuration_check.changed or not storpool_network_interface_configuration.stat.exists
 
 - name: Bringing up network interfaces
   become: yes
   ansible.builtin.command: net_helper up
   when:
     - sp_bring_up_network
-    - interface_configuration_check.changed
+    - interface_configuration_check.changed or not storpool_network_interface_configuration.stat.exists
