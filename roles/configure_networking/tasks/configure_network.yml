@@ -200,6 +200,7 @@
         --stop-services
         {% endif %}
   when:
+    - storpool_network_interface_configuration.stat.exists
     - interface_configuration_check.changed
 
 - name: Applying network configuration
