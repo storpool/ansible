@@ -13,7 +13,7 @@
 
 - name: Generating VF configuration
   become: yes
-  ansible.builtin.commnad: >-
+  ansible.builtin.command: >-
     /usr/lib/storpool/vf-genconf
     {% if sp_mtu is defined %}
     --mtu {{ sp_mtu }}
