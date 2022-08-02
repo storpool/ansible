@@ -53,7 +53,7 @@
   roles:
     - configure-cgroups
   tags:
-    - setup-cgroups
+    - configure-cgroups
 
 - import_playbook: playbooks/7_setup-services.yml
 - import_playbook: playbooks/8_tests.yml
