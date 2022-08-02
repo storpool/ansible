@@ -40,12 +40,12 @@
     - configure-networking
 
 - name: Configure Drives
-  hosts: storpool_servers
+  hosts: storpool_server
   gather_facts: false
   roles:
     - initialize_disks
   tags:
-    - initialize_disks
+    - initialize-disks
 
 - name: Configure StorPool CGroups
   hosts: storpool
