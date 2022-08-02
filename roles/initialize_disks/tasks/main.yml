@@ -26,6 +26,14 @@
   when:
     - sp_discover_disk_run
 
+- name: Stopping multipathd before disk discovery
+  become: yes
+  ansible.builtin.systemd:
+    name: multipathd
+    state: stopped
+  when:
+    - sp_discover_disk_run
+
 - name: Discovering suitable disks
   become: true
   command: >-
@@ -51,6 +59,7 @@
     - sp_backup_disk_init_config
 
 - name: Save disk discovery command with timestamp
+  become: yes
   copy:
     content: '{{ disk_discovery.cmd }}'
     dest: '{{ disk_init_helper_discovery_file | dirname }}/.discover-cmd_{{ discover_disk_ts }}'
@@ -59,6 +68,7 @@
     - sp_backup_disk_init_config
 
 - name: Save disk discovery JSON dump with timestamp
+  become: yes
   copy:
     src: '{{ disk_init_helper_discovery_file }}'
     remote_src: yes
@@ -70,7 +80,7 @@
 - name: Copying disk testing tools
   copy:
     src: perform_disktest.sh
-    dest: '{{ sp_toolsdir }}'
+    dest: '{{ ansible_user_dir }}/storpool/'
     mode: 0755
 
 - name: Reading the disk discover json file
@@ -92,7 +102,7 @@
   become: true
   command:
     argv:
-      - '{{ sp_toolsdir }}/perform_disktest.sh'
+      - '{{ ansible_user_dir }}/storpool/perform_disktest.sh'
       - '{{ disks_to_be_tested | join(" ") }}'
   when:
     - sp_test_discovered_disks
@@ -122,7 +132,16 @@
     {{ disk_init_helper_discovery_file }}
   register: disk_init
 
+- name: Starting multipathd after disk initialization
+  become: yes
+  ansible.builtin.systemd:
+    name: multipathd
+    state: started
+  when:
+    - sp_discover_disk_run
+
 - name: Save disk initialization command with timestamp
+  become: yes
   copy:
     content: '{{ disk_init.cmd }}'
     dest: '{{ disk_init_helper_discovery_file | dirname }}/.init-cmd_{{ discover_disk_ts }}'
