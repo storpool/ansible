@@ -206,18 +206,6 @@
 
 - name: Reconfiguring network
   block:
-    - name: Gathering running services
-      ansible.builtin.service_facts:
-      when:
-        - not sp_force_network_reconfiguration
-
-    - name: Checking if storpool services are running
-      ansible.builtin.assert:
-        that: "{{ services | dict2items(key_name='name', value_name='info') | selectattr('name', 'contains', 'storpool') | selectattr('info.state', 'eq', 'running') | length > 0 }}"
-        fail_msg: "StorPool services are running, please stop them prior to changing network configuration"
-      when:
-        - not sp_force_network_reconfiguration
-
     - name: Cleaning up previous configuration
       become: yes
       ansible.builtin.command: >-
