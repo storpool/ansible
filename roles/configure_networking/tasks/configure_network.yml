@@ -56,7 +56,21 @@
 - name: Checking if iSCSI interface mode is defined
   ansible.builtin.assert:
     that: sp_iscsi_network_mode is defined
-    fail_msg: "No iSCSI network mode defined, generating network configuration will fail"
+    fail_msg: "No iSCSI network mode defined, generating network configuration will fail."
+  when:
+    - is_iscsi_host
+
+- name: Checking if iSCSI OS network configuration is defined
+  ansible.builtin.assert:
+    that: sp_iscsicfg_net is defined
+    fail_msg: "No OS interface network configuration found."
+  when:
+    - is_iscsi_host
+
+- name: Checking if two iSCSI OS networking configurations are defined
+  ansible.builtin.assert:
+    that: sp_iscsicfg_net | length >= 1
+    fail_msg: "No iSCSI OS network configuration defined"
   when:
     - is_iscsi_host
 
@@ -139,8 +153,8 @@
     {% if is_iscsi_host and sp_iscsi_address_offset is defined %}
     --sp-iscsi-address-offset {{ sp_iscsi_address_offset }}
     {% endif %}
-    {% if is_iscsi_host and iscsicfg_net is defined %}
-    {% for iscsi_net in iscsicfg_net %}
+    {% if is_iscsi_host %}
+    {% for iscsi_net in sp_iscsicfg_net %}
     --iscsicfg-net {{ iscsi_net }}
     {% endfor %}
     {% endif %}
@@ -195,26 +209,20 @@
     - name: Gathering running services
       ansible.builtin.service_facts:
       when:
-        - not force_network_reconfiguration
+        - not sp_force_network_reconfiguration
 
     - name: Checking if storpool services are running
       ansible.builtin.assert:
-        that: "{{ services | selectattr('name', 'contains', 'storpool') | selectattr('state', 'eq', 'running') | length > 0 }}"
+        that: "{{ services | dict2items(key_name='name', value_name='info') | selectattr('name', 'contains', 'storpool') | selectattr('info.state', 'eq', 'running') | length > 0 }}"
         fail_msg: "StorPool services are running, please stop them prior to changing network configuration"
       when:
-        - not force_network_reconfiguration
-
-    - name: Bringing down network interfaces
-      become: yes
-      ansible.builtin.command: net_helper up
-      when:
-        - force_network_reconfiguration
+        - not sp_force_network_reconfiguration
 
     - name: Cleaning up previous configuration
       become: yes
       ansible.builtin.command: >-
         net_helper cleanup
-        {% if force_network_reconfiguration %}
+        {% if sp_force_network_reconfiguration %}
         --stop-services
         {% endif %}
   when:
