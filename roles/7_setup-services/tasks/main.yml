@@ -10,11 +10,13 @@
   when: get_nvme_list_result.stdout_lines | length > 0
 
 - name: Enable Storpool services
-  command: "{{ sp_ctl }} enable --batch"
+  become: yes
+  command: /usr/sbin/storpool_ctl enable --batch
   changed_when: false
 
 - name: Start Storpool services
-  command: "{{ sp_ctl }} start --batch"
+  become: yes
+  command: /usr/sbin/storpool_ctl start --batch
   changed_when: false
   when:
     - start_services is not defined or
