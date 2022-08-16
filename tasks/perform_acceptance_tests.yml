@@ -1,0 +1,23 @@
+- name: Performing CPU turbo boost check
+  become: yes
+  ansible.builtin.command: "{{ ansible_user_dir }}/storpool/turbocheck"
+  register: turbo_check_result
+  changed_when: false
+  failed_when: false
+  when:
+    - hostvars['localhost'].ansible_hostname == 'poli'
+
+- name: Checking CPU turbo boost result
+  ansible.builtin.assert:
+    that: turbo_check_result.rc == 0
+    fail_msg: "CPU turbo boost is not enabled"
+  when:
+    - turbo_check_result.rc is defined
+
+- name: Triggering a kernel crash to test kdump
+  become: yes
+  ansible.builtin.reboot:
+    reboot_command: /bin/bash -c 'echo "c" > /proc/sysrq-trigger'
+  tags:
+    - never
+    - kdump-test

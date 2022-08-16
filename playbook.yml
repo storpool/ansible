@@ -62,6 +62,10 @@
   tags:
     - configure-services
 
-- import_playbook: playbooks/7_setup-services.yml
-- import_playbook: playbooks/8_tests.yml
-- import_playbook: playbooks/9_sed.yml
+- name: Performing system-wide testing
+  hosts: storpool
+  tasks:
+    - name: Importing testing tasks
+      import_tasks: tasks/perform_acceptance_tests.yml
+  tags:
+    - perform-tests

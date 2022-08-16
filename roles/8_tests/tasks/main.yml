@@ -1,6 +1,0 @@
----
-- name: Include kdump test tasks
-  include_tasks: "test_turbo.yml"
-
-- name: Include turbo test tasks
-  include_tasks: "test_kdump.yml"
