@@ -63,14 +63,14 @@
 - name: Checking if iSCSI OS network configuration is defined
   ansible.builtin.assert:
     that: sp_iscsicfg_net is defined
-    fail_msg: "No OS interface network configuration found."
+    fail_msg: "No iSCSI OS network configuration defined."
   when:
     - is_iscsi_host
 
 - name: Checking if two iSCSI OS networking configurations are defined
   ansible.builtin.assert:
     that: sp_iscsicfg_net | length >= 1
-    fail_msg: "No iSCSI OS network configuration defined"
+    fail_msg: "At least two iSCSI OS network configurations are required."
   when:
     - is_iscsi_host
 
