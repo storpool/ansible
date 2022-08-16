@@ -54,8 +54,13 @@
     - configure_cgroups
   tags:
     - configure-cgroups
+
+- name: Configuring StorPool services
+  hosts: storpool
+  roles:
+    - configure_services
   tags:
-    - configure-cgroups
+    - configure-services
 
 - import_playbook: playbooks/7_setup-services.yml
 - import_playbook: playbooks/8_tests.yml

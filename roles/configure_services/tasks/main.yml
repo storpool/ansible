@@ -1,0 +1,24 @@
+---
+- name: Running storpool_hugepages to apply NVME config
+  become: yes
+  ansible.builtin.command: >-
+    /usr/sbin/storpool_hugepages
+    {% if ansible_verbosity > 1 %}
+    -v
+    {% endif %}
+  register: create_storpool_hugepages_result
+  failed_when: create_storpool_hugepages_result.rc != 0
+
+- name: Enable Storpool services
+  become: yes
+  ansible.builtin.command: /usr/sbin/storpool_ctl enable --batch
+  changed_when: false
+
+- name: Start Storpool services
+  become: yes
+  ansible.builtin.command: /usr/sbin/storpool_ctl start --batch
+  register: start_services_result
+  changed_when: start_services_result.stdout_lines | length > 0
+  when:
+    - sp_start_services is not defined or
+      sp_start_services | bool
