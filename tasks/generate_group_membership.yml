@@ -1,0 +1,12 @@
+- name: Making host part of storpool_block group if it has no services defined
+  ansible.builtin.add_host:
+    name: "{{ inventory_hostname }}"
+    groups:
+      - storpool_block
+  when:
+    - group_names | select('contains', 'storpool_') | length == 0
+
+- name: Making host part of respective storpool_ groups
+  ansible.builtin.add_host:
+    name: "{{ inventory_hostname }}"
+    groups: "{{ ['storpool'] | product(sp_services) | map('join', '_') | list }}"

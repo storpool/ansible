@@ -27,6 +27,11 @@
 
 - name: Installing StorPool components
   hosts: storpool
+  pre_tasks:
+    - name: Building in-memory inventory groups
+      include_tasks: tasks/generate_group_membership.yml
+      when:
+        - sp_create_groups_by_services
   roles:
     - install_storpool_components
   tags:
@@ -34,6 +39,11 @@
 
 - name: Configuring Networking
   hosts: storpool
+  pre_tasks:
+    - name: Building in-memory inventory groups
+      include_tasks: tasks/generate_group_membership.yml
+      when:
+        - sp_create_groups_by_services
   roles:
     - configure_networking
   tags:
@@ -42,6 +52,11 @@
 - name: Configure Drives
   hosts: storpool_server
   gather_facts: false
+  pre_tasks:
+    - name: Building in-memory inventory groups
+      include_tasks: tasks/generate_group_membership.yml
+      when:
+        - sp_create_groups_by_services
   roles:
     - initialize_disks
   tags:
