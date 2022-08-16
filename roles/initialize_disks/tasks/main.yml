@@ -4,6 +4,7 @@
     export PATH=$PATH:/usr/sbin
     /usr/sbin/storpool_showconf -n -e SP_OURID
   register: retrieve_id_result
+  changed_when: false
 
 - name: Setting node ID as a fact
   set_fact:
@@ -111,12 +112,7 @@
 
 - name: Setting self-booting disk flag
   set_fact:
-    self_boot_flag: '{{ sp_new_cluster and inventory_hostname == groups["storpool_servers"][0] }}'
-
-- name: Debug self-booting disk
-  debug:
-    var: self_boot_flag
-    verbosity: 2
+    self_boot_flag: '{{ sp_new_cluster and inventory_hostname == groups["storpool_server"][0] }}'
 
 - name: Initializing disks
   become: true
