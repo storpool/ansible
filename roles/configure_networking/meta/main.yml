@@ -1,7 +1,7 @@
 galaxy_info:
   author: Kaloyan Kotlarski
   namespace: storpool
-  role_name: configure_node
+  role_name: configure_networking
   description: Ansible role for setup, configuration and validation of StorPool networking
   company: StorPool Storage AD
   license: Apache-2.0
