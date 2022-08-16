@@ -1,5 +1,5 @@
 ---
-# tasks file for configure-cgroups
+# tasks file for configure_cgroups
 - name: Checking if StorPool cgroup configuration exists
   become: true
   stat:

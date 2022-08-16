@@ -51,6 +51,8 @@
   hosts: storpool
   gather_facts: false
   roles:
+    - configure_cgroups
+  tags:
     - configure-cgroups
   tags:
     - configure-cgroups
