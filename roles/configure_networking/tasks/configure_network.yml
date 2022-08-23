@@ -80,6 +80,8 @@
     path: /etc/network/interfaces
     regexp: ^source /etc/network/interfaces.d
     state: absent
+  when:
+    - ansible_os_family == "Debian"
 
 - name: Configuring /etc/network/interfaces
   become: yes
@@ -87,6 +89,8 @@
     path: /etc/network/interfaces
     line: source-directory interfaces.d
     state: present
+  when:
+    - ansible_os_family == "Debian"
 
 - name: Creating temporary configuration file
   ansible.builtin.tempfile:
