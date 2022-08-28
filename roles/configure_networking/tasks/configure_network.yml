@@ -165,6 +165,8 @@
     > {{ temporary_genconfig_parameters.path }}
   register: genconfig_output
   changed_when: false
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/sbin"
 
 - name: Checking if net_helper configuration exists
   become: yes
