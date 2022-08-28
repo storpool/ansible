@@ -18,7 +18,7 @@
   become: true
   shell: |
     /usr/sbin/grub2-mkconfig \
-    -o {{ '/boot/efi/EFI/{{ ansible_distribution | lower }}/grub.cfg' if grub_efi_configuration.stat.exists else '$(readlink -f /etc/grub2.cfg)' }}
+    -o {{ '/boot/efi/EFI/' + (ansible_distribution | lower) + /grub.cfg' if grub_efi_configuration.stat.exists else '$(readlink -f /etc/grub2.cfg)' }}
   changed_when: false
   listen: Update GRUB configuration
   when:
