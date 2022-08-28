@@ -142,16 +142,16 @@
     {% if is_iscsi_host and sp_iscsi_network_mode is defined %}
     --iscsi-mode {{ sp_iscsi_network_mode }}
     {% endif %}
-    {% if is_iscsi_host and iscsi_mtu is defined %}
+    {% if is_iscsi_host and sp_iscsi_mtu is defined %}
     --iscsi-mtu {{ iscsi_mtu }}
     {% endif %}
-    {% if is_iscsi_host and iscsi_bond_name is defined %}
+    {% if is_iscsi_host and sp_iscsi_bond_name is defined %}
     --iscsi-bond-name {{ iscsi_bond_name }}
     {% endif %}
-    {% if is_iscsi_host and iscsi_bridge_name is defined %}
+    {% if is_iscsi_host and sp_iscsi_bridge_name is defined %}
     --iscsi-bridge-name {{ iscsi_bridge_name }}
     {% endif %}
-    {% if is_iscsi_host and iscsi_arp_ip_targets is defined %}
+    {% if is_iscsi_host and sp_iscsi_arp_ip_targets is defined %}
     --iscsi-arp-ip-targets {{ iscsi_arp_ip_targets }}
     {% endif %}
     {% if is_iscsi_host and sp_iscsi_address_offset is defined %}
