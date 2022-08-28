@@ -131,13 +131,13 @@
     {% if sp_address_offset is defined %}
     --sp-address-offset {{ sp_address_offset }}
     {% endif %}
-    {% if sp_addnet_address_offset is defined %}
-    --sp-addnet-address-offset {{ sp_addnet_address_offset }}
-    {% endif %}
-    {% if add_iface_net is defined %}
+    {% if sp_add_iface_net is defined %}
     {% for net in add_iface_net %}
     --add-iface-net {{ net }}
     {% endfor %}
+    {% if sp_addnet_address_offset is defined %}
+    --sp-addnet-address-offset {{ sp_addnet_address_offset }}
+    {% endif %}
     {% endif %}
     {% if is_iscsi_host and sp_iscsi_network_mode is defined %}
     --iscsi-mode {{ sp_iscsi_network_mode }}

@@ -1,9 +1,8 @@
 sp_configure_network: False
+sp_force_network_reconfiguration: False
+sp_bring_up_network: True
+
 sp_network_mode: active-backup-bond
 
 net_helper_path: "/usr/sbin/net_helper"
 genconfig_path: "/etc/storpool/autonets.conf"
-
-sp_force_network_reconfiguration: False
-
-sp_bring_up_network: True
