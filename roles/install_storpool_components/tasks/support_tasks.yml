@@ -9,6 +9,8 @@
     chdir: "{{ cluster_directory }}"
     cmd: "installtools {{ inventory_hostname }}"
   changed_when: false
+  environment:
+    remotedir: "{{ sp_tools_directory }}"
 
 - name: Performing mlc test
   become: true
