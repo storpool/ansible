@@ -200,7 +200,7 @@
 - name: Checking if interface configuration changes are required
   become: yes
   ansible.builtin.command: >-
-    net_helper check --from-config {{ genconfig_path }} --exit-status 254
+    {{ net_helper_path }} check --from-config {{ genconfig_path }} --exit-status 254
   register: interface_configuration_check
   changed_when:
     - interface_configuration_check.rc == 254
@@ -215,7 +215,7 @@
     - name: Cleaning up previous configuration
       become: yes
       ansible.builtin.command: >-
-        net_helper cleanup
+        {{ net_helper_path }} cleanup
         {% if sp_force_network_reconfiguration %}
         --stop-services
         {% endif %}
@@ -226,13 +226,14 @@
 - name: Applying network configuration
   become: yes
   ansible.builtin.command: >-
-    net_helper applyifcfg --from-config {{ genconfig_path }}
+    {{ net_helper_path }} applyifcfg --from-config {{ genconfig_path }}
   when:
     - interface_configuration_check.changed or not storpool_network_interface_configuration.stat.exists
 
 - name: Bringing up network interfaces
   become: yes
-  ansible.builtin.command: net_helper up
+  ansible.builtin.command: >-
+    {{ net_helper_path }} up
   when:
     - sp_bring_up_network
     - interface_configuration_check.changed or not storpool_network_interface_configuration.stat.exists
