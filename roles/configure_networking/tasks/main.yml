@@ -24,4 +24,4 @@
   when:
     - not sp_configure_network | bool
   tags:
-    - perform-vf-configuration0
+    - perform-vf-configuration
