@@ -1,0 +1,15 @@
+all:
+  hosts: {}
+  children:
+    storpool:
+      hosts:
+        node1:
+          sp_services:
+            - server
+            - mgmt
+      vars:
+        sp_new_cluster: True
+      children:
+        storpool_server:
+          hosts: {}
+          vars: {}
