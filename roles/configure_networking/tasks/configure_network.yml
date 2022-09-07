@@ -1,6 +1,6 @@
 - name: Setting if host will run StorPool iSCSI service
   ansible.builtin.set_fact:
-    is_iscsi_host: inventory_hostname in groups['storpool_iscsi']
+    is_iscsi_host: "{{ (inventory_hostname in groups['storpool_iscsi']) | bool }}"
 
 - name: Checking if raw interfaces are defined
   ansible.builtin.assert:
