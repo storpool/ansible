@@ -13,3 +13,6 @@ all:
         storpool_server:
           hosts: {}
           vars: {}
+        storpool_iscsi:
+          hosts: {}
+          vars: {}
