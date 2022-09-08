@@ -1,4 +1,8 @@
 ---
+- name: Retrieving running services
+  become: yes
+  ansible.builtin.service_facts:
+
 - name: Retrieving node ID from storpool.conf
   shell: |
     export PATH=$PATH:/usr/sbin
@@ -34,6 +38,7 @@
     state: stopped
   when:
     - sp_discover_disk_run
+    - "multipathd.service" in ansible_facts.services
 
 - name: Discovering suitable disks
   become: true
@@ -135,6 +140,8 @@
     state: started
   when:
     - sp_discover_disk_run
+    - "multipathd.service" in ansible_facts.services
+    -  ansible_facts.services["multipathd.service"]["state"] == "running"
 
 - name: Save disk initialization command with timestamp
   become: yes
