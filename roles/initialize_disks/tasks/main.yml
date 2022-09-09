@@ -38,7 +38,7 @@
     state: stopped
   when:
     - sp_discover_disk_run
-    - "multipathd.service" in ansible_facts.services
+    - ansible_facts.services["multipathd.service"] is defined
 
 - name: Discovering suitable disks
   become: true
@@ -140,8 +140,8 @@
     state: started
   when:
     - sp_discover_disk_run
-    - "multipathd.service" in ansible_facts.services
-    -  ansible_facts.services["multipathd.service"]["state"] == "running"
+    - ansible_facts.services["multipathd.service"] is defined
+    - ansible_facts.services["multipathd.service"]["state"] == "running"
 
 - name: Save disk initialization command with timestamp
   become: yes
