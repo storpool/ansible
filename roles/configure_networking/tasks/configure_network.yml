@@ -132,7 +132,7 @@
     --sp-address-offset {{ sp_address_offset }}
     {% endif %}
     {% if sp_add_iface_net is defined %}
-    {% for net in add_iface_net %}
+    {% for net in sp_add_iface_net %}
     --add-iface-net {{ net }}
     {% endfor %}
     {% if sp_addnet_address_offset is defined %}
