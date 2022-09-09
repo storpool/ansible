@@ -92,6 +92,27 @@
   when:
     - ansible_os_family == "Debian"
 
+- name: Installing network-scripts on EL 8
+  become: yes
+  ansible.builtin.dnf:
+    name: network-scripts
+    state: present
+  when:
+    - ansible_os_family == "RedHat"
+    - ( ansible_distribution_major_version | int ) == 8
+    - not sp_nm_controlled
+
+- name: Disabling NetworkManager on EL 8
+  become: yes
+  ansible.builtin.systemd:
+    name: NetworkManager
+    state: stopped
+    enabled: no
+  when:
+    - ansible_os_family == "RedHat"
+    - ( ansible_distribution_major_version | int ) == 8
+    - not sp_nm_controlled
+
 - name: Creating temporary configuration file
   ansible.builtin.tempfile:
     suffix: net_helper
