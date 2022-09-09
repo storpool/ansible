@@ -134,7 +134,7 @@
     {% if sp_mtu is defined %}
     --sp-mtu {{ sp_mtu }}
     {% endif %}
-    {% if (sp_nm_controlled is defined and sp_nm_controlled | bool) or (ansible_os_family == 'RedHat' and (ansible_distribution_major_version | int) >= 8) %}
+    {% if (sp_nm_controlled | bool) %}
     --nm-controlled
     {% endif %}
     {% if disable_network_acceleration %}
