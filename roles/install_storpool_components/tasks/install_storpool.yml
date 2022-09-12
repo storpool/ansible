@@ -21,7 +21,7 @@
 - name: Setting list of modules to be installed
   ansible.builtin.set_fact:
     install_modules_list: "@cli bindings-py cgtool common beacon kmod update {{ service_list | map('split', 'storpool_') | map('last') | join(' ') }}"
-    extra_block_module: "{{ (sp_install_block_on_non_clients and inventory_hostname not in groups['storpool_block']) | ternary(' block', '') }}"
+    extra_block_module: "{{ (groups['storpool_block'] is defined and inventory_hostname in groups['storpool_block']) | ternary(' block', '') }}"
 
 - name: Installing StorPool modules
   become: true

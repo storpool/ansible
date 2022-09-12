@@ -5,7 +5,7 @@
       - storpool_block
   when:
     - sp_install_block_on_non_clients
-    - sp_services | length == 0
+    - sp_services | length == 0 or "block" not in sp_services
   loop: "{{ groups['storpool'] }}"
   delegate_to: localhost
 
