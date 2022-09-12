@@ -33,6 +33,7 @@
       include_tasks: tasks/generate_group_membership.yml
       when:
         - sp_create_groups_by_services
+      delegate_to: localhost
   roles:
     - install_storpool_components
   tags:
