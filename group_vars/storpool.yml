@@ -1,5 +1,5 @@
 # Defines the release version to be installed
-sp_release: 19.01
+sp_release: 20.0
 
 # Defines whether inventory group membership should be automatically established based on the value of sp_services
 sp_create_groups_by_services: True
