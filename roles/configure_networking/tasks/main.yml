@@ -10,6 +10,8 @@
 
 - name: Validating network configuration
   import_tasks: "validate_network.yml"
+  tags:
+    - validate-network-configuration
 
 - name: Generating VF configuration
   become: yes
