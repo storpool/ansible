@@ -11,9 +11,9 @@
   ansible.builtin.set_fact:
     raw_interfaces_names: "{{ sp_raw_interfaces | split (' ') }}"
 
-- name: Checking if atleast two interfaces are set
+- name: Checking if atleast one interface is set
   ansible.builtin.assert:
-    that: raw_interfaces_names | length >= 2
+    that: raw_interfaces_names | length >= 1
     fail_msg: "Not enough raw interfaces set, currently set {{ raw_interfaces_names | length }}"
 
 - name: Checking if raw interface exists on the host
