@@ -1,8 +1,8 @@
-# Defines the release version to be installed
-sp_release: 20.0
-
 # Defines whether inventory group membership should be automatically established based on the value of sp_services
 sp_create_groups_by_services: True
 
 # Defines whether storpool_block service should be installed on non-clients
 sp_install_block_on_non_clients: True
+
+# Detect by default if the host is a Virtual Machine
+sp_vm: "{{ ansible_virtualization_role == 'guest' }}"

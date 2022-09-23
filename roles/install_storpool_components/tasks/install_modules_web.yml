@@ -1,16 +1,4 @@
 ---
-- name: Checking if StorPool release version is set
-  ansible.builtin.assert:
-    that:
-      - sp_release is defined
-    fail_msg: "StorPool release version is not defined"
-
-- name: Checking if the release target is valid
-  ansible.builtin.assert:
-    that:
-      - sp_target_release in supported_release_targets
-    fail_msg: "Unsupported release method set: {{ sp_target_release }}"
-
 - name: Downloading required tools
   ansible.builtin.get_url:
     url: "{{ item.url }}"
