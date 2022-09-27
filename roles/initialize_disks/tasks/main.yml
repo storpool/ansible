@@ -34,8 +34,11 @@
 - name: Stopping multipathd before disk discovery
   become: yes
   ansible.builtin.systemd:
-    name: multipathd
+    name: "{{ item }}"
     state: stopped
+  loop:
+    - multipathd.service
+    - multipathd.socket
   when:
     - sp_discover_disk_run
     - ansible_facts.services["multipathd.service"] is defined
@@ -136,8 +139,11 @@
 - name: Starting multipathd after disk initialization
   become: yes
   ansible.builtin.systemd:
-    name: multipathd
+    name: "{{ item }}"
     state: started
+  loop:
+    - multipathd.service
+    - multipathd.socket
   when:
     - sp_discover_disk_run
     - ansible_facts.services["multipathd.service"] is defined
