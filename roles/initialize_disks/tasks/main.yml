@@ -142,7 +142,6 @@
     name: "{{ item }}"
     state: started
   loop:
-    - multipathd.service
     - multipathd.socket
   when:
     - sp_discover_disk_run
