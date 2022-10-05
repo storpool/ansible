@@ -14,7 +14,10 @@
     {{ sp_getpackage_path }} 
     -g {{ sp_release }} 
     -t {{ sp_target_release }} 
-    -u {{ sp_vault_url }} 
+    -u {{ sp_vault_url }}
+    {% if sp_kernel_version is defined %}
+    -k {{ sp_kernel_version }}
+    {% endif %}
     {% if get_debug_packages %}
     -d
     {% endif %}
