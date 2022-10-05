@@ -6,7 +6,7 @@
 - name: Configuring network setup
   include_tasks: "configure_network.yml"
   when:
-  - sp_configure_network | bool
+    - sp_configure_network | bool
 
 - name: Validating network configuration
   import_tasks: "validate_network.yml"
