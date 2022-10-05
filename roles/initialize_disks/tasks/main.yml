@@ -163,4 +163,4 @@
   args:
     executable: /bin/bash
   when:
-    - sp_server_instances > 1
+    - (sp_server_instances | int) > 1
