@@ -7,7 +7,6 @@ EOUSAGE
     exit 1
 fi
 kernel_version="$1"
-now="$(date +"%Y-%m-%d_%H-%M-%S")"
 
 distro_regex="CentOS|Red Hat Enterprise Linux Server|AlmaLinux|Debian|Ubuntu"
 prog_name="$0"
@@ -24,30 +23,25 @@ set_grub_default() {
         exit 1
     fi
 
+    now="$(date +"%Y-%m-%d_%H-%M-%S")"
     if ! sed -i."$now" "s/^GRUB_DEFAULT=.*$/GRUB_DEFAULT=$default/g" /etc/default/grub ; then
         log "Failed to update /etc/default/grub"
+        exit 1
+    fi
+
+    if ! "$GRUB_MKCFG" -o "$GRUB_CFG"; then
+        log "Failed to generate new GRUB config"
         exit 1
     fi
 }
 
 parse_grub_cfg() {
-    local grub_cfg="$1"
-    if [[ -z $grub_cfg ]]; then
-        log "Usage: parse_grub_cfg /path/to/grub.cfg"
-        exit 1
-    fi
-    if [[ ! -r $grub_cfg ]]; then
-        log "GRUB config $grub_cfg is not readable or does not exist"
-        return
-    fi
-    log "Using GRUB config $grub_cfg"
-
     local source
     source="$(mktemp)"
     trap 'rm -f "$source"' EXIT QUIT
 
     rm -f "$source"
-    grep -E -i -w --regexp="^submenu|^menuentry|^[[:space:]]{1,}submenu|^[[:space:]]{1,}menuentry" "$grub_cfg" > "$source"
+    grep -E -i -w --regexp="^submenu|^menuentry|^[[:space:]]{1,}submenu|^[[:space:]]{1,}menuentry" "$GRUB_CFG" > "$source"
     local first=""
     local second=""
     while IFS= read -r line ; do
@@ -87,6 +81,21 @@ parse_grub_cfg() {
     fi
 }
 
+get_grub_entry() {
+    if command -v grubby >/dev/null; then
+        if ! kernel_info=$(grubby --info "/boot/vmlinuz-$kernel_version"); then
+            echo "Could not find kernel $kernel_version"
+            exit 1
+        fi
+        entry="$("$kernel_info" | sed -nr -e 's/title=(.*)/\1/p' -e 's/^["\'']//' -e 's/["\'']$//')"
+        if [[ -n $entry ]]; then
+            echo "$entry"
+            return 0
+        fi
+    fi
+    parse_grub_cfg
+}
+
 parse_boot_loader_entries() {
     if [[ ! -d "/boot/loader/entries" ]]; then
         log "The /boot/loader/entries directory does not exist, skipping"
@@ -111,19 +120,41 @@ parse_boot_loader_entries() {
     echo "\"$title\""
 }
 
-for cfg in "/boot/grub/grub.cfg" "/boot/grub2/grub.cfg" $(find /boot -name grub.cfg); do
-    new_default="$(parse_grub_cfg "$cfg")"
-    if [[ -n $new_default ]]; then
-        set_grub_default "$new_default"
-        exit 0
+GRUB_CFG=""
+for cfg in "/boot/grub/grub.cfg" "/boot/grub2/grub.cfg"; do
+    if [[ -f $cfg ]]; then
+        GRUB_CFG="$cfg"
+        log "Assuming GRUB configuration file is $GRUB_CFG"
+        break
     fi
 done
+if [[ -z $GRUB_CFG ]]; then
+    log "Could not find grub.cfg file!"
+    exit 1
+fi
 
-new_default="$(parse_boot_loader_entries)"
+GRUB_MKCFG=""
+for mkcfg in "grub-mkconfig" "grub2-mkconfig"; do
+    if command -v "$mkcfg" >/dev/null; then
+        GRUB_MKCFG="$mkcfg"
+        log "Assuming GRUB mkconfig executable is is $GRUB_MKCFG"
+        break
+    fi
+done
+if [[ -z $GRUB_MKCFG || -x $GRUB_MKCFG ]]; then
+    log "Could not find a GRUB update executable!"
+    exit 1
+fi
+
+new_default="$(get_grub_entry "$cfg")"
+if [[ -z $new_default ]]; then
+    new_default="$(parse_boot_loader_entries)"
+fi
+
 if [[ -n $new_default ]]; then
     set_grub_default "$new_default"
     exit 0
+else
+    log "Could not find kernel $kernel_version"
+    exit 1
 fi
-
-log "Could not find specified kernel"
-exit 1

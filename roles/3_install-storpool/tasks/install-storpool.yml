@@ -5,6 +5,23 @@
 - name: Get StorPool packages
   import_tasks: "subtasks/get_storpool/storpool_{{ sp_release_method | default('web') }}.yml"
 
+- name: Configure kernel version and parameters
+  import_tasks: "subtasks/configure_kernel.yml"
+
+- name: Test Memory - check on async task
+  become: true
+  async_status:
+    jid: "{{ memory_test_sleeper.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 200
+  delay: 30
+  when:
+    - sp_vm is defined
+    - not sp_vm | bool
+    - memory_test_sleeper is defined
+    - memory_test_sleeper.ansible_job_id is defined
+
 - name: Install StorPool modules
   become: true
   command:
