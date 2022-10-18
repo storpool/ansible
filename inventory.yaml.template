@@ -4,9 +4,7 @@ all:
     storpool:
       hosts:
         node1:
-          sp_services:
-            - server
-            - mgmt
+          sp_services: []
       vars:
         sp_new_cluster: True
       children:
