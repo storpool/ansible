@@ -43,13 +43,6 @@
   register: storpool_modules_sleeper
   changed_when: false
 
-- name: Executing StorPool Support specific tasks
-  import_tasks: "support_tasks.yml"
-  when:
-    - hostvars['localhost'].ansible_hostname == 'poli'
-  tags:
-    - install-support-tools
-
 - name: Install StorPool modules - check on async task
   become: true
   async_status:
