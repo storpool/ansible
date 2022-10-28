@@ -37,6 +37,33 @@ all:
 # Offset to calculate diskid prefix (useful when sp_node_id >= 40), also see 
         sp_diskid_offset:
 
+# Automated network configuration options
+# examples are available in roles/configure_networking/README.md
+
+#       sp_force_network_reconfiguration: False # Controls whether network configuration should be applied if the host is already configured. 
+#       sp_bring_up_network: True # Controls whether configured network interfaces should be brought up. 
+#       sp_raw_interfaces: "" # A pair of white space delimited interface names that are to be used as raw interfaces. 
+#       sp_mtu: 9000 # MTU of the raw interfaces to configure. 
+#       sp_vlan: 0 # VLAN ID to be used for StorPool storage data. If not set, the net_helper utility assumes untagged traffic. 
+#       sp_network: 0.0.0.0/0 # Network prefix in the format of `A.B.C.D/E` designating the network to generate addresses from. 
+#       sp_network_mode: "active-backup-bond" # The network mode that StorPool will work with, one of "active-backup-bond", "exclusive-ifaces", "bridge-mlag-bond", "mlag-bond", "bridge-active-backup-bond"
+#       sp_nm_controlled: False # Controls whether network configuration should be applied via NetworkManager. 
+#       disable_network_acceleration: False # Disables hardware-based acceleration. CAUTION! Do not set this without explicitly consulting with StorPool Support team. 
+#       sp_bond_name: "" # If defined, it sets the name of the bond interface to be used by StorPool. 
+#       sp_bridge_name: "" # If defined, it sets the name of the bridge interface to be used by StorPool. 
+#       sp_arp_ip_targets: "" # Whitespace delimited list of IP addresses to be used as ARP IP targets. 
+#       sp_address_offset: "" # If defined, this will offset the IP address of each host by the amount specified. 
+#       sp_add_iface_net: "" #  List of extra VLANs and IP addresses to be configured on the interfaces. 
+#       sp_addnet_address_offset: "" # If defined, this will offset the extra IP address of each host by the amount specified. 
+#       sp_iscsi_network_mode: "" # If defined, it sets the network mode of the iSCSI raw interfaces. 
+#       sp_iscsi_mtu: "" # If defined, sets the MTU of the iSCSI interfaces. By default it's set to 9000. 
+#       sp_iscsi_bond_name: "" # If defined, sets the name of the bond interface which binds the two iSCSI raw interfaces. 
+#       sp_iscsi_bridge_name: "" # If defined, sets the name of the bridge interface which sits on top of a bond used for iSCSI. 
+#       sp_iscsi_arp_ip_targets: "" # Whitespace delimited list of IP addresses to be used as ARP IP targets for iSCSI bond. 
+#       sp_iscsi_address_offset: "" # If defined, this will offset the iSCSI OS IP address of each host by the amount specified. 
+#       sp_iscsicfg_net: "" # List of extra VLANs and IP addresses to be configured on the iSCSI interfaces. 
+
+
 # Any option from the globals can be overriden per node
       hosts:
         node1:
