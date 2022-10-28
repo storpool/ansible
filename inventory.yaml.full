@@ -1,0 +1,59 @@
+all:
+  hosts: {}
+  children:
+    storpool:
+
+# Global vars for the deployment. Any of these can also be set per-host.          
+      vars:
+        sp_new_cluster: True
+        sp_release: 20.0
+# Whether to always attempt to re-install regardless if a previous version was installed or not
+        sp_reinstall: False
+# Location of storpool.conf, autodetected
+#       sp_config:
+# Perform OS update (yum/apt update/upgrade) on target hosts
+        sp_update_system: False
+# Retry StorPool installation to handle transient network errors
+        sp_retry_install:
+# Wether to configure the network
+# If set to true, make sure to read roles/configure_networking/README.md first.
+* This autoconfigures also storpool.conf's SP_IFACE*_CFG
+#       sp_configure_network: False
+# Set SELinux state (valid options are "permissive" or "disabled")
+#       sp_selinux: disabled
+# Stop and disable NetworkManager
+#       sp_disable_nm: True
+# Stop and disable firewalld/ufw (if False, will add ports for StorPool)
+#       sp_disable_fw: True
+# Nodes are virtual machines - It will be determined automatically if not specifically set
+#       sp_vm: False
+# Is the node/cluster hyperconverged?
+#       sp_cg_hyperconverged: False
+# Extra cgconfig (storpool_cg) options
+#       sp_cg_conf_extra:
+
+# Disk initialization options (also see ./roles/initialize_disks/README.md for
+# additional parameters)
+# Offset to calculate diskid prefix (useful when sp_node_id >= 40), also see 
+        sp_diskid_offset:
+
+# Any option from the globals can be overriden per node
+      hosts:
+        node1:
+# services make sense to be configured only per node
+          sp_services:
+             - server
+             - mgmt
+             - bridge
+             - iscsi
+
+
+
+# internal use
+      children:
+        storpool_server:
+          hosts: {}
+          vars: {}
+        storpool_iscsi:
+          hosts: {}
+          vars: {}
