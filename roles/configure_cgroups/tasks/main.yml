@@ -47,3 +47,6 @@
       {% endif %}
       SET_MEMSW={{ sp_cg_set_memsw }}
   when: sp_slice_conf_file.stat.exists
+
+- name: Flushing handlers
+  meta: flush_handlers
