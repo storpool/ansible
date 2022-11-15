@@ -3,7 +3,7 @@
   become: true
   copy:
     src: "{{ sp_configuration_path }}"
-    dest: /etc/
+    dest: /etc/storpool.conf
   tags:
     - copy-storpool-conf
 
