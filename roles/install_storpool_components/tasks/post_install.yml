@@ -65,7 +65,8 @@
     - memory_test_sleeper is defined
     - memory_test_sleeper.ansible_job_id is defined
 
-- name: Seting default kernel version
+- name: Setting default kernel version
+  become: yes
   ansible.builtin.script:
     cmd: "files/sp_set_kernel {{ sp_kernel_version }}"
   when:
@@ -74,6 +75,7 @@
   notify: Reboot host
 
 - name: Checking if the kernel cmdline contains all expected parameters
+  become: yes
   command: /usr/lib/storpool/kernel_cmdline_check --exit-code 2
   register: kernel_cmdline_check
   ignore_errors: true
