@@ -1,5 +1,5 @@
 ---
-- name: Running storpool_hugepages to apply NVME config
+- name: Running storpool_hugepages
   become: yes
   ansible.builtin.command: >-
     /usr/sbin/storpool_hugepages
