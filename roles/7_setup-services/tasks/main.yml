@@ -1,13 +1,8 @@
 ---
-- name: Checking for configured NVMe devices
-  command: /usr/sbin/storpool_showconf -n SP_NVME_PCI_ID
-  register: get_nvme_list_result
-
-- name: Running storpool_hugepages to apply NVME config
+- name: Running storpool_hugepages
   command: /usr/sbin/storpool_hugepages
   register: create_storpool_hugepages_result
   failed_when: create_storpool_hugepages_result.rc != 0
-  when: get_nvme_list_result.stdout_lines | length > 0
 
 - name: Enable Storpool services
   command: "{{ sp_ctl }} enable --batch"
