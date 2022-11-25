@@ -15,7 +15,7 @@
     -g {{ sp_release }} 
     -t {{ sp_target_release }} 
     -u {{ sp_vault_url }}
-    {% if sp_kernel_version is defined %}
+    {% if sp_kernel_version is defined and (sp_kernel_version | length) >= 5 %}
     -k {{ sp_kernel_version }}
     {% endif %}
     {% if get_debug_packages %}
