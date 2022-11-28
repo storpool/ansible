@@ -133,7 +133,7 @@
 - name: Execute net_helper genconfig with provided parameters
   ansible.builtin.shell: >-
     {{ net_helper_path }} genconfig
-    {% if is_iscsi_host %}
+    {% if is_iscsi_host and sp_iscsi_raw_interfaces is defined %}
     {{ sp_raw_interfaces + ' ' + sp_iscsi_raw_interfaces }}
     {% else %}
     {{ sp_raw_interfaces }}
