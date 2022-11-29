@@ -47,14 +47,14 @@
   loop_control:
     loop_var: interface
   loop:
-    - "{{ first_raw_interface }}"
-    - "{{ second_raw_interface }}"
-    - "{{ first_resolve_interface }}"
-    - "{{ second_resolve_interface }}"
+    - "{{ first_raw_interface | replace('-', '_') }}"
+    - "{{ second_raw_interface | replace('-', '_') }}"
+    - "{{ first_resolve_interface | replace('-', '_') }}"
+    - "{{ second_resolve_interface | replace('-', '_') }}"
 
 - name: Checking if resolve interfaces have the configured IP addresses
   ansible.builtin.assert:
     that:
-      - hostvars[inventory_hostname]['ansible_' + first_resolve_interface]['ipv4']['address'] == first_resolve_ip_address
-      - hostvars[inventory_hostname]['ansible_' + second_resolve_interface]['ipv4']['address'] == second_resolve_ip_address
+      - hostvars[inventory_hostname]['ansible_' + (first_resolve_interface | replace('-', '_'))]['ipv4']['address'] == first_resolve_ip_address
+      - hostvars[inventory_hostname]['ansible_' + (second_resolve_interface | replace('-', '_'))]['ipv4']['address'] == second_resolve_ip_address
     fail_msg: "Resolve interface does not have configured IP address assigned to it"
