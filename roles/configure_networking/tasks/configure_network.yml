@@ -66,7 +66,7 @@
     enabled: no
   when:
     - sp_disable_nm
-    - "NetworkManager.service" in ansible_facts.services
+    - '"NetworkManager.service" in ansible_facts.services'
 
 - name: Creating temporary configuration file
   ansible.builtin.tempfile:
