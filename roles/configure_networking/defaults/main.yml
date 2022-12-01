@@ -7,6 +7,7 @@ sp_network_mode: active-backup-bond
 sp_nm_controlled: False
 
 sp_disable_nm: False
+sp_disable_fw: True
 
 net_helper_path: "/usr/sbin/net_helper"
 genconfig_path: "/etc/storpool/autonets.conf"

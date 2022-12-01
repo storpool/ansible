@@ -3,10 +3,18 @@
   ansible.builtin.set_fact:
     disable_network_acceleration: "{{ (sp_disable_hw_acceleration is defined and sp_disable_hw_acceleration | bool) }}"
 
+- name: Gathering running services
+  ansible.builtin.service_facts:
+
 - name: Configuring network setup
   include_tasks: "configure_network.yml"
   when:
     - sp_configure_network | bool
+
+- name: Configuring firewall
+  import_tasks: "configure_firewall.yml"
+  tags:
+    - configure-firewall
 
 - name: Validating network configuration
   import_tasks: "validate_network.yml"
