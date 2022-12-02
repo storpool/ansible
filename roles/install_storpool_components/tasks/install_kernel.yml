@@ -7,3 +7,11 @@
     kernel_package_name:
       redhat: kernel
       debian: linux-image
+
+- name: Installing extra modules package on Debian-based systems
+  become: yes
+  ansible.builtin.apt:
+    name: "linux-modules-extra-{{ sp_kernel_version }}"
+    state: present
+  when:
+    - ansible_os_family == "Debian"
