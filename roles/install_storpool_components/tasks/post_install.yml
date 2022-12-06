@@ -79,7 +79,7 @@
   ansible.builtin.command:
     cmd: >
       /opt/storpool/python3/bin/python3 -B -u
-      "{{ sp_toolsdir }}/sp_set_kernel.py" "{{ sp_kernel_version }}"
+      "{{ sp_tools_directory }}/sp_set_kernel.py" "{{ sp_kernel_version }}"
   environment:
     PYTHONPATH: "{{ extracted }}/py"
   when:
