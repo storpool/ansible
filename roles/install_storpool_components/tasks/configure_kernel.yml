@@ -53,9 +53,23 @@
   tags:
     - skip_ansible_lint
 
+- name: Copy default kernel script
+  become: true
+  copy:
+    src: "files/sp_set_kernel.py"
+    dest: "{{ sp_toolsdir }}/sp_set_kernel.py"
+  when:
+    - sp_kernel_version is defined
+    - not ansible_kernel | regex_search("^" + sp_kernel_version)
+
 - name: Set default kernel
-  script:
-    cmd: "files/sp_set_kernel {{ sp_kernel_version }}"
+  become: true
+  ansible.builtin.command:
+    cmd: >
+      /opt/storpool/python3/bin/python3 -B -u
+      "{{ sp_toolsdir }}/sp_set_kernel.py" "{{ sp_kernel_version }}"
+  environment:
+    PYTHONPATH: "{{ extracted }}/py"
   when:
     - sp_kernel_version is defined
     - not ansible_kernel | regex_search("^" + sp_kernel_version)
