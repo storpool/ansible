@@ -8,7 +8,7 @@
   when: '''VERSION_ID="18.04"'' in os_release_lines'
 
 - name: Install python3 on Ubuntu 20.04 and Ubuntu 22.04
-  raw: apt-get update && apt-get install -y python3
+  raw: apt-get update && env DEBIAN_FRONTEND=noninteractive apt-get install -y python3
   changed_when: false
   failed_when: false
   register: apt_install_result

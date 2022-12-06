@@ -112,6 +112,7 @@ ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --limit
 | sp_cg_hyperconverged | List of arguments to pass to storpool_cg conf |
 | sp_cg_conf_extra | List of extra arguments to pass to storpool_cg conf |
 | sp_diskid_offset |  Offset to calculate diskid prefix (useful when sp_node_id >= 40) |
+| sp_kernel_params_reboot | Automatically reboot to apply required kernel parameters set by `install.sh` ***Defaults to False***  |
 
 > For more information please check hosts.example file    
 
