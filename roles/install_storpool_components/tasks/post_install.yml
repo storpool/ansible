@@ -65,17 +65,30 @@
     - memory_test_sleeper is defined
     - memory_test_sleeper.ansible_job_id is defined
 
-- name: Setting default kernel version
-  become: yes
-  ansible.builtin.script:
-    cmd: "files/sp_set_kernel {{ sp_kernel_version }}"
+- name: Copy default kernel script
+  become: true
+  copy:
+    src: "files/sp_set_kernel.py"
+    dest: "{{ sp_toolsdir }}/sp_set_kernel.py"
+  when:
+    - sp_kernel_version is defined
+    - not ansible_kernel | regex_search("^" + sp_kernel_version)
+
+- name: Set default kernel
+  become: true
+  ansible.builtin.command:
+    cmd: >
+      /opt/storpool/python3/bin/python3 -B -u
+      "{{ sp_toolsdir }}/sp_set_kernel.py" "{{ sp_kernel_version }}"
+  environment:
+    PYTHONPATH: "{{ extracted }}/py"
   when:
     - sp_kernel_version is defined
     - not ansible_kernel | regex_search("^" + sp_kernel_version)
   notify: Reboot host
 
 - name: Checking if the kernel cmdline contains all expected parameters
-  become: yes
+  become: true
   command: /usr/lib/storpool/kernel_cmdline_check --exit-code 2
   register: kernel_cmdline_check
   ignore_errors: true
