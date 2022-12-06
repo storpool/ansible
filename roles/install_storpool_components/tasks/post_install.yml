@@ -69,7 +69,7 @@
   become: true
   copy:
     src: "files/sp_set_kernel.py"
-    dest: "{{ sp_toolsdir }}/sp_set_kernel.py"
+    dest: "{{ sp_tools_directory }}/sp_set_kernel.py"
   when:
     - sp_kernel_version is defined
     - not ansible_kernel | regex_search("^" + sp_kernel_version)
