@@ -80,8 +80,6 @@
     cmd: >
       /opt/storpool/python3/bin/python3 -B -u
       "{{ sp_tools_directory }}/sp_set_kernel.py" "{{ sp_kernel_version }}"
-  environment:
-    PYTHONPATH: "{{ extracted }}/py"
   when:
     - sp_kernel_version is defined
     - not ansible_kernel | regex_search("^" + sp_kernel_version)
