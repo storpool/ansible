@@ -95,3 +95,9 @@
   # in https://github.com/ansible/ansible/issues/14877
   failed_when: kernel_cmdline_check.rc == 0
   notify: Reboot host
+
+- name: Execuite StorPool components post-installation hook
+  become: yes
+  ansible.builtin.shell: {{ sp_post_install_components_hook }}
+  when:
+    - sp_post_install_components_hook is defined
