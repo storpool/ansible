@@ -1,0 +1,27 @@
+# Defines the release version to be installed
+sp_release: 20.0
+
+# Release target to search the release version in
+sp_target_release: release
+
+sp_tools_directory: "{{ ansible_user_dir }}/storpool"
+
+sp_configuration_path: "{{ inventory_dir }}/storpool.conf"
+
+sp_getpackage_url: https://vault.storpool.com/getpackage.py
+sp_install_helper_url: https://vault.storpool.com/install_modules_helper.py
+sp_vault_url: https://vault.storpool.com/getpkg.php
+
+sp_getpackage_path: "{{ sp_tools_directory }}/getpackage.py"
+
+sp_install_method: web
+sp_install_helper_path: "{{ sp_tools_directory }}/install_modules_helper.py"
+
+sp_reinstall: False
+sp_retry_install: True
+
+sp_reboot_after_install: False
+
+sp_run_enable_grub_iommu: True
+
+get_debug_packages: False

@@ -109,7 +109,8 @@ ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --limit
 | sp_disable_fw | Stop and disable firewalld/ufw (if False, will add ports for StorPool) ***Defaults to True*** |
 | sp_vm | Nodes are virtual machines - It will be determined automatically if not specifically set |
 | sp_summary_wait | Generate a summary and pause after variable validation ***Defaults to True*** |
-| sp_cg_conf_extra | List of arguments to pass to storpool_cg conf |
+| sp_cg_hyperconverged | List of arguments to pass to storpool_cg conf |
+| sp_cg_conf_extra | List of extra arguments to pass to storpool_cg conf |
 | sp_diskid_offset |  Offset to calculate diskid prefix (useful when sp_node_id >= 40) |
 | sp_kernel_params_reboot | Automatically reboot to apply required kernel parameters set by `install.sh` ***Defaults to False***  |
 
@@ -129,8 +130,6 @@ ansible-playbook /path/to/ansible/playbook.yml --inventory ansible.hosts --tags 
 
 ## Work is needed for:
 
-- Better disk initialization
-- Tests of CPU settings (turbocheck)
 - Auto-enable storpool_nvmed if nvme drives have been initialized
 - Add integration roles (onapp, openstack, cloudstack opennebula, etc)
 - Ubuntu: more testing to address specific cases

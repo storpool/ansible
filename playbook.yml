@@ -1,27 +1,88 @@
 #!/usr/bin/env ansible-playbook
 ---
-- import_playbook: playbooks/1_prepare.yml
-- import_playbook: playbooks/2_setup-infra.yml
-- import_playbook: playbooks/3_install-storpool.yml
-- import_playbook: playbooks/4_setup-network.yml
+- name: Gather localhost's facts
+  hosts: localhost
+  gather_subset: 'min'
+  tasks: []
+  tags:
+    - always
+
+- name: Ensure Python is installed
+  hosts: storpool
+  connection: ssh
+  gather_facts: false
+  become: true
+  roles:
+    - ensure_python
+  tags:
+    - always
+
+- name: Configuring hosts
+  hosts: storpool
+  gather_facts: yes
+  roles:
+    - storpool.bootstrap_node
+    - storpool.install_sp_python
+  tags:
+    - bootstrap-hosts
+
+- name: Installing StorPool components
+  hosts: storpool
+  pre_tasks:
+    - name: Building in-memory inventory groups
+      import_tasks: tasks/generate_group_membership.yml
+      when:
+        - sp_create_groups_by_services
+
+  roles:
+    - install_storpool_components
+  tags:
+    - install-storpool-components
+
+- name: Configuring Networking
+  hosts: storpool
+  pre_tasks:
+    - name: Building in-memory inventory groups
+      include_tasks: tasks/generate_group_membership.yml
+      when:
+        - sp_create_groups_by_services
+  roles:
+    - configure_networking
+  tags:
+    - configure-networking
 
 - name: Configure Drives
-  hosts: storpool_servers
+  hosts: storpool_server
   gather_facts: false
+  pre_tasks:
+    - name: Building in-memory inventory groups
+      include_tasks: tasks/generate_group_membership.yml
+      when:
+        - sp_create_groups_by_services
   roles:
     - initialize_disks
   tags:
-    - initialize_disks
+    - initialize-disks
 
 - name: Configure StorPool CGroups
   hosts: storpool
   gather_facts: false
   roles:
-    - configure-cgroups
+    - configure_cgroups
   tags:
-    - setup-cgroups
+    - configure-cgroups
 
-- import_playbook: playbooks/7_setup-services.yml
-- import_playbook: playbooks/common_reboot.yml
-- import_playbook: playbooks/8_tests.yml
-- import_playbook: playbooks/9_sed.yml
+- name: Configuring StorPool services
+  hosts: storpool
+  roles:
+    - configure_services
+  tags:
+    - configure-services
+
+- name: Performing system-wide testing
+  hosts: storpool
+  tasks:
+    - name: Importing testing tasks
+      import_tasks: tasks/perform_acceptance_tests.yml
+  tags:
+    - perform-tests

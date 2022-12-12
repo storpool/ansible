@@ -1,0 +1,19 @@
+galaxy_info:
+  author: Kaloyan Kotlarski
+  namespace: storpool
+  role_name: install_storpool_components
+  description: Ansible role for installing StorPool components
+  company: StorPool Storage AD
+  license: Apache-2.0
+  platforms:
+    - name: EL
+      versions:
+        - 7
+        - 8
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+        - jammy
+  min_ansible_version: 2.12
+  galaxy_tags: []

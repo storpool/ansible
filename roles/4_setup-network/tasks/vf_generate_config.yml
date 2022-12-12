@@ -1,3 +1,0 @@
-- name: Generate VF configuration
-  command: "{{ sp_vf_genconf }}"
-  changed_when: false

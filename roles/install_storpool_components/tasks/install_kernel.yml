@@ -1,0 +1,17 @@
+- name: Installing specific kernel version
+  become: yes
+  ansible.builtin.package:
+    name: "{{ kernel_package_name[(ansible_os_family | lower)] }}-{{ sp_kernel_version }}"
+    state: present
+  vars:
+    kernel_package_name:
+      redhat: kernel
+      debian: linux-image
+
+- name: Installing extra modules package on Debian-based systems
+  become: yes
+  ansible.builtin.apt:
+    name: "linux-modules-extra-{{ sp_kernel_version }}"
+    state: present
+  when:
+    - ansible_os_family == "Debian"

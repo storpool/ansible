@@ -1,0 +1,216 @@
+- name: Setting if host will run StorPool iSCSI service
+  ansible.builtin.set_fact:
+    is_iscsi_host: "{{ (inventory_hostname in groups['storpool_iscsi']) | bool }}"
+
+- name: Checking if raw interfaces are defined
+  ansible.builtin.assert:
+    that: sp_raw_interfaces is defined
+    fail_msg: "Host doesn't have any raw interfaces configured"
+
+- name: Creating a list of raw interfaces names
+  ansible.builtin.set_fact:
+    raw_interfaces_names: "{{ sp_raw_interfaces | split (' ') }}"
+
+- name: Checking if atleast one interface is set
+  ansible.builtin.assert:
+    that: raw_interfaces_names | length >= 1
+    fail_msg: "Not enough raw interfaces set, currently set {{ raw_interfaces_names | length }}"
+
+- name: Checking if raw interface exists on the host
+  ansible.builtin.assert:
+    that: interface_name in ansible_interfaces
+    fail_msg: "StorPool raw interface {{ interface_name }} not found on host."
+  loop: "{{ raw_interfaces_names }}"
+  loop_control:
+    loop_var: interface_name
+
+- name: Checking if resolve network is defined
+  ansible.builtin.assert:
+    that: sp_network is defined
+    fail_msg: "Resolve network is not configured"
+
+- name: Adjusting /etc/network/interfaces
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /etc/network/interfaces
+    regexp: ^source /etc/network/interfaces.d
+    state: absent
+  when:
+    - ansible_os_family == "Debian"
+
+- name: Configuring /etc/network/interfaces
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /etc/network/interfaces
+    line: source-directory interfaces.d
+    state: present
+  when:
+    - ansible_os_family == "Debian"
+
+- name: Installing network-scripts on EL 8
+  become: yes
+  ansible.builtin.dnf:
+    name: network-scripts
+    state: present
+  when:
+    - ansible_os_family == "RedHat"
+    - ( ansible_distribution_major_version | int ) == 8
+    - not sp_nm_controlled
+  notify: Enable network-scripts
+
+- name: Disabling NetworkManager if requested explicitly
+  become: yes
+  ansible.builtin.systemd:
+    name: NetworkManager
+    state: stopped
+    enabled: no
+  when:
+    - sp_disable_nm
+    - ansible_os_family == "RedHat"
+    - '"NetworkManager.service" in ansible_facts.services'
+
+- name: Creating temporary configuration file
+  ansible.builtin.tempfile:
+    suffix: net_helper
+  register: temporary_genconfig_parameters
+
+- name: Execute net_helper genconfig with provided parameters
+  ansible.builtin.shell: >-
+    {{ net_helper_path }} genconfig
+    {% if is_iscsi_host and sp_iscsi_raw_interfaces is defined %}
+    {{ sp_raw_interfaces + ' ' + sp_iscsi_raw_interfaces }}
+    {% else %}
+    {{ sp_raw_interfaces }}
+    {% endif %}
+    --sp-network {{ sp_network }}
+    --sp-mode {{ sp_network_mode | quote }}
+    {% if sp_vlan is defined and (sp_vlan | int) != 0 %}
+    --vlan {{ sp_vlan }}
+    {% endif %}
+    {% if sp_mtu is defined %}
+    --sp-mtu {{ sp_mtu }}
+    {% endif %}
+    {% if (sp_nm_controlled | bool) %}
+    --nm-controlled
+    {% endif %}
+    {% if disable_network_acceleration %}
+    --no-hwacc
+    {% endif %}
+    {% if sp_bond_name is defined %}
+    --sp-bond-name {{ sp_bond_name }}
+    {% endif %}
+    {% if sp_bridge_name is defined %}
+    --sp-bridge-name {{ sp_bridge_name }}
+    {% endif %}
+    {% if sp_arp_ip_targets is defined %}
+    --arp-ip-targets {{ sp_arp_ip_targets }}
+    {% endif %}
+    {% if sp_address_offset is defined %}
+    --sp-address-offset {{ sp_address_offset }}
+    {% endif %}
+    {% if sp_add_iface_net is defined %}
+    {% for net in sp_add_iface_net %}
+    --add-iface-net {{ net }}
+    {% endfor %}
+    {% if sp_addnet_address_offset is defined %}
+    --sp-addnet-address-offset {{ sp_addnet_address_offset }}
+    {% endif %}
+    {% endif %}
+    {% if is_iscsi_host and sp_iscsi_network_mode is defined %}
+    --iscsi-mode {{ sp_iscsi_network_mode }}
+    {% endif %}
+    {% if is_iscsi_host and sp_iscsi_mtu is defined %}
+    --iscsi-mtu {{ iscsi_mtu }}
+    {% endif %}
+    {% if is_iscsi_host and sp_iscsi_bond_name is defined %}
+    --iscsi-bond-name {{ iscsi_bond_name }}
+    {% endif %}
+    {% if is_iscsi_host and sp_iscsi_bridge_name is defined %}
+    --iscsi-bridge-name {{ iscsi_bridge_name }}
+    {% endif %}
+    {% if is_iscsi_host and sp_iscsi_arp_ip_targets is defined %}
+    --iscsi-arp-ip-targets {{ iscsi_arp_ip_targets }}
+    {% endif %}
+    {% if is_iscsi_host and sp_iscsi_address_offset is defined %}
+    --sp-iscsi-address-offset {{ sp_iscsi_address_offset }}
+    {% endif %}
+    {% if is_iscsi_host %}
+    {% for iscsi_net in sp_iscsicfg_net %}
+    --iscsicfg-net {{ iscsi_net }}
+    {% endfor %}
+    {% endif %}
+    > {{ temporary_genconfig_parameters.path }}
+  register: genconfig_output
+  changed_when: false
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/sbin"
+
+- name: Checking if net_helper configuration exists
+  become: yes
+  ansible.builtin.stat:
+    path: "{{ genconfig_path }}"
+  register: genconfig_file
+
+- name: Checking if StorPool network interface configuration exists
+  become: true
+  ansible.builtin.stat:
+    path: /etc/storpool.conf.d/net_helper.conf
+  register: storpool_network_interface_configuration
+
+- name: Generating diff output for current and new network configuration
+  ansible.builtin.command: "/usr/bin/diff -u {{ genconfig_path }} {{ temporary_genconfig_parameters.path }}"
+  register: network_configuration_diff
+  failed_when: network_configuration_diff.rc == 2
+  changed_when: false
+  when:
+    - genconfig_file.stat.exists
+
+- name: Moving temporary network configuration to persistent
+  become: yes
+  ansible.builtin.copy:
+    src: "{{ temporary_genconfig_parameters.path }}"
+    dest: "{{ genconfig_path }}"
+    remote_src: yes
+  when:
+    - not genconfig_file.stat.exists or (network_configuration_diff is defined and network_configuration_diff.rc == 1)
+
+- name: Checking if interface configuration changes are required
+  become: yes
+  ansible.builtin.command: >-
+    {{ net_helper_path }} check --from-config {{ genconfig_path }} --exit-status 254
+  register: interface_configuration_check
+  changed_when:
+    - interface_configuration_check.rc == 254
+  failed_when:
+    - interface_configuration_check.rc != 0
+    - interface_configuration_check.rc != 254
+  when:
+    - storpool_network_interface_configuration.stat.exists
+
+- name: Reconfiguring network
+  block:
+    - name: Cleaning up previous configuration
+      become: yes
+      ansible.builtin.command: >-
+        {{ net_helper_path }} cleanup
+        {% if sp_force_network_reconfiguration %}
+        --stop-services
+        {% endif %}
+  when:
+    - storpool_network_interface_configuration.stat.exists
+    - interface_configuration_check.changed
+
+- name: Applying network configuration
+  become: yes
+  ansible.builtin.command: >-
+    {{ net_helper_path }} applyifcfg --from-config {{ genconfig_path }}
+  when:
+    - interface_configuration_check.changed or not storpool_network_interface_configuration.stat.exists
+
+- name: Bringing up network interfaces
+  become: yes
+  ansible.builtin.command: >-
+    {{ net_helper_path }} up
+  when:
+    - sp_bring_up_network
+    - interface_configuration_check.changed or not storpool_network_interface_configuration.stat.exists

@@ -1,0 +1,28 @@
+---
+- name: Checking if a release file path is defined
+  ansible.builtin.assert:
+    that:
+      - sp_release_file is defined
+    fail_msg: "No path to a release archive is defined"
+
+- name: Checking if the release archive exists
+  ansible.builtin.assert:
+    that:
+      - release_file_list | length > 0
+    fail_msg: "Cannot find release file for path: {{ sp_release_file }}"
+  vars:
+    release_file_list: lookup('ansible.builtin.fileglob', sp_release_file)
+
+- name: Copying install_modules_helper to node
+  ansible.builtin.copy:
+    src: install_modules_helper.py
+    dest: "{{ sp_tools_directory }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0755
+
+- name: Copying release file to hosts
+  become: true
+  ansible.builtin.copy:
+    src: "{{ sp_release_file }}"
+    dest: "{{ sp_tools_directory }}"

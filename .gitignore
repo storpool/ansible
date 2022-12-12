@@ -1,4 +1,7 @@
 facts/
 ansible.log
+ansible.hosts
 playbook.retry
 roles/custom_*
+roles/storpool.*
+inventory.*

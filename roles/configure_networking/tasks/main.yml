@@ -1,0 +1,37 @@
+---
+- name: Figuring out whether to disable network acceleration
+  ansible.builtin.set_fact:
+    disable_network_acceleration: "{{ (sp_disable_hw_acceleration is defined and sp_disable_hw_acceleration | bool) }}"
+
+- name: Gathering running services
+  ansible.builtin.service_facts:
+
+- name: Configuring network setup
+  include_tasks: "configure_network.yml"
+  when:
+    - sp_configure_network | bool
+
+- name: Configuring firewall
+  import_tasks: "configure_firewall.yml"
+  tags:
+    - configure-firewall
+
+- name: Validating network configuration
+  import_tasks: "validate_network.yml"
+  tags:
+    - validate-network-configuration
+
+- name: Generating VF configuration
+  become: yes
+  ansible.builtin.command: >-
+    /usr/lib/storpool/vf-genconf
+    {% if sp_mtu is defined %}
+    --mtu {{ sp_mtu }}
+    {% endif %}
+    {% if disable_network_acceleration %}
+    --disable-hw-acceleration
+    {% endif %}
+  when:
+    - not sp_configure_network | bool
+  tags:
+    - perform-vf-configuration

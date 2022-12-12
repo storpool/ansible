@@ -1,0 +1,9 @@
+supported_installation_methods:
+  - local
+  - web
+
+supported_release_targets:
+  - release
+  - pre-release
+  - testing
+  - sp-lab

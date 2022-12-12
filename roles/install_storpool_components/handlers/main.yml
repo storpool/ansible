@@ -1,0 +1,61 @@
+- name: Rebuilding GRUB configuration on Debian-based OS
+  become: true
+  ansible.builtin.command: /usr/sbin/update-grub2
+  listen: Update GRUB configuration
+  when:
+    - ansible_os_family == 'Debian'
+
+- name: Checking if the host boots via EFI
+  become: true
+  stat:
+    path: "/boot/efi/EFI/{{ ansible_distribution | lower }}/grub.cfg"
+  register: grub_efi_configuration
+  listen: Update GRUB configuration
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: Rebuilding GRUB configuration on RHEL-based OS
+  become: true
+  shell: |
+    /usr/sbin/grub2-mkconfig \
+    -o {{ '/boot/efi/EFI/' + (ansible_distribution | lower) + '/grub.cfg' if grub_efi_configuration.stat.exists else '$(readlink -f /etc/grub2.cfg)' }}
+  changed_when: false
+  listen: Update GRUB configuration
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: Rebooting host
+  become: true
+  ansible.builtin.reboot:
+  listen: Reboot host
+  when:
+    - sp_reboot_after_install
+
+- name: Gather facts anew after reboot
+  gather_facts:
+    parallel: yes
+  listen: Reboot host
+  when:
+    - sp_reboot_after_install
+
+- name: Verify we are using the specified kernel
+  ansible.builtin.assert:
+    that:
+      - ansible_kernel | regex_search("^" + sp_kernel_version)
+    success_msg: "Running expected kernel {{ sp_kernel_version }}"
+    fail_msg: "Running unexpected kernel {{ ansible_kernel }}"
+  listen: Reboot host
+  when:
+    - sp_reboot_after_install
+    - sp_kernel_version is defined
+
+- name: Verify kernel parameters are applied
+  command:
+    argv:
+      - "/usr/lib/storpool/kernel_cmdline_check"
+      - "--exit-code"
+      - "2"
+  listen: Reboot host
+  when:
+    - sp_reboot_after_install
+    - sp_kernel_version is defined

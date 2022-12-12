@@ -1,9 +1,0 @@
-- name: Adding lines that disable periodic upgrades
-  lineinfile:
-    path: /etc/apt/apt.conf.d/999storpool
-    line: "{{ item }}"
-    state: present
-    create: true
-  loop:
-    - APT::Periodic::Update-Package-Lists "0";
-    - APT::Periodic::Unattended-Upgrade "0";

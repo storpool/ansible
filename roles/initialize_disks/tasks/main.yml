@@ -1,9 +1,14 @@
 ---
+- name: Retrieving running services
+  become: yes
+  ansible.builtin.service_facts:
+
 - name: Retrieving node ID from storpool.conf
   shell: |
     export PATH=$PATH:/usr/sbin
     /usr/sbin/storpool_showconf -n -e SP_OURID
   register: retrieve_id_result
+  changed_when: false
 
 - name: Setting node ID as a fact
   set_fact:
@@ -25,6 +30,18 @@
     state: absent
   when:
     - sp_discover_disk_run
+
+- name: Stopping multipathd before disk discovery
+  become: yes
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+  loop:
+    - multipathd.service
+    - multipathd.socket
+  when:
+    - sp_discover_disk_run
+    - ansible_facts.services["multipathd.service"] is defined
 
 - name: Discovering suitable disks
   become: true
@@ -51,6 +68,7 @@
     - sp_backup_disk_init_config
 
 - name: Save disk discovery command with timestamp
+  become: yes
   copy:
     content: '{{ disk_discovery.cmd }}'
     dest: '{{ disk_init_helper_discovery_file | dirname }}/.discover-cmd_{{ discover_disk_ts }}'
@@ -59,6 +77,7 @@
     - sp_backup_disk_init_config
 
 - name: Save disk discovery JSON dump with timestamp
+  become: yes
   copy:
     src: '{{ disk_init_helper_discovery_file }}'
     remote_src: yes
@@ -70,7 +89,7 @@
 - name: Copying disk testing tools
   copy:
     src: perform_disktest.sh
-    dest: '{{ sp_toolsdir }}'
+    dest: '{{ ansible_user_dir }}/storpool/'
     mode: 0755
 
 - name: Reading the disk discover json file
@@ -92,7 +111,7 @@
   become: true
   command:
     argv:
-      - '{{ sp_toolsdir }}/perform_disktest.sh'
+      - '{{ ansible_user_dir }}/storpool/perform_disktest.sh'
       - '{{ disks_to_be_tested | join(" ") }}'
   when:
     - sp_test_discovered_disks
@@ -101,12 +120,7 @@
 
 - name: Setting self-booting disk flag
   set_fact:
-    self_boot_flag: '{{ sp_new_cluster and inventory_hostname == groups["storpool_servers"][0] }}'
-
-- name: Debug self-booting disk
-  debug:
-    var: self_boot_flag
-    verbosity: 2
+    self_boot_flag: '{{ sp_new_cluster and inventory_hostname == groups["storpool_server"][0] }}'
 
 - name: Initializing disks
   become: true
@@ -122,7 +136,20 @@
     {{ disk_init_helper_discovery_file }}
   register: disk_init
 
+- name: Starting multipathd after disk initialization
+  become: yes
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+  loop:
+    - multipathd.socket
+  when:
+    - sp_discover_disk_run
+    - ansible_facts.services["multipathd.service"] is defined
+    - ansible_facts.services["multipathd.service"]["state"] == "running"
+
 - name: Save disk initialization command with timestamp
+  become: yes
   copy:
     content: '{{ disk_init.cmd }}'
     dest: '{{ disk_init_helper_discovery_file | dirname }}/.init-cmd_{{ discover_disk_ts }}'
@@ -136,4 +163,4 @@
   args:
     executable: /bin/bash
   when:
-    - sp_server_instances > 1
+    - (sp_server_instances | int) > 1

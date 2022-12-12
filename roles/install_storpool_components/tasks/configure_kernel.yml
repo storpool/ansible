@@ -1,0 +1,90 @@
+---
+- name: Find StorPool release archives
+  ansible.builtin.find:
+    paths: "{{ sp_toolsdir }}"
+    patterns: "^storpool-{{ sp_release }}.*\\.tar\\.gz$"
+    use_regex: yes
+    recurse: no
+  register: release_archives
+
+- name: Get latest StorPool release archive
+  ansible.builtin.set_fact:
+    release_archive: "{{ (release_archives.files|sort(attribute='mtime')|last).path }}"
+
+- name: Extract StorPool release archive
+  become: true
+  ansible.builtin.unarchive:
+    src: "{{ release_archive }}"
+    remote_src: yes
+    dest: "{{ sp_toolsdir }}"
+
+- name: Get extracted archive folder name
+  ansible.builtin.set_fact:
+    extracted: "{{ release_archive | regex_replace('(-debug)?\\.tar\\.gz$', '') }}"
+
+- name: Configure GRUB parameters
+  become: true
+  ansible.builtin.command:
+    cmd: >
+      /opt/storpool/python3/bin/python3 -B -u -m sp.tools.install_helper
+      --exclude '*'
+      --include 'boot.grub_parameters'
+      --modules '{% if "server" in sp_install_services %}server {% endif %}{% if sp_install_services | regex_search("block|beacon|iscsi|mgmt") %}block{% endif %}'
+      --allow-not-installed
+      --verbose {{ item }}
+    chdir: "{{ extracted }}"
+  environment:
+    PYTHONPATH: "{{ extracted }}/py"
+  loop:
+    - preinst
+    - postinst
+
+- name: Enable IOMMU in GRUB config
+  become: true
+  ansible.builtin.command:
+    cmd: /opt/storpool/python3/bin/python3 -B -u -m sp.tools.enable_grub_iommu
+    chdir: "{{ extracted }}"
+  environment:
+    PYTHONPATH: "{{ extracted }}/py"
+  when:
+    - not sp_vm | bool
+    - sp_run_enable_grub_iommu | bool
+  changed_when: false
+  tags:
+    - skip_ansible_lint
+
+- name: Copy default kernel script
+  become: true
+  copy:
+    src: "files/sp_set_kernel.py"
+    dest: "{{ sp_toolsdir }}/sp_set_kernel.py"
+  when:
+    - sp_kernel_version is defined
+    - not ansible_kernel | regex_search("^" + sp_kernel_version)
+
+- name: Set default kernel
+  become: true
+  ansible.builtin.command:
+    cmd: >
+      /opt/storpool/python3/bin/python3 -B -u
+      "{{ sp_toolsdir }}/sp_set_kernel.py" "{{ sp_kernel_version }}"
+  environment:
+    PYTHONPATH: "{{ extracted }}/py"
+  when:
+    - sp_kernel_version is defined
+    - not ansible_kernel | regex_search("^" + sp_kernel_version)
+  notify: "reload kernel"
+
+- name: Check kernel cmdline
+  command:
+    argv:
+      - "/usr/lib/storpool/kernel_cmdline_check"
+      - "--exit-code"
+      - "2"
+  register: kernel_cmdline_check
+  ignore_errors: true
+  changed_when: kernel_cmdline_check.rc == 2
+  # Workaround for the case described
+  # in https://github.com/ansible/ansible/issues/14877
+  failed_when: kernel_cmdline_check.rc == 0
+  notify: "reload kernel"

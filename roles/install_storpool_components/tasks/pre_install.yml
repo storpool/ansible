@@ -1,0 +1,31 @@
+---
+- name: Copying storpool.conf
+  become: true
+  copy:
+    src: "{{ sp_configuration_path }}"
+    dest: /etc/storpool.conf
+  tags:
+    - copy-storpool-conf
+
+- name: Creating directories
+  import_tasks: "create_directories.yml"
+
+- name: Executing StorPool Support specific tasks
+  import_tasks: "support_tasks.yml"
+  when:
+    - hostvars['localhost'].ansible_hostname == 'poli'
+  tags:
+    - install-support-tools
+
+- name: Installing specific version of the Linux kernel
+  include_tasks: "install_kernel.yml"
+  when:
+    - sp_kernel_version is defined
+    - not ansible_kernel | regex_search("^" + sp_kernel_version)
+
+- name: Test memory
+  import_tasks: "test_memory.yml"
+  when:
+    - not sp_vm | bool
+  tags:
+    - test-memory

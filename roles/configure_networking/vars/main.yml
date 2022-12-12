@@ -1,0 +1,7 @@
+firewall_service_map:
+  redhat: firewalld.service
+  debian: ufw.service
+firewall_ports:
+  - 81
+  - 3749
+  - 47567

@@ -1,0 +1,17 @@
+---
+- name: Creating StorPool tools directory
+  file:
+    path: "{{ sp_tools_directory }}"
+    state: directory
+
+- name: Creating StorPool system directories
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /etc/storpool
+    - /etc/storpool.conf.d
+    - /etc/storpool/mlc
+    - /etc/cgconfig.d
+    - /usr/lib/storpool

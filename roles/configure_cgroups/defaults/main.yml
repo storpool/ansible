@@ -1,0 +1,6 @@
+---
+# defaults file for configure_cgroups
+sp_cgtool_bin: /usr/sbin/storpool_cg
+sp_cg_conf_extra: ''
+sp_cg_start_cgconfig: true
+sp_cg_hyperconverged: false

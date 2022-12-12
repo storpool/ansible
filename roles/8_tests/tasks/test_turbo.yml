@@ -1,6 +1,0 @@
----
-- name: Check CPU running at higher than nominal frequency - turbo works ?
-  command: "{{ sp_toolsdir }}/turbocheck"
-  register: test_turbocheck
-  failed_when: test_turbocheck.rc != 0
-  changed_when: false

@@ -1,0 +1,31 @@
+---
+- name: Setting of cluster directory
+  ansible.builtin.set_fact:
+    cluster_directory: "{{ sp_custdir + '/' + sp_cluster if sp_custdir is defined and sp_cluster is defined else inventory_dir }}"
+
+- name: Installing support tools
+  delegate_to: localhost
+  command:
+    chdir: "{{ cluster_directory }}"
+    cmd: "installtools {{ inventory_hostname }}"
+  changed_when: false
+  environment:
+    remotedir: "{{ sp_tools_directory }}"
+
+- name: Performing mlc test
+  become: true
+  shell: "{{ sp_tools_directory }}/mlc/mlc > /etc/storpool/mlc/mlc.output"
+  args:
+    executable: /bin/bash
+    creates: /etc/storpool/mlc/mlc.output
+  when:
+    - not sp_vm | bool
+
+- name: Collecting inventory
+  delegate_to: localhost
+  command:
+    chdir: "{{ cluster_directory }}"
+    cmd: "collect_inventory {{ inventory_hostname }}"
+  changed_when: false
+  when:
+    - not sp_vm | bool

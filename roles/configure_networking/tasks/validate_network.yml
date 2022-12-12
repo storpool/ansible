@@ -1,0 +1,60 @@
+- name: Regathering network facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "network"
+
+- name: Retrieving configured interfaces from remote host
+  become: yes
+  ansible.builtin.shell: |
+    export PATH=$PATH:/usr/sbin
+    /usr/sbin/storpool_showconf -n -e -- SP_IFACE1_CFG SP_IFACE2_CFG
+  register: all_interfaces_list
+  failed_when: all_interfaces_list.rc != 0
+  changed_when: false
+
+- name: Checking if two interfaces are configured
+  ansible.builtin.assert:
+    that: all_interfaces_list.stdout_lines | length == 2
+    fail_msg: "Two interfaces must be configured"
+
+- name: Setting interface facts
+  ansible.builtin.set_fact:
+    first_raw_interface: "{{ (all_interfaces_list.stdout_lines[0] | split(':')).pop(2) }}"
+    second_raw_interface: "{{ (all_interfaces_list.stdout_lines[1] | split(':')).pop(2) }}"
+    first_resolve_interface: "{{ (all_interfaces_list.stdout_lines[0] | split(':')).pop(1) }}"
+    second_resolve_interface: "{{ (all_interfaces_list.stdout_lines[1] | split(':')).pop(1) }}"
+    first_resolve_ip_address: "{{ (all_interfaces_list.stdout_lines[0] | split(':')).pop(4) }}"
+    second_resolve_ip_address: "{{ (all_interfaces_list.stdout_lines[1] | split(':')).pop(4) }}"
+
+- name: Checking if all interfaces exist
+  ansible.builtin.assert:
+    that:
+      - interface in ansible_interfaces
+    fail_msg: "Interface {{ interface }} does not exist"
+  loop_control:
+    loop_var: interface
+  loop:
+    - "{{ first_raw_interface }}"
+    - "{{ second_raw_interface }}"
+    - "{{ first_resolve_interface }}"
+    - "{{ second_resolve_interface }}"
+
+- name: Checking if all interfaces are up
+  ansible.builtin.assert:
+    that: hostvars[inventory_hostname]['ansible_' + interface]['active']
+    fail_msg: "Interface {{ interface }} is not active"
+  loop_control:
+    loop_var: interface
+  loop:
+    - "{{ first_raw_interface | replace('-', '_') }}"
+    - "{{ second_raw_interface | replace('-', '_') }}"
+    - "{{ first_resolve_interface | replace('-', '_') }}"
+    - "{{ second_resolve_interface | replace('-', '_') }}"
+
+- name: Checking if resolve interfaces have the configured IP addresses
+  ansible.builtin.assert:
+    that:
+      - hostvars[inventory_hostname]['ansible_' + (first_resolve_interface | replace('-', '_'))]['ipv4']['address'] == first_resolve_ip_address
+      - hostvars[inventory_hostname]['ansible_' + (second_resolve_interface | replace('-', '_'))]['ipv4']['address'] == second_resolve_ip_address
+    fail_msg: "Resolve interface does not have configured IP address assigned to it"

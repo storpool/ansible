@@ -1,0 +1,24 @@
+---
+- name: Downloading required tools
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+  with_items:
+    - { url: "{{ sp_getpackage_url }}", dest: "{{ sp_tools_directory }}" }
+    - { url: "{{ sp_install_helper_url }}", dest: "{{ sp_tools_directory }}" }
+
+- name: Download the release archive from the vault
+  become: true
+  command: >- 
+    {{ sp_getpackage_path }} 
+    -g {{ sp_release }} 
+    -t {{ sp_target_release }} 
+    -u {{ sp_vault_url }}
+    {% if sp_kernel_version is defined and (sp_kernel_version | length) >= 1 %}
+    -k {{ sp_kernel_version }}
+    {% endif %}
+    {% if get_debug_packages %}
+    -d
+    {% endif %}
+  changed_when: false

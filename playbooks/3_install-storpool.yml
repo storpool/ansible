@@ -1,8 +1,0 @@
----
-- name: Start StorPool installation
-  hosts: storpool
-  gather_facts: false
-  roles:
-    - 3_install-storpool
-  tags:
-    - install
