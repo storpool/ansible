@@ -66,6 +66,7 @@
     enabled: no
   when:
     - sp_disable_nm
+    - ansible_os_family == "RedHat"
     - '"NetworkManager.service" in ansible_facts.services'
 
 - name: Creating temporary configuration file
