@@ -67,7 +67,8 @@
   when:
     - sp_disable_nm
     - ansible_os_family == "RedHat"
-    - '"NetworkManager.service" in ansible_facts.services'
+    - ansible_facts.services["NetworkManager.service"] is defined
+    - ansible_facts.services["NetworkManager.service"]["status"] != "not-found"
 
 - name: Creating temporary configuration file
   ansible.builtin.tempfile:
