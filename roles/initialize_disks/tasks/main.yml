@@ -18,10 +18,10 @@
 - name: Verifying disk ID offset
   assert:
     that:
-      - node_id|int - sp_disk_offset|int > 0
-    fail_msg: 'sp_disk_offest value ({{ sp_disk_offset }}) is too high for host {{ inventory_hostname }} with ID {{ node_id }}'
+      - node_id|int - sp_diskid_offset|int > 0
+    fail_msg: 'sp_diskid_offset value ({{ sp_diskid_offset }}) is too high for host {{ inventory_hostname }} with ID {{ node_id }}'
   when:
-    - sp_disk_offset is defined
+    - sp_diskid_offset is defined
 
 - name: Removing previous disk discovery configuration
   become: true
