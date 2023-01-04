@@ -34,14 +34,20 @@
 - name: Stopping multipathd before disk discovery
   become: yes
   ansible.builtin.systemd:
-    name: "{{ item }}"
+    name: multipathd.service
     state: stopped
-  loop:
-    - multipathd.service
-    - multipathd.socket
   when:
     - sp_discover_disk_run
     - ansible_facts.services["multipathd.service"] is defined
+
+- name: Stopping multipathd socket before disk discovery
+  become: yes
+  ansible.builtin.systemd:
+    name: multipathd.socket
+    state: stopped
+  when:
+    - sp_discover_disk_run
+    - ansible_facts.services["multipathd.socket"] is defined
 
 - name: Discovering suitable disks
   become: true
@@ -139,14 +145,20 @@
 - name: Starting multipathd after disk initialization
   become: yes
   ansible.builtin.systemd:
-    name: "{{ item }}"
+    name: multipathd.service
     state: started
-  loop:
-    - multipathd.socket
   when:
     - sp_discover_disk_run
     - ansible_facts.services["multipathd.service"] is defined
-    - ansible_facts.services["multipathd.service"]["state"] == "running"
+
+- name: Starting multipathd socket after disk initialization
+  become: yes
+  ansible.builtin.systemd:
+    name: multipathd.socket
+    state: started
+  when:
+    - sp_discover_disk_run
+    - ansible_facts.services["multipathd.socket"] is defined
 
 - name: Save disk initialization command with timestamp
   become: yes
