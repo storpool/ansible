@@ -59,6 +59,8 @@
       include_tasks: tasks/generate_group_membership.yml
       when:
         - sp_create_groups_by_services
+      tags:
+        - initialize-disks
   roles:
     - initialize_disks
   tags:
