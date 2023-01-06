@@ -53,7 +53,9 @@
 
 - name: Configure Drives
   hosts: storpool_server
-  gather_facts: false
+  gather_facts: "{{'initialize-disks' in ansible_run_tags}}"
+  gather_subset:
+    - "min"
   roles:
     - initialize_disks
   tags:
