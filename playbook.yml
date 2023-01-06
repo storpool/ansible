@@ -20,6 +20,7 @@
 - name: Configuring hosts
   hosts: storpool
   gather_facts: yes
+  become: true
   roles:
     - storpool.bootstrap_node
     - storpool.install_sp_python
