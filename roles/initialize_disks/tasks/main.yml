@@ -70,7 +70,6 @@
   set_fact:
     discover_disk_ts: '{{ ansible_date_time.epoch }}'
   when:
-    - sp_discover_disk_run
     - sp_backup_disk_init_config
 
 - name: Save disk discovery command with timestamp
@@ -166,7 +165,6 @@
     content: '{{ disk_init.cmd }}'
     dest: '{{ disk_init_helper_discovery_file | dirname }}/.init-cmd_{{ discover_disk_ts }}'
   when:
-    - sp_discover_disk_run
     - sp_backup_disk_init_config
 
 - name: Assigning disks to servers
