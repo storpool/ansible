@@ -83,7 +83,9 @@
   when:
     - sp_kernel_version is defined
     - not ansible_kernel | regex_search("^" + sp_kernel_version)
-  notify: Reboot host
+  notify:
+    - Update GRUB configuration
+    - Reboot host
 
 - name: Checking if the kernel cmdline contains all expected parameters
   become: true
@@ -94,7 +96,9 @@
   # Workaround for the case described
   # in https://github.com/ansible/ansible/issues/14877
   failed_when: kernel_cmdline_check.rc == 0
-  notify: Reboot host
+  notify:
+    - Update GRUB configuration
+    - Reboot host
 
 - name: Execuite StorPool components post-installation hook
   become: yes
