@@ -20,7 +20,7 @@ sp_install_helper_path: "{{ sp_tools_directory }}/install_modules_helper.py"
 sp_reinstall: False
 sp_retry_install: True
 
-sp_reboot_after_install: False
+sp_reboot_after_install: True
 
 sp_run_enable_grub_iommu: True
 
