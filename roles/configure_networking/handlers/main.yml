@@ -1,6 +1,0 @@
-- name: Enabling network-scripts sevice
-  become: yes
-  ansible.builtin.systemd:
-    name: network
-    enabled: yes
-  listen: Enable network-scripts
