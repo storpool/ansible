@@ -18,10 +18,10 @@
 - name: Verifying disk ID offset
   assert:
     that:
-      - node_id|int - sp_disk_offset|int > 0
-    fail_msg: 'sp_disk_offest value ({{ sp_disk_offset }}) is too high for host {{ inventory_hostname }} with ID {{ node_id }}'
+      - node_id|int - sp_diskid_offset|int > 0
+    fail_msg: 'sp_diskid_offset value ({{ sp_diskid_offset }}) is too high for host {{ inventory_hostname }} with ID {{ node_id }}'
   when:
-    - sp_disk_offset is defined
+    - sp_diskid_offset is defined
 
 - name: Removing previous disk discovery configuration
   become: true
@@ -34,14 +34,20 @@
 - name: Stopping multipathd before disk discovery
   become: yes
   ansible.builtin.systemd:
-    name: "{{ item }}"
+    name: multipathd.service
     state: stopped
-  loop:
-    - multipathd.service
-    - multipathd.socket
   when:
     - sp_discover_disk_run
     - ansible_facts.services["multipathd.service"] is defined
+
+- name: Stopping multipathd socket before disk discovery
+  become: yes
+  ansible.builtin.systemd:
+    name: multipathd.socket
+    state: stopped
+  when:
+    - sp_discover_disk_run
+    - ansible_facts.services["multipathd.socket"] is defined
 
 - name: Discovering suitable disks
   become: true
@@ -64,7 +70,6 @@
   set_fact:
     discover_disk_ts: '{{ ansible_date_time.epoch }}'
   when:
-    - sp_discover_disk_run
     - sp_backup_disk_init_config
 
 - name: Save disk discovery command with timestamp
@@ -139,14 +144,20 @@
 - name: Starting multipathd after disk initialization
   become: yes
   ansible.builtin.systemd:
-    name: "{{ item }}"
+    name: multipathd.service
     state: started
-  loop:
-    - multipathd.socket
   when:
     - sp_discover_disk_run
     - ansible_facts.services["multipathd.service"] is defined
-    - ansible_facts.services["multipathd.service"]["state"] == "running"
+
+- name: Starting multipathd socket after disk initialization
+  become: yes
+  ansible.builtin.systemd:
+    name: multipathd.socket
+    state: started
+  when:
+    - sp_discover_disk_run
+    - ansible_facts.services["multipathd.socket"] is defined
 
 - name: Save disk initialization command with timestamp
   become: yes
@@ -154,7 +165,6 @@
     content: '{{ disk_init.cmd }}'
     dest: '{{ disk_init_helper_discovery_file | dirname }}/.init-cmd_{{ discover_disk_ts }}'
   when:
-    - sp_discover_disk_run
     - sp_backup_disk_init_config
 
 - name: Assigning disks to servers

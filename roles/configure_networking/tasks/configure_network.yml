@@ -56,7 +56,16 @@
     - ansible_os_family == "RedHat"
     - ( ansible_distribution_major_version | int ) == 8
     - not sp_nm_controlled
-  notify: Enable network-scripts
+
+- name: Enabling network-scripts service
+  become: yes
+  ansible.builtin.systemd:
+    name: network
+    enabled: yes
+  when:
+    - ansible_os_family == "RedHat"
+    - ( ansible_distribution_major_version | int ) == 8
+    - not sp_nm_controlled
 
 - name: Disabling NetworkManager if requested explicitly
   become: yes

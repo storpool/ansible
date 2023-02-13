@@ -17,6 +17,17 @@
   tags:
     - always
 
+- name: Build in-memory inventory groups
+  hosts: storpool
+  gather_facts: false
+  tasks:
+    - name: Generate group memberships
+      ansible.builtin.import_tasks: tasks/generate_group_membership.yml
+      when:
+        - sp_create_groups_by_services
+  tags:
+    - always
+
 - name: Configuring hosts
   hosts: storpool
   gather_facts: yes
@@ -62,12 +73,9 @@
 
 - name: Configure Drives
   hosts: storpool_server
-  gather_facts: false
-  pre_tasks:
-    - name: Building in-memory inventory groups
-      include_tasks: tasks/generate_group_membership.yml
-      when:
-        - sp_create_groups_by_services
+  gather_facts: "{{'initialize-disks' in ansible_run_tags}}"
+  gather_subset:
+    - "min"
   roles:
     - initialize_disks
   tags:
