@@ -1,12 +1,17 @@
+- name: Setting firewall service name depending on OS family
+  ansible.builtin.set_fact:
+    firewall_service_name: "{{ firewall_service_map[(ansible_os_family | lower)] }}"
+
 - name: Disabling firewall service
   become: yes
   ansible.builtin.systemd:
-    name: "{{ firewall_service_map[(ansible_os_family | lower)] }}"
+    name: "{{ firewall_service_name }}"
     state: stopped
     enabled: no
   when:
     - sp_disable_fw | bool
-    - firewall_service_map[(ansible_os_family | lower)] in ansible_facts.services
+    - firewall_service_name in ansible_facts.services
+    - ansible_facts.services[firewall_service_name]['status'] != 'unknown'
 
 - name: Configuring firewall on RedHat-like systems
   become: yes
