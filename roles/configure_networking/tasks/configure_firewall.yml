@@ -11,7 +11,7 @@
   when:
     - sp_disable_fw | bool
     - firewall_service_name in ansible_facts.services
-    - ansible_facts.services[firewall_service_name]['status'] != 'unknown'
+    - ansible_facts.services[firewall_service_name]['status'] != 'not-found'
 
 - name: Configuring firewall on RedHat-like systems
   become: yes
