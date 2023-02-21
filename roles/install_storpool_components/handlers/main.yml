@@ -32,8 +32,10 @@
     - sp_reboot_after_install
 
 - name: Gather facts anew after reboot
-  gather_facts:
-    parallel: yes
+  ansible.builtin.setup:
+    gather_subset:
+      - 'all'
+      - '!facter'
   listen: Reboot host
   when:
     - sp_reboot_after_install
