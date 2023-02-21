@@ -31,6 +31,9 @@
 - name: Configuring hosts
   hosts: storpool
   gather_facts: yes
+  gather_subset:
+    - 'all'
+    - '!facter'
   roles:
     - storpool.bootstrap_node
     - storpool.install_sp_python
@@ -39,6 +42,15 @@
 
 - name: Installing StorPool components
   hosts: storpool
+  gather_subset:
+    - 'all'
+    - '!facter'
+  pre_tasks:
+    - name: Building in-memory inventory groups
+      import_tasks: tasks/generate_group_membership.yml
+      when:
+        - sp_create_groups_by_services
+
   roles:
     - install_storpool_components
   tags:
@@ -46,6 +58,14 @@
 
 - name: Configuring Networking
   hosts: storpool
+  gather_subset:
+    - 'all'
+    - '!facter'
+  pre_tasks:
+    - name: Building in-memory inventory groups
+      include_tasks: tasks/generate_group_membership.yml
+      when:
+        - sp_create_groups_by_services
   roles:
     - configure_networking
   tags:
@@ -71,6 +91,9 @@
 
 - name: Configuring StorPool services
   hosts: storpool
+  gather_subset:
+    - 'all'
+    - '!facter'
   roles:
     - configure_services
   tags:
@@ -78,6 +101,9 @@
 
 - name: Performing system-wide testing
   hosts: storpool
+  gather_subset:
+    - 'all'
+    - '!facter'
   tasks:
     - name: Importing testing tasks
       import_tasks: tasks/perform_acceptance_tests.yml
