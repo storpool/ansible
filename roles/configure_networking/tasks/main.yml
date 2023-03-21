@@ -2,6 +2,8 @@
 - name: Figuring out whether to disable network acceleration
   ansible.builtin.set_fact:
     disable_network_acceleration: "{{ (sp_disable_hw_acceleration is defined and sp_disable_hw_acceleration | bool) }}"
+  tags:
+    - always
 
 - name: Gathering running services
   ansible.builtin.service_facts:

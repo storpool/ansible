@@ -9,7 +9,7 @@
 
 - name: Ensure Python is installed
   hosts: storpool
-  connection: ssh
+  strategy: linear
   gather_facts: false
   become: true
   roles:
