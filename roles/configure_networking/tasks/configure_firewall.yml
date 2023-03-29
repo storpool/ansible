@@ -30,7 +30,7 @@
 - name: Configuring firewall on Debian-like systems
   become: yes
   community.general.ufw:
-    port: "{{ item }}"
+    port: "{{ port }}"
     rule: allow
     proto: tcp
   loop: "{{ firewall_ports }}"
