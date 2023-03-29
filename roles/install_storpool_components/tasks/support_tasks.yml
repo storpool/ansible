@@ -20,6 +20,8 @@
     creates: /etc/storpool/mlc/mlc.output
   when:
     - not sp_vm | bool
+  tags:
+    - test-memory
 
 - name: Collecting inventory
   delegate_to: localhost
