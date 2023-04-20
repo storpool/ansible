@@ -8,8 +8,8 @@
 - name: Checking if the host boots via EFI
   become: true
   stat:
-    path: "/boot/efi/EFI/{{ ansible_distribution | lower }}/grub.cfg"
-  register: grub_efi_configuration
+    path: /sys/firmware/efi
+  register: sysfs_firmware_efi
   listen: Update GRUB configuration
   when:
     - ansible_os_family == 'RedHat'
@@ -18,7 +18,7 @@
   become: true
   shell: |
     /usr/sbin/grub2-mkconfig \
-    -o {{ '/boot/efi/EFI/' + (ansible_distribution | lower) + '/grub.cfg' if grub_efi_configuration.stat.exists else '$(readlink -f /etc/grub2.cfg)' }}
+    -o $(readlink -f /etc/grub2{{ '-efi' if sysfs_firmware_efi.stat.exists else '' }}.cfg)
   changed_when: false
   listen: Update GRUB configuration
   when:
