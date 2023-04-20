@@ -1,19 +1,20 @@
-- name: Making host part of storpool_block group if it has no services defined
+- name: Adding sp_services variable if not defined
+  ansible.builtin.set_fact:
+    sp_services:
+      - block
+  when:
+   - sp_services is undefined
+
+- name: Making host part of storpool_block group
   ansible.builtin.add_host:
     name: "{{ item }}"
     groups:
       - storpool_block
   when:
     - sp_install_block_on_non_clients
-    - sp_services | length == 0 or "block" not in sp_services
+    - '"block" not in sp_services'
   loop: "{{ groups['storpool'] }}"
   delegate_to: localhost
-
-- name: Checking if the host has a list of services defined
-  ansible.builtin.assert:
-    that:
-      - sp_services | length > 0
-    fail_msg: sp_services variable is empty, please either define it as a host variable or enable sp_install_block_on_non_clients
 
 - name: Making host part of respective storpool_ groups
   ansible.builtin.add_host:
