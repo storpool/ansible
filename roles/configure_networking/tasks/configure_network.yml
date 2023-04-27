@@ -31,12 +31,14 @@
 
 - name: Adjusting /etc/network/interfaces
   become: yes
-  ansible.builtin.lineinfile:
+  ansible.builtin.replace:
     path: /etc/network/interfaces
-    regexp: ^source /etc/network/interfaces.d
-    state: absent
+    regexp: ^source /etc/network/interfaces\.d.*
+    replace: source /etc/network/interfaces.d/*
   when:
     - ansible_os_family == "Debian"
+    - ( ansible_distribution_major_version | int ) >= 11
+    - ( ansible_distribution_major_version | int ) <= 18
 
 - name: Configuring /etc/network/interfaces
   become: yes
@@ -46,6 +48,7 @@
     state: present
   when:
     - ansible_os_family == "Debian"
+    - ( ansible_distribution_major_version | int ) <= 9
 
 - name: Installing network-scripts on EL 8
   become: yes
