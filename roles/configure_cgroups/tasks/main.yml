@@ -18,7 +18,7 @@
 
 - name: Setting numa_overflow fact
   set_fact:
-    sp_cg_set_numa_overflow: >-
+    sp_cg_numa_overflow: >-
       {{ "1" if "storpool_server" in group_names 
       and group_names|length == 2 else "0" }}
     cacheable: true
@@ -39,7 +39,7 @@
       {{ sp_cg_conf_extra }}
       {% endif %}
       SET_MEMSW={{ sp_cg_set_memsw }}
-      NUMA_OVERFLOW={{ sp_cg_set_numa_overflow }}
+      NUMA_OVERFLOW={{ sp_cg_numa_overflow }}
   when: not sp_slice_conf_file.stat.exists
   notify: 'start cgconfig'
 
@@ -53,7 +53,7 @@
       {% if sp_cg_conf_extra | length > 0 %}
       {{ sp_cg_conf_extra }}
       {% endif %}
-      SET_MEMSW={{ sp_cg_set_memsw }}
+      SET_MEMSW={{ sp_cg_memsw }}
       NUMA_OVERFLOW={{ sp_cg_set_numa_overflow }}
   when: sp_slice_conf_file.stat.exists
 
