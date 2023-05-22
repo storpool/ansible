@@ -19,11 +19,8 @@
 - name: Setting numa_overflow fact
   set_fact:
     sp_cg_numa_overflow: >-
-      {{ "1" 
-      if "storpool_server" in group_names 
-      and group_names|length == 2 
-      and not sp_cg_hyperconverged 
-      else "0" }}
+      {{ "1" if "storpool_server" in group_names
+      and not sp_cg_hyperconverged else "0" }}
     cacheable: true
 
 - name: Dumping sp_cg_conf_extra value
