@@ -27,6 +27,7 @@
 - name: Rebooting host
   become: true
   ansible.builtin.reboot:
+    reboot_timeout: 900
   listen: Reboot host
   when:
     - sp_reboot_after_install
