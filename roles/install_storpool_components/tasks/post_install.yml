@@ -93,9 +93,8 @@
   register: kernel_cmdline_check
   ignore_errors: true
   changed_when: kernel_cmdline_check.rc == 2
-  # Workaround for the case described
-  # in https://github.com/ansible/ansible/issues/14877
-  failed_when: kernel_cmdline_check.rc == 0
+  failed_when:
+    - kernel_cmdline_check.rc != 0 or kernel_cmdline_check.rc != 2
   notify:
     - Update GRUB configuration
     - Reboot host
