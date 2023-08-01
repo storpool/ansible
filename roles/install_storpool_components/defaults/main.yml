@@ -21,6 +21,7 @@ sp_reinstall: False
 sp_retry_install: True
 
 sp_reboot_after_install: True
+sp_reboot_sequentially: False
 
 sp_run_enable_grub_iommu: True
 
