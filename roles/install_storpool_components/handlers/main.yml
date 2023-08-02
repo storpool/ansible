@@ -29,6 +29,7 @@
   ansible.builtin.reboot:
     reboot_timeout: 900
   listen: Reboot host
+  throttle: "{{ 1 if sp_reboot_sequentially else 63 }}"
   when:
     - sp_reboot_after_install
 
