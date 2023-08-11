@@ -7,6 +7,16 @@
     kernel_package_name:
       redhat: kernel
       debian: linux-image
+  when:
+    - "'proxmox_hv' not in group_names"
+
+- name: Installing specific kernel version on Proxmox
+  become: yes
+  ansible.builtin.package:
+    name: "pve-kernel-{{ sp_kernel_version }}"
+    state: present
+  when:
+    - "'proxmox_hv' in group_names"
 
 - name: Installing extra modules package on Debian-based systems
   become: yes
@@ -15,3 +25,4 @@
     state: present
   when:
     - ansible_os_family == "Debian"
+    - "'proxmox_hv' not in group_names"
