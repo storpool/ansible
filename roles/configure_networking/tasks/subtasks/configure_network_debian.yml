@@ -1,23 +1,31 @@
 ---
-- name: Adjust /etc/network/interfaces (Ubuntu/Debian)
-  lineinfile:
-    path: /etc/network/interfaces
-    regexp: "^source /etc/network/interfaces.d"
-    state: absent
+- name: Deploy enslavedummy (Ubuntu/Debian)
+  copy:
+    src: enslavedummy
+    dest: /sbin
+    mode: 0755
 
-- name: Adjust /etc/network/interfaces (Ubuntu/Debian)
-  lineinfile:
+- name: Adjusting /etc/network/interfaces
+  become: yes
+  ansible.builtin.replace:
     path: /etc/network/interfaces
-    line: "source-directory interfaces.d"
+    regexp: ^source /etc/network/interfaces\.d.*
+    replace: source /etc/network/interfaces.d/*
+  when:
+    - ( ansible_distribution_major_version | int ) >= 11
+    - ( ansible_distribution_major_version | int ) <= 18
+
+- name: Configuring /etc/network/interfaces
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /etc/network/interfaces
+    line: source-directory interfaces.d
+    state: present
+  when:
+    - ( ansible_distribution_major_version | int ) <= 9
 
 - name: Create /etc/network/interfaces.d (Ubuntu/Debian)
   file:
     path: /etc/network/interfaces.d
     state: directory
-    mode: 0755
-
-- name: Deploy enslavedummy (Ubuntu/Debian)
-  copy:
-    src: enslavedummy
-    dest: /sbin
     mode: 0755

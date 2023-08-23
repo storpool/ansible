@@ -29,58 +29,8 @@
     that: sp_network is defined
     fail_msg: "Resolve network is not configured"
 
-- name: Adjusting /etc/network/interfaces
-  become: yes
-  ansible.builtin.replace:
-    path: /etc/network/interfaces
-    regexp: ^source /etc/network/interfaces\.d.*
-    replace: source /etc/network/interfaces.d/*
-  when:
-    - ansible_os_family == "Debian"
-    - ( ansible_distribution_major_version | int ) >= 11
-    - ( ansible_distribution_major_version | int ) <= 18
-
-- name: Configuring /etc/network/interfaces
-  become: yes
-  ansible.builtin.lineinfile:
-    path: /etc/network/interfaces
-    line: source-directory interfaces.d
-    state: present
-  when:
-    - ansible_os_family == "Debian"
-    - ( ansible_distribution_major_version | int ) <= 9
-
-- name: Installing network-scripts on EL 8
-  become: yes
-  ansible.builtin.dnf:
-    name: network-scripts
-    state: present
-  when:
-    - ansible_os_family == "RedHat"
-    - ( ansible_distribution_major_version | int ) == 8
-    - not sp_nm_controlled
-
-- name: Enabling network-scripts service
-  become: yes
-  ansible.builtin.systemd:
-    name: network
-    enabled: yes
-  when:
-    - ansible_os_family == "RedHat"
-    - ( ansible_distribution_major_version | int ) == 8
-    - not sp_nm_controlled
-
-- name: Disabling NetworkManager if requested explicitly
-  become: yes
-  ansible.builtin.systemd:
-    name: NetworkManager
-    state: stopped
-    enabled: no
-  when:
-    - sp_disable_nm
-    - ansible_os_family == "RedHat"
-    - ansible_facts.services["NetworkManager.service"] is defined
-    - ansible_facts.services["NetworkManager.service"]["status"] != "not-found"
+- name: Including distribution-specific tasks
+  include_tasks: "subtasks/configure_network_{{ ansible_os_family | lower }}.yml"
 
 - name: Creating temporary configuration file
   ansible.builtin.tempfile:
