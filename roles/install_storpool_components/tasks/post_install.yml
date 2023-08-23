@@ -26,18 +26,6 @@
     - Update GRUB configuration
     - Reboot host
 
-- name: Increasing crashkernel size (Debian/Ubuntu)
-  become: true
-  ansible.builtin.lineinfile:
-    path: /etc/default/grub.d/kdump-tools.cfg
-    create: yes
-    line: GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT crashkernel=512M"
-  notify:
-    - Update GRUB configuration
-    - Reboot host
-  when:
-    - ansible_os_family == "Debian"
-
 - name: Running patchkdumptools on Debian-based OS
   become: true
   command: /usr/lib/storpool/patchkdumptools --no-change-exit-status 254
@@ -46,6 +34,20 @@
   failed_when:
     - patch_kdump_tools_result.rc != 0
     - patch_kdump_tools_result.rc != 254
+  notify:
+    - Update GRUB configuration
+    - Reboot host
+  when:
+    - ansible_os_family == "Debian"
+
+# TODO: Create a map to set the appropriate memory size depending on the total memory available to the machine
+- name: Increasing crashkernel size (Debian/Ubuntu)
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub.d/kdump-tools.cfg
+    create: yes
+    regexp: crashkernel=.*
+    line: GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT crashkernel=1024M"
   notify:
     - Update GRUB configuration
     - Reboot host
