@@ -53,7 +53,7 @@
       {% if sp_cg_conf_extra | length > 0 %}
       {{ sp_cg_conf_extra }}
       {% endif %}
-      SET_MEMSW={{ sp_cg_memsw }}
+      SET_MEMSW={{ sp_cg_set_memsw }}
       NUMA_OVERFLOW={{ sp_cg_set_numa_overflow }}
   when: sp_slice_conf_file.stat.exists
 
