@@ -16,6 +16,14 @@
   notify:
     - Installed network-scripts
 
+- name: Installing network-scripts wrapper on EL 9
+  become: yes
+  ansible.builtin.dnf:
+    name: NetworkManager-initscripts-updown
+    state: present
+  when:
+    - ( ansible_distribution_major_version | int ) == 9
+
 - name: Disabling NetworkManager
   become: yes
   ansible.builtin.systemd:
@@ -26,3 +34,4 @@
     - sp_disable_nm
     - ansible_facts.services["NetworkManager.service"] is defined
     - ansible_facts.services["NetworkManager.service"]["status"] != "not-found"
+    - ( ansible_distribution_major_version | int ) <= 8
