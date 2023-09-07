@@ -95,8 +95,7 @@
   register: kernel_cmdline_check
   ignore_errors: true
   changed_when: kernel_cmdline_check.rc == 2
-  failed_when:
-    - kernel_cmdline_check.rc != 0 or kernel_cmdline_check.rc != 2
+  failed_when: kernel_cmdline_check.rc == 1 or kernel_cmdline_check.rc >= 3
   notify:
     - Update GRUB configuration
     - Reboot host
