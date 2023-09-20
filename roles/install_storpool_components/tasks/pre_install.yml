@@ -30,7 +30,7 @@
   tags:
     - test-memory
 
-- name: Execuite StorPool components pre-installation hook
+- name: Execute StorPool components pre-installation hook
   become: yes
   ansible.builtin.shell: "{{ sp_pre_install_components_hook }}"
   when:
