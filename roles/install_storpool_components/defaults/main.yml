@@ -1,5 +1,5 @@
 # Defines the release version to be installed
-sp_release: 20.0
+sp_release: 21.0
 
 # Release target to search the release version in
 sp_target_release: release
