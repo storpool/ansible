@@ -6,7 +6,7 @@ all:
 # Global vars for the deployment. Any of these can also be set per-host.          
       vars:
         sp_new_cluster: True
-        sp_release: 20.0
+        sp_release: 21.0
 # Whether to always attempt to re-install regardless if a previous version was installed or not
         sp_reinstall: False
 # Location of storpool.conf, autodetected
