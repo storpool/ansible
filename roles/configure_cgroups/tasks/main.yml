@@ -54,7 +54,7 @@
       {{ sp_cg_conf_extra }}
       {% endif %}
       SET_MEMSW={{ sp_cg_set_memsw }}
-      NUMA_OVERFLOW={{ sp_cg_set_numa_overflow }}
+      NUMA_OVERFLOW={{ sp_cg_numa_overflow }}
   when: sp_slice_conf_file.stat.exists
 
 - name: Flushing handlers
