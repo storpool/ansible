@@ -54,6 +54,18 @@
   when:
     - ansible_os_family == "Debian"
 
+- name: Increasing crashkernel size (EL)
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: crashkernel=.*
+    line: GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT crashkernel=1024M"
+  notify:
+    - Update GRUB configuration
+    - Reboot host
+  when:
+    - ansible_os_family == "RedHat"
+
 - name: Waiting for memory tests to complete
   become: true
   async_status:
