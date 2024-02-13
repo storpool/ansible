@@ -77,9 +77,9 @@ def main():
                         log.error('storpool-sed-unlock: Unable to enable MBRDone for {}'.format(udev_device))
 
                     try:
-                        partprobe_output = subprocess.check_output(
-                            ['/usr/sbin/partprobe', '/dev/disk/by-id/{}'.format(udev_device)],
-                            shell=False
+                        other_output = subprocess.check_output(
+                             ['/usr/sbin/hdparm', '-z', '/dev/disk/by-id/{}'.format(udev_device)],
+                             shell=False
                         )
 
                         log.info('storpool-sed-unlock: Re-read {}'.format(udev_device))
@@ -102,10 +102,11 @@ def main():
                         log.error('storpool-sed-unlock: Unable to unlock {}'.format(udev_device))
 
                     try:
-                        partprobe_output = subprocess.check_output(
-                            ['/usr/sbin/partprobe', '/dev/disk/by-id/{}'.format(udev_device)],
-                            shell=False
+                        other_output = subprocess.check_output(
+                             ['/usr/sbin/hdparm', '-z', '/dev/disk/by-id/{}'.format(udev_device)],
+                             shell=False
                         )
+
 
                         log.info('storpool-sed-unlock: Re-read {}'.format(udev_device))
 
