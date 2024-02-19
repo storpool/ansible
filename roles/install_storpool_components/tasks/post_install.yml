@@ -100,7 +100,7 @@
     - Update GRUB configuration
     - Reboot host
 
-- name: Execuite StorPool components post-installation hook
+- name: Execute StorPool components post-installation hook
   become: yes
   ansible.builtin.shell: "{{ sp_post_install_components_hook }}"
   when:
