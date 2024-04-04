@@ -96,6 +96,8 @@
     src: perform_disktest.sh
     dest: '{{ ansible_user_dir }}/storpool/'
     mode: 0755
+  tags:
+    - test-disks
 
 - name: Reading the disk discover json file
   become: true
@@ -104,6 +106,8 @@
   register: disk_discover_json_b64encoded
   when:
     - sp_discover_disk_run
+  tags:
+    - test-disks
 
 - name: Generating a list of disks to be tested
   set_fact:
@@ -111,6 +115,8 @@
   when:
     - sp_test_discovered_disks
     - sp_discover_disk_run
+  tags:
+    - test-disks
 
 - name: Testing discovered disks
   become: true
@@ -122,6 +128,8 @@
     - sp_test_discovered_disks
     - sp_discover_disk_run
     - disks_to_be_tested | length >= 1
+  tags:
+    - test-disks
 
 - name: Setting self-booting disk flag
   set_fact:
