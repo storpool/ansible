@@ -16,13 +16,6 @@
     sp_cg_set_memsw: '{{ "1" if cgroup_memsw_file.stat.exists else "0" }}'
     cacheable: true
 
-- name: Setting numa_overflow fact
-  set_fact:
-    sp_cg_numa_overflow: >-
-      {{ "1" if "storpool_server" in group_names
-      and not sp_cg_hyperconverged else "0" }}
-    cacheable: true
-
 - name: Dumping sp_cg_conf_extra value
   debug:
     var: sp_cg_conf_extra
@@ -39,7 +32,6 @@
       {{ sp_cg_conf_extra }}
       {% endif %}
       SET_MEMSW={{ sp_cg_set_memsw }}
-      NUMA_OVERFLOW={{ sp_cg_numa_overflow }}
   when: not sp_slice_conf_file.stat.exists
   notify: 'start cgconfig'
 
@@ -54,7 +46,6 @@
       {{ sp_cg_conf_extra }}
       {% endif %}
       SET_MEMSW={{ sp_cg_set_memsw }}
-      NUMA_OVERFLOW={{ sp_cg_numa_overflow }}
   when: sp_slice_conf_file.stat.exists
 
 - name: Flushing handlers
