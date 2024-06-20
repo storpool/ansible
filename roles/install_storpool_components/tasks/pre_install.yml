@@ -29,3 +29,9 @@
     - not sp_vm | bool
   tags:
     - test-memory
+
+- name: Execute StorPool components pre-installation hook
+  become: yes
+  ansible.builtin.shell: "{{ sp_pre_install_components_hook }}"
+  when:
+    - sp_pre_install_components_hook is defined
