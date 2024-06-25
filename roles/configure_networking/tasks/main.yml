@@ -22,6 +22,20 @@
   import_tasks: "validate_network.yml"
   tags:
     - validate-network-configuration
+    
+- name: Checking if NIC "Mellanox Technologies MT2892 Family [ConnectX-6 [D|E]x]" with unsupported firmware is present
+  # This task checks for the specific NIC and firmware combination that can result in
+  # the multicast packet amplification issue described here: https://access.redhat.com/solutions/7063133
+  # jq will return 0 if a device with the product model is found and it is using a supported version of the firmware
+  # jq will return 1 if a device with the product model is found but it is not using a supported version of the firmware
+  # jq will return 4 if a device with the product model is not found
+  ansible.builtin.shell: |
+    lshw -json | jq --exit-status '.. | 
+    select((.product == "Mellanox Technologies MT2892 Family [ConnectX-6 Dx]"?)
+    or (.product == "Mellanox Technologies MT2892 Family [ConnectX-6 Ex]"?)) |
+    .configuration.firmware == "22.32.2004 (SM_1291000001000)" '
+  register: nic_model_with_unwanted_fw_present
+  failed_when: nic_model_with_unwanted_fw_present.rc == 1
 
 - name: Generating VF configuration
   become: yes
