@@ -26,6 +26,7 @@ Role Variables
 | sp_ssd_disk_init_args           | List    | []            | List of strings in the form of "--arg1,--arg2" that will be used to initialize SSD devices |
 | sp_hdd_disk_init_args           | List    | []            | List of strings in the form of "--arg1,--arg2" that will be used to initialize HDD devices |
 | sp_discover_disk_run            | Boolean | True          | Designates if the `disk_init_helper` tool should run its discover phase to collect a list with usable devices |
+| sp_discover_disk_pattern        | String  | ""            | Provide a glob patterns to override the default discovery in disk_init_helper |
 | disk_init_helper_discovery_file | String  | "/var/spool/storpool/disk-init-discovery.json" | Specifies a path to a JSON file containing the list of devices of to be initialized |
 | sp_test_discovered_disks        | Boolean | True          | Only for SP testing lab use! Whether to test the disks found in the discovery phase of `disk_init_helper` |
 | sp_backup_disk_init_config      | Boolean | True         | Save timestamped backups of the `disk_init_helper` discovery command, JSON file, and initialization command |
