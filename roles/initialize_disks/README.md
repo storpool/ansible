@@ -30,6 +30,7 @@ Role Variables
 | disk_init_helper_discovery_file | String  | "/var/spool/storpool/disk-init-discovery.json" | Specifies a path to a JSON file containing the list of devices of to be initialized |
 | sp_test_discovered_disks        | Boolean | True          | Only for SP testing lab use! Whether to test the disks found in the discovery phase of `disk_init_helper` |
 | sp_backup_disk_init_config      | Boolean | True         | Save timestamped backups of the `disk_init_helper` discovery command, JSON file, and initialization command |
+| sp_wipe_new_partitions          | Boolean | False        | Wipe any signatures in new partitions created by disk_init_helper (DANGEROUS, use only on new or test installations, developed mostly for stability reasons) |
 
 
 Dependencies
