@@ -1,0 +1,45 @@
+common_packages:
+  - bash-completion
+  - bc
+  - chrony
+  - curl
+  - dmidecode
+  - dosfstools
+  - fio
+  - git
+  - gdisk
+  - hwloc
+  - ipmitool
+  - kexec-tools
+  - lldpd
+  - logrotate
+  - lshw
+  - lsof
+  - lsscsi
+  - mc
+  - man
+  - mtr
+  - net-tools
+  - numactl
+  - nvme-cli
+  - patch
+  - parted
+  - pciutils
+  - perl
+  - psmisc
+  - rsync
+  - screen
+  - smartmontools
+  - socat
+  - strace
+  - sysstat
+  - tar
+  - tcpdump
+  - tmux
+  - vim
+  - wget
+  - xfsprogs
+
+rc_local_commands:
+  - "/usr/bin/cpupower set -b 0; # set energy/performance policy to performance"
+  - "/usr/bin/cpupower frequency-set -g performance; # set cpufreq/pstate governor to performance"

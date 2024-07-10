@@ -1,0 +1,17 @@
+- name: Downloading RPM GPG key
+  become: yes
+  ansible.builtin.get_url:
+    url: "{{ storpool_rpm_gpg_key_url }}"
+    dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-StorPool
+    mode: 0644
+
+- name: Adding yum repositories
+  become: yes
+  ansible.builtin.yum_repository:
+    name: "storpool-{{ item.url_path }}"
+    baseurl: "https://repo.storpool.com/public/{{ item.url_path }}/centos/$releasever/$basearch/"
+    description: "StorPool third-party packages for {{ ansible_distribution }}"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-StorPool
+  loop: "{{ storpool_repositories }}"

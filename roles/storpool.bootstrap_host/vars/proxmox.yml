@@ -1,0 +1,10 @@
+distribution_packages:
+  - cgroup-tools
+  - ifenslave
+  - liblz4-tool
+  - "linux-tools-{{ ansible_kernel.split('.')[:2] | join('.') }}"
+
+debian_11_packages: []
+debian_12_packages:
+  - rsyslog
+  - sudo

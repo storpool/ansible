@@ -35,7 +35,7 @@
     - 'all'
     - '!facter'
   roles:
-    - storpool.bootstrap_node
+    - storpool.bootstrap_host
     - storpool.install_sp_python
   tags:
     - bootstrap-hosts

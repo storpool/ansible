@@ -1,0 +1,35 @@
+- name: Disabling ondemand service
+  become: yes
+  ansible.builtin.systemd:
+    name: ondemand.service
+    state: stopped
+    enabled: no
+  when:
+    - ansible_distribution == 'Ubuntu'
+    - ( ansible_distribution_major_version | int ) <= 20
+
+- name: Disabling apt periodic updates
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /etc/apt/apt.conf.d/999storpool
+    line: "{{ item }}"
+    state: present
+    create: yes
+  loop:
+    - APT::Periodic::Update-Package-Lists "0";
+    - APT::Periodic::Unattended-Upgrade "0";
+
+- name: Disabling multipathd service
+  become: yes
+  ignore_errors: true
+  ansible.builtin.systemd:
+    name: "{{ service_name }}"
+    state: stopped
+    enabled: no
+  loop_control:
+    loop_var: service_name
+  loop:
+    - multipathd.service
+    - multipathd.socket
+  when:
+    - ansible_distribution == 'Ubuntu'

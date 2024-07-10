@@ -1,0 +1,26 @@
+galaxy_info:
+  author: Kaloyan Kotlarski
+  namespace: storpool
+  role_name: bootstrap_node
+  description: Installs the required software dependencies and configures a host to run StorPool software
+  company: StorPool Storage AD
+  license: Apache-2.0
+  min_ansible_version: 2.10
+
+  #
+  # platforms:
+  # - name: Fedora
+  #   versions:
+  #   - all
+  #   - 25
+  # - name: SomePlatform
+  #   versions:
+  #   - all
+  #   - 1.0
+  #   - 7
+  #   - 99.99
+
+  galaxy_tags: []
+
+dependencies: []
+

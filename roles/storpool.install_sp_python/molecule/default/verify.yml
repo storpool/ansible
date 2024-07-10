@@ -1,0 +1,16 @@
+---
+- name: Verifying that sp-python is installed
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Gather installed packages
+      package_facts:
+        manager: auto
+
+    - name: Checking that sp-python is installed
+      assert:
+        that:
+          - "'sp-python2' in ansible_facts.packages"
+          - "'sp-python2-modules' in ansible_facts.packages"
+          - "'sp-python3' in ansible_facts.packages"
+          - "'sp-python3-modules' in ansible_facts.packages"

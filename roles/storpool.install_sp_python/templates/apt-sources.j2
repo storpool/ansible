@@ -1,0 +1,6 @@
+Types: deb deb-src
+URIs: https://repo.storpool.com/public/{{ item.url_path }}/{{ ansible_distribution | lower }}/
+Suites: {{ ansible_distribution_release }}
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/storpool-keyring.gpg

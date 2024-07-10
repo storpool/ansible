@@ -1,0 +1,18 @@
+- name: Downloading gpg keyring
+  become: yes
+  ansible.builtin.get_url:
+    url: "{{ storpool_apt_keyring_url }}"
+    dest: /usr/share/keyrings/storpool-keyring.gpg
+    mode: 0644
+
+- name: Adding StorPool APT repositories
+  become: yes
+  ansible.builtin.template:
+    dest: "/etc/apt/sources.list.d/{{ item.filename }}.sources"
+    src: apt-sources.j2
+  loop: "{{ storpool_repositories }}"
+
+- name: Updating APT cache
+  become: yes
+  ansible.builtin.apt:
+    update_cache: yes

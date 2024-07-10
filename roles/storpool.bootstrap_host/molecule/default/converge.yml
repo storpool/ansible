@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include storpool.bootstrap_node"
+      include_role:
+        name: "storpool.bootstrap_node"

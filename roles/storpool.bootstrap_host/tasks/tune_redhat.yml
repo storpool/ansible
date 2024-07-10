@@ -1,0 +1,31 @@
+- name: Starting mcelog service
+  become: yes
+  ansible.builtin.systemd:
+    name: mcelog.service
+    state: started
+    enabled: yes
+  when:
+    - ansible_processor | select('contains', 'Intel') | length > 0
+
+- name: Starting tuned service
+  become: yes
+  ansible.builtin.systemd:
+    name: tuned.service
+    state: started
+    enabled: true
+
+- name: Getting tuned profile
+  become: yes
+  ansible.builtin.command: "/usr/sbin/tuned-adm active"
+  register: tuned_active
+
+- name: Setting tuned profile
+  become: yes
+  ansible.builtin.command: "/usr/sbin/tuned-adm profile {{ tuned_profile }}"
+  when:
+    - tuned_profile not in tuned_active.stdout
+
+- name: Configuring SELinux
+  become: yes
+  ansible.posix.selinux:
+    state: "{{ sp_selinux_disable | ternary('disabled', 'permissive') }}"

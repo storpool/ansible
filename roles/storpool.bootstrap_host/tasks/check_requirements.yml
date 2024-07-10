@@ -1,0 +1,24 @@
+---
+- name: Checking for a supported Operating System
+  ansible.builtin.assert:
+    that:
+      - (ansible_distribution == 'Debian' and ansible_distribution_major_version | int >= 11 ) or
+        (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version | int >= 18 ) or
+        (ansible_os_family == 'RedHat' and ansible_distribution_major_version | int >= 7 )
+    fail_msg: "Unsupported Operating System version: {{ ansible_distribution }} {{ ansible_distribution_major_version }}"
+
+- name: Checking if there's atleast 50 GB free space on the root partion
+  ansible.builtin.assert:
+    that:
+      - rootfs_mount.size_available >= 1024 ** 3 * 50
+    fail_msg: "At least 50 GB of free space on the rootfs is required, currently there is {{ rootfs_mount.size_available / (1024 ** 3) }} GB"
+  vars:
+    rootfs_mount: "{{ ansible_mounts | selectattr('mount', 'eq', '/') | first }}"
+
+- name: Checking if host clock is correct
+  assert:
+    that:
+      - ((localhost_date_time.epoch | int) - (ansible_date_time.epoch | int) | abs) < ( 60 * 60 * 2 )
+    fail_msg: "Clock of node {{ inventory_hostname }} is not correct"
+  vars:
+    localhost_date_time: "{{ hostvars['localhost'].ansible_date_time }}"
