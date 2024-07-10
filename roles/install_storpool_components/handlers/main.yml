@@ -1,3 +1,4 @@
+---
 - name: Rebuilding GRUB configuration on Debian-based OS
   become: true
   ansible.builtin.command: /usr/sbin/update-grub2

@@ -1,3 +1,4 @@
+---
 - name: Starting mcelog service
   become: yes
   ansible.builtin.systemd:

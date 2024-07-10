@@ -1,3 +1,4 @@
+---
 - name: Downloading RPM GPG key
   become: yes
   ansible.builtin.get_url:

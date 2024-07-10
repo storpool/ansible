@@ -17,7 +17,7 @@
 - name: Check if sed.conf exists on target host
   debug:
     msg: |
-      {{ sp_sed_conf }}: {{ sp_sed_conf_file.stat.exists | ternary('Exists, skipping configuration tasks', 'Does not exists, SED will be configured') }} 
+      {{ sp_sed_conf }}: {{ sp_sed_conf_file.stat.exists | ternary('Exists, skipping configuration tasks', 'Does not exists, SED will be configured') }}
       NOTE: Please remove {{ sp_sed_conf }} if you want to re-configure SED.
   when:
     - sp_sed_conf is defined

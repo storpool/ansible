@@ -1,3 +1,4 @@
+---
 - name: Downloading gpg keyring
   become: yes
   ansible.builtin.get_url:

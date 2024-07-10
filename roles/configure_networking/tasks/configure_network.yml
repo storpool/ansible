@@ -1,3 +1,4 @@
+---
 - name: Setting if host will run StorPool iSCSI service
   ansible.builtin.set_fact:
     is_iscsi_host: "{{ (inventory_hostname in groups['storpool_iscsi']) | bool }}"

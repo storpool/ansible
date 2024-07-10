@@ -1,3 +1,4 @@
+---
 - name: Performing CPU turbo boost check
   become: yes
   ansible.builtin.command: "{{ ansible_user_dir }}/storpool/turbocheck"

@@ -1,3 +1,4 @@
+---
 storpool_apt_keyring_url: "https://repo.storpool.com/public/keys/storpool-keyring.gpg"
 storpool_rpm_gpg_key_url: "https://repo.storpool.com/public/keys/rpm-storpool.gpg"
 

@@ -1,3 +1,4 @@
+---
 - name: Setting firewall service name depending on OS family
   ansible.builtin.set_fact:
     firewall_service_name: "{{ firewall_service_map[(ansible_os_family | lower)] }}"

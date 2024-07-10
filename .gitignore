@@ -4,3 +4,4 @@ ansible.hosts
 playbook.retry
 roles/custom_*
 inventory.*
+.idea/

@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Kaloyan Kotlarski
   namespace: storpool
@@ -15,5 +16,5 @@ galaxy_info:
         - bionic
         - focal
         - jammy
-  min_ansible_version: 2.12
+  min_ansible_version: 2.13
   galaxy_tags: []

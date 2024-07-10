@@ -1,3 +1,4 @@
+---
 - name: Installing python3 on ubuntu hosts
   gather_facts: no
   hosts: ubuntu

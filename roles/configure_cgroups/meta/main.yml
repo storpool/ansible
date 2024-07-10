@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: Kaloyan Kotlarski
   description: This role configures CGroups on the target hosts
@@ -19,4 +20,3 @@ galaxy_info:
   galaxy_tags: []
 
 dependencies: []
-  

@@ -1,9 +1,10 @@
+---
 - name: Adding sp_services variable if not defined
   ansible.builtin.set_fact:
     sp_services:
       - block
   when:
-   - sp_services is undefined
+    - sp_services is undefined
 
 - name: Making host part of storpool_block group
   ansible.builtin.add_host:
@@ -22,4 +23,3 @@
     groups: "{{ ['storpool'] | product(hostvars[item]['sp_services']) | map('join', '_') | list }}"
   loop: "{{ ansible_play_hosts }}"
   delegate_to: localhost
-

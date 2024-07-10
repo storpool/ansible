@@ -1,3 +1,4 @@
+---
 # Defines whether inventory group membership should be automatically established based on the value of sp_services
 sp_create_groups_by_services: True
 

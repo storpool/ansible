@@ -1,3 +1,4 @@
+---
 - name: Regathering network facts
   ansible.builtin.setup:
     gather_subset:

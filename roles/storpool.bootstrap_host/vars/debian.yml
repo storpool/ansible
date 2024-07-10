@@ -1,9 +1,10 @@
+---
 distribution_packages:
   - cgroup-tools
   - ifenslave
   - liblz4-tool
   - vlan
-  
+
 debian_11_packages:
   - linux-cpupower
   - linux-perf
