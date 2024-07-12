@@ -3,7 +3,7 @@
   ansible.builtin.assert:
     that:
       - sp_release_file is defined
-    fail_msg: "No path to a release archive is defined"
+    fail_msg: No path to a release archive is defined
 
 - name: Checking if the release archive exists
   ansible.builtin.assert:
@@ -19,10 +19,11 @@
     dest: "{{ sp_tools_directory }}"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: 0755
+    mode: "0755"
 
 - name: Copying release file to hosts
   become: true
   ansible.builtin.copy:
     src: "{{ sp_release_file }}"
     dest: "{{ sp_tools_directory }}"
+    mode: "0644"

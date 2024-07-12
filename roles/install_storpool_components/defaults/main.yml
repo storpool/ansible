@@ -18,12 +18,12 @@ sp_getpackage_path: "{{ sp_tools_directory }}/getpackage.py"
 sp_install_method: web
 sp_install_helper_path: "{{ sp_tools_directory }}/install_modules_helper.py"
 
-sp_reinstall: False
-sp_retry_install: True
+sp_reinstall: false
+sp_retry_install: true
 
-sp_reboot_after_install: True
-sp_reboot_sequentially: False
+sp_reboot_after_install: true
+sp_reboot_sequentially: false
 
-sp_run_enable_grub_iommu: True
+sp_run_enable_grub_iommu: true
 
-get_debug_packages: False
+get_debug_packages: false

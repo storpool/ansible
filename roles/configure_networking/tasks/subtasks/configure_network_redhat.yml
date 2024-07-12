@@ -3,10 +3,10 @@
   copy:
     src: ifup-pre-local
     dest: /sbin
-    mode: 0755
+    mode: "0755"
 
 - name: Installing network-scripts on EL 8
-  become: yes
+  become: true
   ansible.builtin.dnf:
     name: network-scripts
     state: present
@@ -15,20 +15,20 @@
     - not sp_nm_controlled
 
 - name: Enabling network-scripts service
-  become: yes
+  become: true
   ansible.builtin.systemd:
     name: network
-    enabled: yes
+    enabled: true
   when:
     - ( ansible_distribution_major_version | int ) == 8
     - not sp_nm_controlled
 
 - name: Disabling NetworkManager
-  become: yes
+  become: true
   ansible.builtin.systemd:
     name: NetworkManager
     state: stopped
-    enabled: no
+    enabled: false
   when:
     - sp_disable_nm
     - ansible_facts.services["NetworkManager.service"] is defined

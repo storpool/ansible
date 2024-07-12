@@ -33,7 +33,7 @@
       {% endif %}
       SET_MEMSW={{ sp_cg_set_memsw }}
   when: not sp_slice_conf_file.stat.exists
-  notify: 'start cgconfig'
+  notify: start cgconfig
 
 - name: Migrating cgroup configuration
   become: true

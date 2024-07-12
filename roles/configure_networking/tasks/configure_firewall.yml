@@ -4,18 +4,18 @@
     firewall_service_name: "{{ firewall_service_map[(ansible_os_family | lower)] }}"
 
 - name: Disabling firewall service
-  become: yes
+  become: true
   ansible.builtin.systemd:
     name: "{{ firewall_service_name }}"
     state: stopped
-    enabled: no
+    enabled: false
   when:
     - sp_disable_fw | bool
     - firewall_service_name in ansible_facts.services
     - ansible_facts.services[firewall_service_name]['status'] != 'not-found'
 
 - name: Configuring firewall on RedHat-like systems
-  become: yes
+  become: true
   ansible.posix.firewalld:
     port: "{{ port }}/tcp"
     permanent: true
@@ -29,7 +29,7 @@
     - ansible_os_family == "RedHat"
 
 - name: Configuring firewall on Debian-like systems
-  become: yes
+  become: true
   community.general.ufw:
     port: "{{ port }}"
     rule: allow

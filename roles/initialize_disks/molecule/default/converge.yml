@@ -2,6 +2,6 @@
 - name: Converge
   hosts: all
   tasks:
-    - name: "Include initialize_disks"
+    - name: Include initialize_disks
       include_role:
-        name: "initialize_disks"
+        name: initialize_disks

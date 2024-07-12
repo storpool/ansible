@@ -9,22 +9,22 @@
   ansible.builtin.service_facts:
 
 - name: Configuring network setup
-  include_tasks: "configure_network.yml"
+  include_tasks: configure_network.yml
   when:
     - sp_configure_network | bool
 
 - name: Configuring firewall
-  import_tasks: "configure_firewall.yml"
+  import_tasks: configure_firewall.yml
   tags:
     - configure-firewall
 
 - name: Validating network configuration
-  import_tasks: "validate_network.yml"
+  import_tasks: validate_network.yml
   tags:
     - validate-network-configuration
 
 - name: Generating VF configuration
-  become: yes
+  become: true
   ansible.builtin.command: >-
     /usr/lib/storpool/vf-genconf
     {% if sp_mtu is defined %}

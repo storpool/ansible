@@ -3,7 +3,7 @@
   assert:
     that:
       - sp_sed_universal_password | length > 0
-    fail_msg: "SED universal password is empty. Aborting!"
+    fail_msg: SED universal password is empty. Aborting!
   when:
     - sp_sed_universal_password is defined
 
@@ -24,7 +24,7 @@
     - sp_sed_conf_file is defined
 
 - name: Include distro-specific task (SED prerequisites)
-  include_tasks: "subtasks/pre-sed-{{ ansible_os_family | lower }}.yml"
+  include_tasks: subtasks/pre-sed-{{ ansible_os_family | lower }}.yml
   when:
     - sp_sed_conf_file is defined
     - not sp_sed_conf_file.stat.exists

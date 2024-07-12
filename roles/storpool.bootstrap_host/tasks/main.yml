@@ -13,22 +13,22 @@
     - check-requirements
 
 - name: Refreshing APT cache
-  become: yes
+  become: true
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
   when:
     - ansible_os_family == "Debian"
 
 - name: Upgrading all installed packages
-  become: yes
+  become: true
   ansible.builtin.package:
-    name: '*'
+    name: "*"
     state: latest
   when:
     - sp_upgrade_os | bool
 
 - name: Upgrading ca-certificates package to the latest version
-  become: yes
+  become: true
   ansible.builtin.package:
     name: ca-certificates
     state: latest
@@ -36,7 +36,7 @@
     - not sp_upgrade_os | bool
 
 - name: Installing EPEL repository on RHEL-like distributions
-  become: yes
+  become: true
   ansible.builtin.yum:
     name: epel-release
     state: present
@@ -45,25 +45,25 @@
     - ansible_distribution != "RedHat"
 
 - name: Installing software dependencies
-  become: yes
+  become: true
   ansible.builtin.package:
-    name: "{{ common_packages + distribution_packages + lookup('vars', ansible_distribution|lower + '_' + ansible_distribution_major_version + '_packages') }}"
+    name: "{{ common_packages + distribution_packages + lookup('vars', ansible_distribution | lower + '_' + ansible_distribution_major_version + '_packages') }}"
     state: present
 
 - name: Generating /etc/rc.local
-  become: yes
+  become: true
   ansible.builtin.template:
     src: rc.local.j2
     dest: /etc/rc.local
-    mode: 0755
+    mode: "0755"
 
 - name: Adding shmfs entry in fstab
-  become: yes
-  ansible.builtin.mount:
+  become: true
+  ansible.posix.mount:
     name: /dev/shm
     src: none
     fstype: tmpfs
-    opts: "size=90%,nosuid,nodev,noauto"
+    opts: size=90%,nosuid,nodev,noauto
     state: mounted
 
 - name: Disabling swap
@@ -73,14 +73,14 @@
     - ansible_swaptotal_mb > 0
 
 - name: Removing swap entry from fstab
-  become: yes
+  become: true
   ansible.builtin.lineinfile:
     path: /etc/fstab
     regexp: \sswap\s
     state: absent
 
 - name: Limiting journald memory to 64M
-  become: yes
+  become: true
   ansible.builtin.lineinfile:
     path: /etc/systemd/journald.conf
     regexp: RuntimeMaxUse=
@@ -92,7 +92,7 @@
   ansible.builtin.service_facts:
 
 - name: Enabling requried services
-  become: yes
+  become: true
   ansible.builtin.systemd:
     name: "{{ service_name }}"
     enabled: true
@@ -111,7 +111,7 @@
     manager: auto
 
 - name: Disabling generic services
-  become: yes
+  become: true
   ansible.builtin.systemd:
     name: "{{ service_name }}"
     enabled: false
@@ -123,4 +123,4 @@
   when: service_name in ansible_facts.services
 
 - name: Performing distribution-specific tasks
-  include_tasks: "tune_{{ ansible_os_family | lower }}.yml"
+  include_tasks: tune_{{ ansible_os_family | lower }}.yml

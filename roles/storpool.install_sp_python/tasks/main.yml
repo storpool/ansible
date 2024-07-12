@@ -1,23 +1,23 @@
 ---
 - name: Updating APT cache
-  become: yes
+  become: true
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
   when:
     - ansible_os_family == 'Debian'
 
 - name: Updating ca-certificates
-  become: yes
+  become: true
   ansible.builtin.package:
     name:
       - ca-certificates
     state: latest
 
 - name: Adding storpool repository
-  include_tasks: "add-repo-{{ ansible_os_family | lower }}.yml"
+  include_tasks: add-repo-{{ ansible_os_family | lower }}.yml
 
 - name: Installing StorPool Python 2 packages
-  become: yes
+  become: true
   ansible.builtin.package:
     name:
       - sp-python2
@@ -27,7 +27,7 @@
     - not ( ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 24 )
 
 - name: Installing StorPool Python 3 packages
-  become: yes
+  become: true
   ansible.builtin.package:
     name:
       - sp-python3

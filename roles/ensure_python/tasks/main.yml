@@ -7,15 +7,19 @@
       changed_when: false
       failed_when: false
 
-    - include_tasks: ensure_centos.yml
+    - name: Installing Python on EL distros
+      include_tasks: ensure_centos.yml
       vars:
         os_release_lines: "{{ os_release.stdout_lines }}"
-      when: '''ID="centos"'' in os_release.stdout_lines or ''ID="almalinux"'' in os_release.stdout_lines or ''ID="rocky"'' in os_release.stdout_lines or ''ID="ol"'' in os_release.stdout_lines'
+      when: "'ID=\"centos\"' in os_release.stdout_lines or 'ID=\"almalinux\"' in os_release.stdout_lines or 'ID=\"rocky\"' in os_release.stdout_lines or 'ID=\"ol\"\
+        ' in os_release.stdout_lines"
 
-    - include_tasks: ensure_debian.yml
-      when: '''ID=debian'' in os_release.stdout_lines'
+    - name: Installing Python on Debian
+      include_tasks: ensure_debian.yml
+      when: "'ID=debian' in os_release.stdout_lines"
 
-    - include_tasks: ensure_ubuntu.yml
+    - name: Installing Python on Ubuntu
+      include_tasks: ensure_ubuntu.yml
       vars:
         os_release_lines: "{{ os_release.stdout_lines }}"
-      when: '''ID=ubuntu'' in os_release.stdout_lines'
+      when: "'ID=ubuntu' in os_release.stdout_lines"

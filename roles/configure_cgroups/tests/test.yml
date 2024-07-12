@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
+- name: Applying configure_cgroups to hosts
+  hosts: localhost
   remote_user: root
   roles:
-    - configure-cgroups
+    - configure_cgroups

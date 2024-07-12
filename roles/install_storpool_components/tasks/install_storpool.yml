@@ -13,10 +13,10 @@
   ansible.builtin.assert:
     that:
       - service_list | length > 0
-    fail_msg: "No StorPool service is configured to be installed. Add the host to the corresponding storpool_<service_name> group."
+    fail_msg: No StorPool service is configured to be installed. Add the host to the corresponding storpool_<service_name> group.
 
 - name: Downloading StorPool packages
-  import_tasks: "install_modules_{{ sp_install_method }}.yml"
+  import_tasks: install_modules_{{ sp_install_method }}.yml
 
 - name: Setting list of modules to be installed
   ansible.builtin.set_fact:

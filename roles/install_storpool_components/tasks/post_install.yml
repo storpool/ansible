@@ -4,7 +4,7 @@
   ansible.builtin.systemd:
     name: rsyslog
     state: restarted
-    enabled: yes
+    enabled: true
 
 - name: Reloading sysctl entries
   become: true
@@ -45,9 +45,10 @@
   become: true
   ansible.builtin.lineinfile:
     path: /etc/default/grub.d/kdump-tools.cfg
-    create: yes
+    create: true
     regexp: crashkernel=.*
     line: GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT crashkernel=1024M"
+    mode: "0644"
   notify:
     - Update GRUB configuration
     - Reboot host
@@ -70,8 +71,9 @@
 - name: Copy default kernel script
   become: true
   copy:
-    src: "files/sp_set_kernel.py"
+    src: files/sp_set_kernel.py
     dest: "{{ sp_tools_directory }}/sp_set_kernel.py"
+    mode: "0755"
   when:
     - sp_kernel_version is defined
     - not ansible_kernel | regex_search("^" + sp_kernel_version)
@@ -101,7 +103,7 @@
     - Reboot host
 
 - name: Execuite StorPool components post-installation hook
-  become: yes
-  ansible.builtin.shell: "{{ sp_post_install_components_hook }}"
+  become: true
+  ansible.builtin.command: "{{ sp_post_install_components_hook }}"
   when:
     - sp_post_install_components_hook is defined

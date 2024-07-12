@@ -4,4 +4,4 @@
   tasks:
     - name: Including storpool.install_sp_python
       include_role:
-        name: "storpool.install_sp_python"
+        name: storpool.install_sp_python

@@ -8,5 +8,5 @@ galaxy_info:
     - name: CentOS
     - name: Debian
     - name: Ubuntu
-  min_ansible_version: 2.14
+  min_ansible_version: "2.14"
   galaxy_tags: []

@@ -2,6 +2,6 @@
 - name: Converge
   hosts: all
   tasks:
-    - name: "Include configure_cgroups"
+    - name: Include configure_cgroups
       include_role:
-        name: "configure_cgroups"
+        name: configure_cgroups

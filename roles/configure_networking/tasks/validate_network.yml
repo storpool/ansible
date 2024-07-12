@@ -3,10 +3,10 @@
   ansible.builtin.setup:
     gather_subset:
       - "!all"
-      - "network"
+      - network
 
 - name: Retrieving configured interfaces from remote host
-  become: yes
+  become: true
   ansible.builtin.shell: |
     export PATH=$PATH:/usr/sbin
     /usr/sbin/storpool_showconf -n -e -- SP_IFACE1_CFG SP_IFACE2_CFG
@@ -17,7 +17,7 @@
 - name: Checking if two interfaces are configured
   ansible.builtin.assert:
     that: all_interfaces_list.stdout_lines | length == 2
-    fail_msg: "Two interfaces must be configured"
+    fail_msg: Two interfaces must be configured
 
 - name: Setting interface facts
   ansible.builtin.set_fact:
@@ -32,7 +32,7 @@
   ansible.builtin.assert:
     that:
       - interface in ansible_interfaces
-    fail_msg: "Interface {{ interface }} does not exist"
+    fail_msg: Interface {{ interface }} does not exist
   loop_control:
     loop_var: interface
   loop:
@@ -44,7 +44,7 @@
 - name: Checking if all interfaces are up
   ansible.builtin.assert:
     that: hostvars[inventory_hostname]['ansible_' + interface]['active']
-    fail_msg: "Interface {{ interface }} is not active"
+    fail_msg: Interface {{ interface }} is not active
   loop_control:
     loop_var: interface
   loop:
@@ -58,4 +58,4 @@
     that:
       - hostvars[inventory_hostname]['ansible_' + (first_resolve_interface | replace('-', '_'))]['ipv4']['address'] == first_resolve_ip_address
       - hostvars[inventory_hostname]['ansible_' + (second_resolve_interface | replace('-', '_'))]['ipv4']['address'] == second_resolve_ip_address
-    fail_msg: "Resolve interface does not have configured IP address assigned to it"
+    fail_msg: Resolve interface does not have configured IP address assigned to it

@@ -1,14 +1,14 @@
 ---
-sp_configure_network: False
-sp_force_network_reconfiguration: False
-sp_bring_up_network: True
+sp_configure_network: false
+sp_force_network_reconfiguration: false
+sp_bring_up_network: true
 
 sp_network_mode: active-backup-bond
 
-sp_nm_controlled: False
+sp_nm_controlled: false
 
-sp_disable_nm: False
-sp_disable_fw: True
+sp_disable_nm: false
+sp_disable_fw: true
 
-net_helper_path: "/usr/sbin/net_helper"
-genconfig_path: "/etc/storpool/autonets.conf"
+net_helper_path: /usr/sbin/net_helper
+genconfig_path: /etc/storpool/autonets.conf

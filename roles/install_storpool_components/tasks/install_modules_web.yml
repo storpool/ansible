@@ -3,7 +3,7 @@
   ansible.builtin.get_url:
     url: "{{ item.url }}"
     dest: "{{ item.dest }}"
-    mode: 0755
+    mode: "0755"
   with_items:
     - { url: "{{ sp_getpackage_url }}", dest: "{{ sp_tools_directory }}" }
     - { url: "{{ sp_install_helper_url }}", dest: "{{ sp_tools_directory }}" }

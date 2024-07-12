@@ -2,7 +2,8 @@
 ---
 - name: Gather localhost's facts
   hosts: localhost
-  gather_subset: 'min'
+  gather_subset:
+    - min
   tasks: []
   tags:
     - always
@@ -30,10 +31,10 @@
 
 - name: Configuring hosts
   hosts: storpool
-  gather_facts: yes
+  gather_facts: true
   gather_subset:
-    - 'all'
-    - '!facter'
+    - all
+    - "!facter"
   roles:
     - storpool.bootstrap_host
     - storpool.install_sp_python
@@ -43,8 +44,8 @@
 - name: Installing StorPool components
   hosts: storpool
   gather_subset:
-    - 'all'
-    - '!facter'
+    - all
+    - "!facter"
   pre_tasks:
     - name: Building in-memory inventory groups
       import_tasks: tasks/generate_group_membership.yml
@@ -59,8 +60,8 @@
 - name: Configuring Networking
   hosts: storpool
   gather_subset:
-    - 'all'
-    - '!facter'
+    - all
+    - "!facter"
   pre_tasks:
     - name: Building in-memory inventory groups
       include_tasks: tasks/generate_group_membership.yml
@@ -75,7 +76,7 @@
   hosts: storpool_server
   gather_facts: "{{'initialize-disks' in ansible_run_tags}}"
   gather_subset:
-    - "min"
+    - min
   roles:
     - initialize_disks
   tags:
@@ -92,8 +93,8 @@
 - name: Configuring StorPool services
   hosts: storpool
   gather_subset:
-    - 'all'
-    - '!facter'
+    - all
+    - "!facter"
   roles:
     - configure_services
   tags:
@@ -102,8 +103,8 @@
 - name: Performing system-wide testing
   hosts: storpool
   gather_subset:
-    - 'all'
-    - '!facter'
+    - all
+    - "!facter"
   tasks:
     - name: Importing testing tasks
       import_tasks: tasks/perform_acceptance_tests.yml

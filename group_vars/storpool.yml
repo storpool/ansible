@@ -1,9 +1,9 @@
 ---
 # Defines whether inventory group membership should be automatically established based on the value of sp_services
-sp_create_groups_by_services: True
+sp_create_groups_by_services: true
 
 # Defines whether storpool_block service should be installed on non-clients
-sp_install_block_on_non_clients: True
+sp_install_block_on_non_clients: true
 
 # Detect by default if the host is a Virtual Machine
 sp_vm: "{{ ansible_virtualization_role == 'guest' }}"

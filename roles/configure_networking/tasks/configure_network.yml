@@ -6,21 +6,21 @@
 - name: Checking if raw interfaces are defined
   ansible.builtin.assert:
     that: sp_raw_interfaces is defined
-    fail_msg: "Host doesn't have any raw interfaces configured"
+    fail_msg: Host doesn't have any raw interfaces configured
 
 - name: Creating a list of raw interfaces names
   ansible.builtin.set_fact:
-    raw_interfaces_names: "{{ sp_raw_interfaces | split (' ') }}"
+    raw_interfaces_names: "{{ sp_raw_interfaces | split(' ') }}"
 
 - name: Checking if atleast one interface is set
   ansible.builtin.assert:
     that: raw_interfaces_names | length >= 1
-    fail_msg: "Not enough raw interfaces set, currently set {{ raw_interfaces_names | length }}"
+    fail_msg: Not enough raw interfaces set, currently set {{ raw_interfaces_names | length }}
 
 - name: Checking if raw interface exists on the host
   ansible.builtin.assert:
     that: interface_name in ansible_interfaces
-    fail_msg: "StorPool raw interface {{ interface_name }} not found on host."
+    fail_msg: StorPool raw interface {{ interface_name }} not found on host.
   loop: "{{ raw_interfaces_names }}"
   loop_control:
     loop_var: interface_name
@@ -28,10 +28,10 @@
 - name: Checking if resolve network is defined
   ansible.builtin.assert:
     that: sp_network is defined
-    fail_msg: "Resolve network is not configured"
+    fail_msg: Resolve network is not configured
 
 - name: Including distribution-specific tasks
-  include_tasks: "subtasks/configure_network_{{ ansible_os_family | lower }}.yml"
+  include_tasks: subtasks/configure_network_{{ ansible_os_family | lower }}.yml
 
 - name: Creating temporary configuration file
   ansible.builtin.tempfile:
@@ -110,7 +110,7 @@
     PATH: "{{ ansible_env.PATH }}:/usr/sbin"
 
 - name: Checking if net_helper configuration exists
-  become: yes
+  become: true
   ansible.builtin.stat:
     path: "{{ genconfig_path }}"
   register: genconfig_file
@@ -122,7 +122,7 @@
   register: storpool_network_interface_configuration
 
 - name: Generating diff output for current and new network configuration
-  ansible.builtin.command: "/usr/bin/diff -u {{ genconfig_path }} {{ temporary_genconfig_parameters.path }}"
+  ansible.builtin.command: /usr/bin/diff -u {{ genconfig_path }} {{ temporary_genconfig_parameters.path }}
   register: network_configuration_diff
   failed_when: network_configuration_diff.rc == 2
   changed_when: false
@@ -130,16 +130,17 @@
     - genconfig_file.stat.exists
 
 - name: Moving temporary network configuration to persistent
-  become: yes
+  become: true
   ansible.builtin.copy:
     src: "{{ temporary_genconfig_parameters.path }}"
     dest: "{{ genconfig_path }}"
-    remote_src: yes
+    remote_src: true
+    mode: "0644"
   when:
     - not genconfig_file.stat.exists or (network_configuration_diff is defined and network_configuration_diff.rc == 1)
 
 - name: Checking if interface configuration changes are required
-  become: yes
+  become: true
   ansible.builtin.command: >-
     {{ net_helper_path }} check --from-config {{ genconfig_path }} --exit-status 254
   register: interface_configuration_check
@@ -152,27 +153,27 @@
     - storpool_network_interface_configuration.stat.exists
 
 - name: Reconfiguring network
+  when:
+    - storpool_network_interface_configuration.stat.exists
+    - interface_configuration_check.changed
+
   block:
     - name: Cleaning up previous configuration
-      become: yes
+      become: true
       ansible.builtin.command: >-
         {{ net_helper_path }} cleanup
         {% if sp_force_network_reconfiguration %}
         --stop-services
         {% endif %}
-  when:
-    - storpool_network_interface_configuration.stat.exists
-    - interface_configuration_check.changed
-
 - name: Applying network configuration
-  become: yes
+  become: true
   ansible.builtin.command: >-
     {{ net_helper_path }} applyifcfg --from-config {{ genconfig_path }}
   when:
     - interface_configuration_check.changed or not storpool_network_interface_configuration.stat.exists
 
 - name: Bringing up network interfaces
-  become: yes
+  become: true
   ansible.builtin.command: >-
     {{ net_helper_path }} up
   when:

@@ -1,23 +1,23 @@
 ---
 # defaults file for initialize_disks
-disk_init_helper_script: '/usr/sbin/disk_init_helper'
-disk_init_helper_discovery_file: '/var/spool/storpool/disk-init-discovery.json'
+disk_init_helper_script: /usr/sbin/disk_init_helper
+disk_init_helper_discovery_file: /var/spool/storpool/disk-init-discovery.json
 sp_discover_disk_run: true
-sp_min_disk_size: '890GB'
-sp_min_nvme_size: '80GB'
-sp_min_pmem_size: '1GB'
-sp_max_disk_size: '14TB'
+sp_min_disk_size: 890GB
+sp_min_nvme_size: 80GB
+sp_min_pmem_size: 1GB
+sp_max_disk_size: 14TB
 sp_nvme_disk_id_offset: 0
 sp_ssd_disk_id_offset: 0
 sp_hdd_disk_id_offset: 10
 sp_ssd_disk_init_args: []
 sp_hdd_disk_init_args: []
 sp_server_instances: 1
-sp_multi_server_helper: '/usr/lib/storpool/multi-server-helper.py'
+sp_multi_server_helper: /usr/lib/storpool/multi-server-helper.py
 sp_new_cluster: false
 sp_test_discovered_disks: true
 sp_backup_disk_init_config: true
 sp_wipe_new_partitions: false
 
 # This hack-fix sets the same default value that 1_prepare uses. It will be removed once the playbook is reworked
-sp_toolsdir: "/root/storpool"
+sp_toolsdir: /root/storpool

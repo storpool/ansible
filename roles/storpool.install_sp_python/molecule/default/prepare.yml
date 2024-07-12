@@ -1,6 +1,6 @@
 ---
 - name: Installing python3 on ubuntu hosts
-  gather_facts: no
+  gather_facts: false
   hosts: ubuntu
   tasks:
     - name: Install python3
@@ -9,7 +9,7 @@
       failed_when: false
 
 - name: Installing required packages
-  gather_facts: no
+  gather_facts: false
   hosts: all
   tasks:
     - name: Installing packages

@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
+- name: Applying the bootstrap_host role
+  hosts: localhost
   remote_user: root
   roles:
-    - bootstrap_node
+    - storpool.bootstrap_host

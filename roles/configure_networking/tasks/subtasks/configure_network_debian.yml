@@ -3,10 +3,10 @@
   copy:
     src: enslavedummy
     dest: /sbin
-    mode: 0755
+    mode: "0755"
 
 - name: Adjusting /etc/network/interfaces
-  become: yes
+  become: true
   ansible.builtin.replace:
     path: /etc/network/interfaces
     regexp: ^source /etc/network/interfaces\.d.*
@@ -16,7 +16,7 @@
     - ( ansible_distribution_major_version | int ) <= 18
 
 - name: Configuring /etc/network/interfaces
-  become: yes
+  become: true
   ansible.builtin.lineinfile:
     path: /etc/network/interfaces
     line: source-directory interfaces.d
@@ -28,4 +28,4 @@
   file:
     path: /etc/network/interfaces.d
     state: directory
-    mode: 0755
+    mode: "0755"

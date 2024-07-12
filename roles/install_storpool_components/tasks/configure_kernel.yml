@@ -2,20 +2,20 @@
 - name: Find StorPool release archives
   ansible.builtin.find:
     paths: "{{ sp_toolsdir }}"
-    patterns: "^storpool-{{ sp_release }}.*\\.tar\\.gz$"
-    use_regex: yes
-    recurse: no
+    patterns: ^storpool-{{ sp_release }}.*\.tar\.gz$
+    use_regex: true
+    recurse: false
   register: release_archives
 
 - name: Get latest StorPool release archive
   ansible.builtin.set_fact:
-    release_archive: "{{ (release_archives.files|sort(attribute='mtime')|last).path }}"
+    release_archive: "{{ (release_archives.files | sort(attribute='mtime') | last).path }}"
 
 - name: Extract StorPool release archive
   become: true
   ansible.builtin.unarchive:
     src: "{{ release_archive }}"
-    remote_src: yes
+    remote_src: true
     dest: "{{ sp_toolsdir }}"
 
 - name: Get extracted archive folder name
@@ -56,8 +56,9 @@
 - name: Copy default kernel script
   become: true
   copy:
-    src: "files/sp_set_kernel.py"
+    src: files/sp_set_kernel.py
     dest: "{{ sp_toolsdir }}/sp_set_kernel.py"
+    mode: "0755"
   when:
     - sp_kernel_version is defined
     - not ansible_kernel | regex_search("^" + sp_kernel_version)
@@ -73,13 +74,13 @@
   when:
     - sp_kernel_version is defined
     - not ansible_kernel | regex_search("^" + sp_kernel_version)
-  notify: "reload kernel"
+  notify: reload kernel
 
 - name: Check kernel cmdline
   command:
     argv:
-      - "/usr/lib/storpool/kernel_cmdline_check"
-      - "--exit-code"
+      - /usr/lib/storpool/kernel_cmdline_check
+      - --exit-code
       - "2"
   register: kernel_cmdline_check
   ignore_errors: true
@@ -87,4 +88,4 @@
   # Workaround for the case described
   # in https://github.com/ansible/ansible/issues/14877
   failed_when: kernel_cmdline_check.rc == 0
-  notify: "reload kernel"
+  notify: reload kernel

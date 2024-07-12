@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
+- name: Apply the initialize_disks role
+  hosts: localhost
   remote_user: root
   roles:
     - initialize_disks

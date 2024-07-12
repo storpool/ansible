@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
+- name: Applying the install_sp_python role
+  hosts: localhost
   remote_user: root
   roles:
-    - install_sp_python
+    - storpool.install_sp_python
