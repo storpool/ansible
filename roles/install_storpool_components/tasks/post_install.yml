@@ -104,6 +104,6 @@
 
 - name: Execuite StorPool components post-installation hook
   become: true
-  ansible.builtin.command: "{{ sp_post_install_components_hook }}"
+  ansible.builtin.shell: "{{ sp_post_install_components_hook }}"  # noqa: command-instead-of-shell
   when:
     - sp_post_install_components_hook is defined
