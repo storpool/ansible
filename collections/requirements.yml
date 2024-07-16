@@ -1,5 +1,6 @@
 ---
-- src: https://github.com/ansible-collections/ansible.posix.git
-  name: ansible.posix
-- src: https://github.com/ansible-collections/community.general
-  name: community.general
+collections:
+  - src: https://github.com/ansible-collections/ansible.posix.git
+    name: ansible.posix
+  - src: https://github.com/ansible-collections/community.general
+    name: community.general
