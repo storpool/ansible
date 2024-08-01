@@ -58,7 +58,7 @@
     - install-storpool-components
 
 - name: Configuring Networking
-  hosts: storpool
+  hosts: storpool_block,storpool_server,storpool_mgmt,storpool_iscsi,storpool_bridge
   gather_subset:
     - all
     - "!facter"
@@ -83,7 +83,7 @@
     - initialize-disks
 
 - name: Configure StorPool CGroups
-  hosts: storpool
+  hosts: storpool_block,storpool_server,storpool_mgmt,storpool_iscsi,storpool_bridge
   gather_facts: false
   roles:
     - configure_cgroups
@@ -91,7 +91,7 @@
     - configure-cgroups
 
 - name: Configuring StorPool services
-  hosts: storpool
+  hosts: storpool_block,storpool_server,storpool_mgmt,storpool_iscsi,storpool_bridge
   gather_subset:
     - all
     - "!facter"
