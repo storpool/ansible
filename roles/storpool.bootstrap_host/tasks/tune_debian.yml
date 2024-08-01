@@ -34,3 +34,13 @@
     - multipathd.socket
   when:
     - ansible_distribution == 'Ubuntu'
+
+- name: Disable kexec on normal reboot
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/default/kexec.d/99-storpool
+    create: true
+    mode: '0644'
+    regexp: '^LOAD_KEXEC='
+    line: 'LOAD_KEXEC=false'
+    state: present
