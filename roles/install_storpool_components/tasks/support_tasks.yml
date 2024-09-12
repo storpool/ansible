@@ -14,7 +14,12 @@
 
 - name: Performing mlc test
   become: true
-  shell: "{{ sp_tools_directory }}/mlc/mlc > /etc/storpool/mlc/mlc.output"
+  shell: |
+    if [ -d /sys/fs/cgroup/memory/ ]; then
+      cgexec -g memory,cpuset:/ {{ sp_tools_directory }}/mlc/mlc > /etc/storpool/mlc/mlc.output
+    else
+      {{ sp_tools_directory }}/mlc/mlc > /etc/storpool/mlc/mlc.output
+    fi
   args:
     executable: /bin/bash
     creates: /etc/storpool/mlc/mlc.output
