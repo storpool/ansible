@@ -189,5 +189,5 @@
     executable: /bin/bash
   when:
     - (sp_server_instances | int) > 1
-    - ansible_facts.services["storpool_server"] is defined
-    - ansible_facts.services["storpool_server"].state != "running"
+    - ansible_facts.services["storpool_server.service"] is defined
+    - ansible_facts.services["storpool_server.service"].state != "running"
