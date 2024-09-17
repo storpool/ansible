@@ -11,6 +11,25 @@
     path: /sys/fs/cgroup/memory/memory.memsw.usage_in_bytes
   register: cgroup_memsw_file
 
+- name: Checking if qemu.slice is set in storpool.conf for Proxmox
+  become: true
+  shell: |
+    set -o pipefail
+    export PATH=$PATH:/usr/sbin
+    /usr/sbin/storpool_showconf -n -e SP_MACHINE_SLICE_NAME | grep qemu.slice
+  register: qemu_slice_result
+  changed_when: false
+  failed_when: false
+  when:
+    - "'proxmox_hv' in group_names"
+
+- name: Checking qemu.slice result
+  ansible.builtin.assert:
+    that: qemu_slice_result.rc == 0
+    fail_msg: qemu.slice must be set for Proxmox node in storpool.conf
+  when:
+    - qemu_slice_result.rc is defined
+
 - name: Setting set_memsw fact
   set_fact:
     sp_cg_set_memsw: '{{ "1" if cgroup_memsw_file.stat.exists else "0" }}'
