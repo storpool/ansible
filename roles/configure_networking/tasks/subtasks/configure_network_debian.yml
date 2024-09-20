@@ -1,5 +1,6 @@
 ---
 - name: Deploy enslavedummy (Ubuntu/Debian)
+  become: true
   copy:
     src: enslavedummy
     dest: /sbin
