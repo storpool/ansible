@@ -42,5 +42,5 @@ common_packages:
   - xfsprogs
 
 rc_local_commands:
-  - "/usr/bin/cpupower set -b 0; # set energy/performance policy to performance"
+  - "/usr/bin/cpupower set -b 0 || true; # set energy/performance policy to performance"
   - "/usr/bin/cpupower frequency-set -g performance; # set cpufreq/pstate governor to performance"
