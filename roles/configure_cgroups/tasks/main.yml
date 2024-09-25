@@ -17,6 +17,8 @@
     set -o pipefail
     export PATH=$PATH:/usr/sbin
     /usr/sbin/storpool_showconf -n -e SP_MACHINE_SLICE_NAME | grep qemu.slice
+  args:
+    executable: /bin/bash
   register: qemu_slice_result
   changed_when: false
   failed_when: false
