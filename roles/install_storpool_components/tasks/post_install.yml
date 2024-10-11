@@ -102,6 +102,20 @@
     - Update GRUB configuration
     - Reboot host
 
+- name: Ensure kdump service is enabled
+  become: true
+  ansible.builtin.systemd:
+    name: kdump{{ "-tools" if ansible_os_family == "Debian" else "" }}.service
+    enabled: true
+
+- name: Start kdump service if kernel parameters are configured
+  become: true
+  ansible.builtin.systemd:
+    name: kdump{{ "-tools" if ansible_os_family == "Debian" else "" }}.service
+    state: started
+  when:
+    - kernel_cmdline_check.rc == 0
+
 - name: Execuite StorPool components post-installation hook
   become: true
   ansible.builtin.shell: "{{ sp_post_install_components_hook }}"  # noqa: command-instead-of-shell
