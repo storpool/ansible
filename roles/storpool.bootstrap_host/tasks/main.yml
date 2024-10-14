@@ -55,6 +55,7 @@
   ansible.builtin.template:
     src: rc.local.j2
     dest: /etc/rc.local
+    follow: true
     mode: "0755"
 
 - name: Adding shmfs entry in fstab
