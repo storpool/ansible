@@ -40,14 +40,13 @@
   when:
     - ansible_os_family == "Debian"
 
-# TODO: Create a map to set the appropriate memory size depending on the total memory available to the machine
 - name: Increasing crashkernel size (Debian/Ubuntu)
   become: true
   ansible.builtin.lineinfile:
     path: /etc/default/grub.d/kdump-tools.cfg
     create: true
     regexp: crashkernel=.*
-    line: GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT crashkernel=1024M"
+    line: GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT crashkernel=1G-64G:256M,64G-512G:512M,512G-:1024M"
     mode: "0644"
   notify:
     - Update GRUB configuration
