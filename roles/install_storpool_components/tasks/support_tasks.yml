@@ -5,9 +5,10 @@
 
 - name: Installing support tools
   delegate_to: localhost
+  delegate_facts: true
   command:
     chdir: "{{ cluster_directory }}"
-    cmd: installtools {{ ssh_alias | default(ansible_host) }}
+    cmd: installtools {{ ssh_alias | default(inventory_hostname) }}
   changed_when: false
   environment:
     remotedir: "{{ sp_tools_directory }}"
@@ -30,9 +31,10 @@
 
 - name: Collecting inventory
   delegate_to: localhost
+  delegate_facts: true
   command:
     chdir: "{{ cluster_directory }}"
-    cmd: collect_inventory {{ ssh_alias | default(ansible_host) }}
+    cmd: collect_inventory {{ ssh_alias | default(inventory_hostname) }}
   changed_when: false
   when:
     - not sp_vm | bool
