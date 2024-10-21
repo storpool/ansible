@@ -7,7 +7,7 @@
   delegate_to: localhost
   command:
     chdir: "{{ cluster_directory }}"
-    cmd: installtools {{ ansible_host }}
+    cmd: installtools {{ ssh_alias | default(ansible_host) }}
   changed_when: false
   environment:
     remotedir: "{{ sp_tools_directory }}"
@@ -32,7 +32,7 @@
   delegate_to: localhost
   command:
     chdir: "{{ cluster_directory }}"
-    cmd: collect_inventory {{ ansible_host }}
+    cmd: collect_inventory {{ ssh_alias | default(ansible_host) }}
   changed_when: false
   when:
     - not sp_vm | bool
