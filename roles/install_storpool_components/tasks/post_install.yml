@@ -102,6 +102,18 @@
   when:
     - kernel_cmdline_check.rc == 0
 
+- name: Disabling random MAC address generation on Debian-based distributions
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/systemd/network/99-default.link.d/
+    src: 10-disable-random-mac.conf
+    mode: '0644'
+  when:
+    - ansible_distribution == 'Ubuntu'
+    - ( ansible_distribution_major_version | int ) >= 22
+  notify:
+    - Reboot host
+
 - name: Execuite StorPool components post-installation hook
   become: true
   ansible.builtin.shell: "{{ sp_post_install_components_hook }}"  # noqa: command-instead-of-shell
