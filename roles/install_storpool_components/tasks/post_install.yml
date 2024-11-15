@@ -54,19 +54,6 @@
   when:
     - ansible_os_family == "Debian"
 
-- name: Waiting for memory tests to complete
-  become: true
-  async_status:
-    jid: "{{ memory_test_sleeper.ansible_job_id }}"
-  register: job_result
-  until: job_result.finished
-  retries: 200
-  delay: 30
-  when:
-    - not sp_vm | bool
-    - memory_test_sleeper is defined
-    - memory_test_sleeper.ansible_job_id is defined
-
 - name: Copy default kernel script
   become: true
   copy:
@@ -120,3 +107,16 @@
   ansible.builtin.shell: "{{ sp_post_install_components_hook }}"  # noqa: command-instead-of-shell
   when:
     - sp_post_install_components_hook is defined
+
+- name: Waiting for memory tests to complete
+  become: true
+  async_status:
+    jid: "{{ memory_test_sleeper.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: 200
+  delay: 30
+  when:
+    - not sp_vm | bool
+    - memory_test_sleeper is defined
+    - memory_test_sleeper.ansible_job_id is defined
