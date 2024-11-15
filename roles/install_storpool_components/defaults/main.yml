@@ -26,4 +26,6 @@ sp_reboot_sequentially: false
 
 sp_run_enable_grub_iommu: true
 
+sp_crashkernel_memory: 1024
+
 get_debug_packages: false
