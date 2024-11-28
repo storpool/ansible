@@ -62,7 +62,7 @@
   become: true
   ansible.posix.mount:
     name: /dev/shm
-    src: none
+    src: tmpfs
     fstype: tmpfs
     opts: size=90%,nosuid,nodev,noauto
     state: mounted
