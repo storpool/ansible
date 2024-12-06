@@ -8,3 +8,7 @@ supported_release_targets:
   - pre-release
   - testing
   - sp-lab
+
+gui_group_name: storpoolgui
+gui_user_name: storpoolgui
+gui_user_homedir: /usr/lib/storpool/gui

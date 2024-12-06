@@ -21,3 +21,13 @@
   changed_when: start_services_result.stdout_lines | length > 0
   when:
     - sp_start_services is not defined or sp_start_services | bool
+
+- name: Start the StorPool GUI service
+  become: true
+  ansible.builtin.systemd_service:
+    name: storpool_gui.service
+    state: started
+  when:
+    - '"storpool_gui" in groups'
+    - inventory_hostname in groups["storpool_gui"]
+    - sp_start_services is not defined or sp_start_services | bool

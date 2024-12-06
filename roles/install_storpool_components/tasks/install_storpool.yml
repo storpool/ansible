@@ -20,7 +20,7 @@
 
 - name: Setting list of modules to be installed
   ansible.builtin.set_fact:
-    install_modules_list: "@cli bindings-py cgtool common beacon kmod update {{ service_list | map('split', 'storpool_') | map('last') | join(' ') }}"
+    install_modules_list: "@cli bindings-py cgtool common beacon kmod update {{ service_list | map('split', 'storpool_') | map('last') | reject('eq', 'gui') | join(' ') }}"
     extra_block_module: "{{ (groups['storpool_block'] is defined and inventory_hostname in groups['storpool_block']) | ternary(' block', '') }}"
 
 - name: Installing StorPool modules
@@ -42,6 +42,12 @@
   poll: 0
   register: storpool_modules_sleeper
   changed_when: false
+
+- name: Installing the StorPool GUI
+  ansible.builtin.import_tasks: install_storpool_gui.yml
+  when:
+    - '"storpool_gui" in groups'
+    - 'inventory_hostname in groups["storpool_gui"]'
 
 - name: Install StorPool modules - check on async task
   become: true

@@ -4,3 +4,4 @@ collections:
     name: ansible.posix
   - src: https://github.com/ansible-collections/community.general
     name: community.general
+  - community.crypto

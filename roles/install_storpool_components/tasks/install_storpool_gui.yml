@@ -1,0 +1,116 @@
+---
+- name: Setting StorPool GUI root directory path
+  ansible.builtin.set_fact:
+    gui_webroot_directory: "{{ gui_user_homedir }}/root"
+    cache: true
+
+- name: Creating the StorPool GUI user group
+  become: true
+  ansible.builtin.group:
+    name: "{{ gui_group_name }}"
+    system: true
+    state: present
+
+- name: Creating the StorPool GUI user
+  become: true
+  ansible.builtin.user:
+    name: "{{ gui_user_name }}"
+    group: "{{ gui_group_name }}"
+    home: "{{ gui_user_homedir }}"
+    password_lock: true
+    system: true
+    state: present
+
+- name: Creating temporary StorPool GUI directory
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: "gui-{{ sp_target_release }}"
+  register: gui_extract_dir
+
+- name: Extracting StorPool GUI archive
+  ansible.builtin.unarchive:
+    src: "https://vault.storpool.com/gui-{{ sp_target_release }}.tar.gz"
+    dest: "{{ gui_extract_dir.path }}"
+    remote_src: true
+
+- name: Finding the StorPool GUI release directory
+  ansible.builtin.find:
+    paths: "{{ gui_extract_dir.path }}"
+    patterns:
+      - "gui-*"
+    file_type: directory
+  register: gui_found_directories
+
+- name: Setting the StorPool GUI release directory path
+  ansible.builtin.set_fact:
+    gui_release_path: "{{ (gui_found_directories.files | first)['path'] }}"
+
+- name: Ensuring the webroot directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ gui_webroot_directory }}"
+    state: directory
+    mode: '0755'
+
+- name: Moving the StorPool GUI web assets
+  become: true
+  ansible.builtin.copy:
+    src: "{{ gui_release_path }}/dist"
+    dest: "{{ gui_webroot_directory }}"
+    remote_src: true
+    mode: '0755'
+
+- name: Moving the StorPool GUI Django app
+  become: true
+  ansible.builtin.copy:
+    src: "{{ gui_release_path }}/dist/sp/tools/gui"
+    dest: /opt/storpool/python3/lib/python3.8/site-packages/sp/tools/
+    remote_src: true
+    mode: '0755'
+
+- name: Creating the StorPool GUI directories
+  become: true
+  ansible.builtin.file:
+    path: "{{ gui_webroot_directory }}/{{ item }}"
+    state: directory
+    owner: "{{ gui_user_name }}"
+    group: "{{ gui_group_name }}"
+    mode: '0755'
+  loop:
+    - state
+    - cert
+
+- name: Creating TLS private key
+  become: true
+  community.crypto.openssl_privatekey:
+    path: "{{ gui_webroot_directory }}/cert/gui.key"
+
+- name: Creating TLS signing request
+  become: true
+  community.crypto.openssl_csr:
+    path: "{{ gui_webroot_directory }}/cert/gui.req"
+    privatekey_path: "{{ gui_webroot_directory }}/cert/gui.key"
+    common_name: storpool-gui
+
+- name: Generate a Self Signed OpenSSL certificate
+  become: true
+  community.crypto.x509_certificate:
+    path: "{{ gui_webroot_directory }}/cert/gui.crt"
+    privatekey_path: "{{ gui_webroot_directory }}/cert/gui.key"
+    csr_path: "{{ gui_webroot_directory }}/cert/gui.req"
+    provider: selfsigned
+
+- name: Copying the StorPool GUI systemd service file
+  become: true
+  ansible.builtin.copy:
+    src: "{{ gui_release_path }}/storpool_gui.service"
+    dest: /usr/lib/systemd/system/
+    mode: '0644'
+    remote_src: yes
+
+- name: Enabling the StorPool GUI systemd service
+  become: true
+  ansible.builtin.systemd_service:
+    name: storpool_gui.service
+    enabled: true
+    daemon-reload: true
