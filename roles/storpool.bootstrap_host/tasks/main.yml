@@ -44,10 +44,15 @@
     - ansible_os_family == "RedHat"
     - ansible_distribution != "RedHat"
 
-- name: Installing software dependencies
+- name: Installing common software dependencies
   become: true
   ansible.builtin.package:
-    name: "{{ common_packages + distribution_packages + lookup('vars', ansible_distribution | lower + '_' + ansible_distribution_major_version + '_packages') }}"
+    name: "{{
+        common_packages
+      + distribution_packages
+      + lookup('vars', ansible_distribution | lower + '_' + ansible_distribution_major_version + '_packages')
+      + (baremetal_only_packages if not sp_vm | bool else [])
+    }}"
     state: present
 
 - name: Generating /etc/rc.local

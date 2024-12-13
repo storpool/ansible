@@ -10,9 +10,7 @@ common_packages:
   - git
   - gdisk
   - hwloc
-  - ipmitool
   - kexec-tools
-  - lldpd
   - logrotate
   - lshw
   - lsof
@@ -30,7 +28,6 @@ common_packages:
   - psmisc
   - rsync
   - screen
-  - smartmontools
   - socat
   - strace
   - sysstat
@@ -40,6 +37,11 @@ common_packages:
   - vim
   - wget
   - xfsprogs
+
+baremetal_only_packages:
+  - ipmitool
+  - lldpd
+  - smartmontools
 
 rc_local_commands:
   - "/usr/bin/cpupower set -b 0 || true; # set energy/performance policy to performance"

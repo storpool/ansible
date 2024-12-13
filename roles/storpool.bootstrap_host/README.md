@@ -14,6 +14,7 @@ Variables without the `sp_` prefix are set as role-level variables.
 | sp_upgrade_os                   | Boolean | `False`                       | Performs distribution-wide upgrade of all packages. |
 | sp_selinux_disable              | Boolean | `True`                        | Disables SELinux on RHEL-like distributions. |
 | common_packages                 | List    | See `vars/main.yml `          | List of package names to be installed common to all Linux distributions. |
+| baremetal_packages              | List    | See `vars/main.yml `          | List of package names to be installed only on baremetal machines. |
 | rc_local_commands               | List    | See `vars/main.yml `          | List of commands to be placed in `/etc/rc.local` and executed at boot. |
 | distribution_packages           | List    | See `vars/redhat,debian.yml`  | List of package names common to all versions of the given distribution family. |
 | centos_7_packages               | List    | See `vars/redhat.yml`         | List of package names to be installed on CentOS 7. |
