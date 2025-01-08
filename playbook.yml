@@ -1,5 +1,22 @@
 #!/usr/bin/env ansible-playbook
 ---
+
+- name: Validate StorPool YAML inventory
+  hosts: localhost
+  tasks:
+    - name: Validate the YAML file
+      yamlinspector:
+        file_content: "{{ lookup('file', inventory_path) }}"
+      vars:
+        inventory_path: "{{ ansible_inventory_sources[0] }}"
+      register: validation_results
+
+    - name: Validation results
+      debug:
+        var: validation_results
+  tags:
+    - validate-yaml
+
 - name: Gather localhost's facts
   hosts: localhost
   gather_subset:

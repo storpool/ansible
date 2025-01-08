@@ -1,0 +1,564 @@
+---
+
+all:
+  type: dict
+  required: true
+  schema:
+    hosts:
+      type: dict
+      required: true
+    children:
+      type: dict
+      required: true
+      schema:
+        storpool:
+          type: dict
+          required: true
+          schema:
+            hosts:
+              type: dict
+              required: true
+              keysrules:
+                type: string
+              valuesrules:
+                type: dict
+                schema:
+                  sp_services:
+                    type: list
+                    required: true
+                    schema:
+                      type: string
+                    allowed:
+                      - server
+                      - mgmt
+                      - block
+                      - iscsi
+                      - bridge
+                      - debug
+
+                  sp_cg_hyperconverged:
+                    type: boolean
+                    required: false
+
+                  sp_raw_interfaces:
+                    type: string
+                    required: false
+
+                  disk_init_helper_discovery_file:
+                    type: string
+                    required: false
+
+                  disk_init_helper_script:
+                    type: string
+                    required: false
+
+                  get_debug_packages:
+                    type: boolean
+                    required: false
+
+                  setup_ports:
+                    type: list
+                    required: false
+
+                  sp_add_iface_net:
+                    type: list
+                    required: false
+
+                  sp_address_offset:
+                    type: integer
+                    required: false
+
+                  sp_disable_nm:
+                    type: boolean
+                    required: false
+
+                  sp_discover_disk_pattern:
+                    type: string
+                    required: false
+
+                  sp_discover_disk_run:
+                    type: boolean
+                    required: false
+
+                  sp_diskid_offset:
+                    type: integer
+                    required: false
+
+                  sp_hdd_disk_init_args:
+                    type: list
+                    required: false
+
+                  sp_network_mode:
+                    type: string
+                    required: false
+                    allowed:
+                      - active-backup-bond
+                      - exclusive-ifaces
+                      - bridge-mlag-bond
+                      - mlag-bond
+                      - bridge-active-backup-bond
+
+                  sp_nm_controlled:
+                    type: boolean
+                    required: false
+
+                  host_sp_ourid:
+                    type: string
+                    required: false
+
+                  sp_post_install_components_hook:
+                    type: string
+                    required: false
+
+                  sp_server_instances:
+                    type: integer
+                    required: false
+                    min: 1
+                    max: 16
+
+                  sp_sleep_type:
+                    type: string
+                    required: false
+
+                  sp_ssd_disk_init_args:
+                    type: list
+                    required: false
+
+                  sp_iscsi_network_mode:
+                    type: string
+                    required: false
+
+                  sp_iscsi_raw_interfaces:
+                    type: string
+                    required: false
+
+                  sp_addnet_address_offset:
+                    type: integer
+                    required: false
+
+                  sp_ourid:
+                    type: integer
+                    required: false
+
+                  sp_vm:
+                    type: boolean
+                    required: false
+
+                  sp_kernel_version:
+                    type: string
+                    required: false
+
+
+            vars:
+              type: dict
+              required: true
+              schema:
+                sp_release:
+                  type: string
+                  required: true
+                  regex: '^(\d+|\d{2}\.\d+(\.\d+)?)$'
+
+                sp_cg_hyperconverged:
+                  type: boolean
+                  required: false
+
+                sp_configure_network:
+                  type: boolean
+                  required: false
+
+                sp_network:
+                  type: string
+                  regex: '^((25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)/([0-9]|[1-2][0-9]|3[0-2])$'
+
+                sp_server_instances:
+                  type: integer
+                  required: false
+                  min: 1
+                  max: 16
+
+                sp_kernel_params_reboot:
+                  type: boolean
+                  required: false
+
+                sp_cg_conf_extra:
+                  type: list
+                  required: false
+
+                sp_summary_wait:
+                  type: boolean
+                  required: false
+
+                sp_disable_fw:
+                  type: boolean
+                  required: false
+
+                sp_disable_nm:
+                  type: boolean
+                  required: false
+
+                sp_selinux:
+                  type: string
+                  required: false
+                  allowed:
+                    - permissive
+                    - disabled
+
+                sp_single_iface:
+                  type: boolean
+                  required: false
+
+                sp_overwrite_iface_conf:
+                  type: boolean
+                  required: false
+
+                sp_alternative_net_setup:
+                  type: boolean
+                  required: false
+
+                sp_update_system:
+                  type: boolean
+                  required: false
+
+                sp_multi_server_helper_enabled:
+                  type: boolean
+                  required: false
+
+                sp_config:
+                  type: string
+                  required: false
+
+                sp_release_file:
+                  type: string
+                  required: false
+
+                sp_toolsdir:
+                  type: string
+                  required: false
+
+                sp_custdir:
+                  type: string
+                  required: false
+
+                sp_cluster:
+                  type: string
+                  required: false
+
+                sp_vlan:
+                  type: integer
+                  required: false
+
+                sp_mtu:
+                  type: string
+                  required: false
+                  regex: "^(1500|[1-8][0-9]{4}|9000)$"
+
+                sp_bring_up_network:
+                  type: boolean
+                  required: false
+
+                sp_force_network_reconfiguration:
+                  type: boolean
+                  required: false
+
+                sp_network_mode:
+                  type: string
+                  required: false
+                  allowed:
+                    - active-backup-bond
+                    - exclusive-ifaces
+                    - bridge-mlag-bond
+                    - mlag-bond
+                    - bridge-active-backup-bond
+
+                sp_nm_controlled:
+                  type: boolean
+                  required: false
+
+                disable_network_acceleration:
+                  type: boolean
+                  required: false
+
+                sp_bond_name:
+                  type: string
+                  required: false
+
+                sp_bridge_name:
+                  type: string
+                  required: false
+
+                sp_arp_ip_targets:
+                  type: string
+                  required: false
+
+                sp_address_offset:
+                  type: integer
+                  required: false
+
+                sp_add_iface_net:
+                  type: list
+                  required: false
+
+                sp_addnet_address_offset:
+                  type: integer
+                  required: false
+
+                sp_new_cluster:
+                  type: boolean
+                  required: true
+
+                sp_diskid_offset:
+                  type: integer
+                  required: false
+
+                sp_tools_directory:
+                  type: string
+                  required: false
+                sp_configuration_path:
+                  type: string
+                  required: false
+
+                sp_getpackage_url:
+                  type: string
+                  required: false
+
+                sp_install_helper_url:
+                  type: string
+                  required: false
+
+                sp_vault_url:
+                  type: string
+                  required: false
+
+                sp_target_release:
+                  type: string
+                  required: true
+                  allowed:
+                    - release
+                    - pre-release
+                    - testing
+                    - sp-lab
+
+                sp_getpackage_path:
+                  type: string
+                  required: false
+
+                sp_install_method:
+                  type: string
+                  required: false
+
+                sp_install_helper_path:
+                  type: string
+                  required: false
+
+                sp_reinstall:
+                  type: boolean
+                  required: false
+
+                sp_retry_install:
+                  type: boolean
+                  required: false
+
+                sp_run_enable_grub_iommu:
+                  type: boolean
+                  required: false
+
+                sp_vm:
+                  type: boolean
+                  required: false
+
+                sp_crashkernel_memory:
+                  type: integer
+                  required: false
+
+                sp_upgrade_os:
+                  type: boolean
+                  required: false
+
+                sp_selinux_disable:
+                  type: boolean
+                  required: false
+
+                common_packages:
+                  type: list
+                  required: false
+
+                baremetal_packages:
+                  type: list
+                  required: false
+
+                rc_local_commands:
+                  type: list
+                  required: false
+
+                distribution_packages:
+                  type: list
+                  required: false
+
+                centos_7_packages:
+                  type: list
+                  required: false
+
+                almalinux_8_packages:
+                  type: list
+                  required: false
+
+                rockylinux_8_packages:
+                  type: list
+                  required: false
+
+                tuned_profile:
+                  type: string
+                  required: false
+
+                ubuntu_18_packages:
+                  type: list
+                  required: false
+
+                ubuntu_20_packages:
+                  type: list
+                  required: false
+
+                sp_iscsi_address_offset:
+                  type: integer
+                  required: false
+
+                sp_iscsicfg_net:
+                  type: list
+                  required: false
+
+                sp_reboot_after_install:
+                  type: boolean
+                  required: false
+
+            children:
+              type: dict
+              required: true
+              schema:
+                storpool_server:
+                  type: dict
+                  schema:
+                    hosts:
+                      type: dict
+                      required: true
+                    vars:
+                      type: dict
+                      schema:
+                        sp_min_disk_size:
+                          type: string
+                          required: false
+                          regex: '^\d{1,4}(GB|TB)$'
+                        sp_max_disk_size:
+                          type: string
+                          required: false
+                          regex: "^(\\d{1,4}(GB|TB))$"
+
+                        sp_min_nvme_size:
+                          type: string
+                          required: false
+                          regex: "^(\\d{1,4}(GB|TB))$"
+
+                        sp_min_pmem_size:
+                          type: string
+                          required: false
+                          regex: "^(\\d{1,4}(GB|TB))$"
+
+                        sp_nvme_disk_id_offset:
+                          type: integer
+                          required: false
+
+                        sp_hdd_disk_id_offset:
+                          type: integer
+                          required: false
+
+                        sp_ssd_disk_init_args:
+                          type: list
+                          required: false
+
+                        sp_hdd_disk_init_args:
+                          type: list
+                          required: false
+
+                        sp_discover_disk_run:
+                          type: boolean
+                          required: false
+
+                        sp_discover_disk_pattern:
+                          type: string
+                          required: false
+
+                        disk_init_helper_discovery_file:
+                          type: string
+                          required: false
+
+                        sp_test_discovered_disks:
+                          type: boolean
+                          required: false
+
+                        sp_backup_disk_init_config:
+                          type: boolean
+                          required: false
+
+                        sp_wipe_new_partitions:
+                          type: boolean
+                          required: false
+
+                        sp_iscsi_address_offset:
+                          type: integer
+                          required: false
+
+                        sp_iscsicfg_net:
+                          type: list
+                          required: false
+
+                        sp_reboot_after_install:
+                          type: boolean
+                          required: false
+
+                storpool_iscsi:
+                  type: dict
+                  schema:
+                    hosts:
+                      type: dict
+                      required: true
+                    vars:
+                      type: dict
+                      required: true
+                      schema:
+                        sp_iscsi_network_mode:
+                          type: string
+                          required: false
+
+                        sp_iscsi_mtu:
+                          type: integer
+                          required: false
+                          min: 1500
+                          max: 9000
+
+                        sp_iscsi_bond_name:
+                          type: string
+                          required: false
+
+                        sp_iscsi_bridge_name:
+                          type: string
+                          required: false
+
+                        sp_iscsi_arp_ip_targets:
+                          type: string
+                          required: false
+
+                        sp_iscsi_address_offset:
+                          type: integer
+                          required: false
+
+                        sp_iscsicfg_net:
+                          type: list
+                          required: false
+        proxmox_hv:
+          type: dict
+          required: false
+          schema:
+            hosts:
+              type: dict
+            vars:
+              type: dict
+              required: false
