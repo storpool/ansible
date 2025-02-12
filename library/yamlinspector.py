@@ -1,13 +1,14 @@
 #!/usr/bin/python
-from ansible.module_utils.basic import AnsibleModule
+"""Ansible module for validation by schema."""
 import yaml
-from cerberus import Validator
+from ansible.module_utils.basic import AnsibleModule  # type: ignore
+from cerberus import Validator  # type: ignore
 
 
 def load_schema(schema_path):
     """Load SCHEMA YAML file."""
     try:
-        with open(schema_path, 'r') as f:
+        with open(schema_path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
     except yaml.YAMLError as e:
         print(f"YAML Syntax Error: {e}")
@@ -25,15 +26,17 @@ def validate_yaml(data, schema):
 
 
 def main():
-    """Ansible module for YAML linting and validation."""
+    """Ansible module for YAML validation main function."""
     schema_path = "validation_schema/storpool-schema.yaml"
     module = AnsibleModule(
-        argument_spec=dict(
-            file_content=dict(type="str", required=True),
-            schema=dict(type="dict",
-                        required=False,
-                        default=load_schema(schema_path=schema_path)),
-        ),
+        argument_spec={
+            "file_content": {"type": "str", "required": True},
+            "schema": {
+                "type": "dict",
+                "required": False,
+                "default": load_schema(schema_path=schema_path),
+            },
+        },
         supports_check_mode=True,
     )
 
@@ -53,8 +56,7 @@ def main():
             result["msg"] = "YAML is valid."
         else:
             result["msg"] = "YAML validation failed."
-            module.fail_json(
-                msg=f"{result['msg']}\n{result['validation_errors']}")
+            module.fail_json(msg=f"{result['msg']}\n{result['validation_errors']}")
     except yaml.YAMLError as e:
         module.fail_json(msg=f"YAML syntax error: {str(e)}")
 

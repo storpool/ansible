@@ -5,3 +5,5 @@ playbook.retry
 roles/custom_*
 inventory.*
 .idea/
+.tox/
+library/.mypy_cache/*
