@@ -2,7 +2,7 @@
 - name: Installing specific kernel version
   become: true
   ansible.builtin.package:
-    name: "{{ kernel_package_name[(ansible_os_family | lower)] }}-{{ sp_kernel_version }}"
+    name: "{{ kernel_package_name[(ansible_os_family | lower)] }}-{{'uek-core-' if 'uek' in sp_kernel_version else ''}}{{ sp_kernel_version }}"
     state: present
   vars:
     kernel_package_name:
