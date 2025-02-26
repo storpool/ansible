@@ -148,6 +148,9 @@ all:
                     type: string
                     required: false
 
+                  sp_configure_network:
+                    type: boolean
+                    required: false
 
             vars:
               type: dict
