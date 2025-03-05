@@ -73,7 +73,6 @@
     PYTHONPATH: "{{ extracted }}/py"
   when:
     - sp_kernel_version is defined
-    - not ansible_kernel | regex_search("^" + sp_kernel_version)
   notify: reload kernel
 
 - name: Check kernel cmdline
