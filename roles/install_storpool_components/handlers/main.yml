@@ -27,6 +27,20 @@
   when:
     - ansible_os_family == 'RedHat'
 
+- name: Rebuidling initrd on RHEL-based OS
+  become: true
+  ansible.builtin.command: /usr/bin/dracut -f
+  listen: Rebuild initramfs
+  when:
+    - ansible_os_family == 'RedHat'
+
+- name: Rebuilding initrd on Debian-based OS
+  become: true
+  ansible.builtin.command: /usr/sbin/update-initramfs -u
+  listen: Rebuild initramfs
+  when:
+    - ansible_os_family == 'Debian'
+
 - name: Rebooting host
   become: true
   ansible.builtin.reboot:

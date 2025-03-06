@@ -12,3 +12,5 @@ supported_release_targets:
 gui_group_name: storpoolgui
 gui_user_name: storpoolgui
 gui_user_homedir: /usr/lib/storpool/gui
+
+intel_ice_ddp_version: 1.3.39.1

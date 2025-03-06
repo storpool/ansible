@@ -114,6 +114,34 @@
   notify:
     - Reboot host
 
+- name: Creating Intel ice module firmware directory
+  become: true
+  ansible.builtin.file:
+    path: /lib/firmware/updates/intel/ice/ddp/
+    state: directory
+    mode: "0755"
+
+- name: Downloading Intel DDP package
+  become: true
+  ansible.builtin.get_url:
+    url: "https://github.com/intel/ethernet-linux-ice/raw/refs/heads/main/ddp/ice-{{ intel_ice_ddp_version }}.pkg"
+    dest: /lib/firmware/updates/intel/ice/ddp/
+    mode: "0644"
+  notify:
+    - Rebuild initramfs
+    - Reboot host
+
+- name: Symlinking the Intel DDP package
+  become: true
+  ansible.builtin.file:
+    src: "/lib/firmware/updates/intel/ice/ddp/ice-{{ intel_ice_ddp_version }}.pkg"
+    dest: /lib/firmware/updates/intel/ice/ddp/ice.pkg
+    state: link
+    mode: "0644"
+  notify:
+    - Rebuild initramfs
+    - Reboot host
+
 - name: Execuite StorPool components post-installation hook
   become: true
   ansible.builtin.shell: "{{ sp_post_install_components_hook }}"  # noqa: command-instead-of-shell
