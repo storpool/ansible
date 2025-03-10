@@ -19,10 +19,7 @@
     - install-support-tools
 
 - name: Installing specific version of the Linux kernel
-  include_tasks: install_kernel.yml
-  when:
-    - sp_kernel_version is defined
-    - not ansible_kernel | regex_search("^" + sp_kernel_version)
+  import_tasks: install_kernel.yml
 
 - name: Test memory
   import_tasks: test_memory.yml

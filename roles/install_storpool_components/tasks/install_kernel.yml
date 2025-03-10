@@ -1,8 +1,12 @@
 ---
-- name: Installing specific kernel version
+- name: Determining desired kernel version
+  ansible.builtin.set_fact:
+    desired_kernel_version: "{{ sp_kernel_version | default(ansible_kernel) }}"
+
+- name: Installing desired kernel version
   become: true
   ansible.builtin.package:
-    name: "{{ kernel_package_name[(ansible_os_family | lower)] }}-{{'uek-core-' if 'uek' in sp_kernel_version else ''}}{{ sp_kernel_version }}"
+    name: "{{ kernel_package_name[(ansible_os_family | lower)] }}-{{'uek-' if 'uek' in desired_kernel_version else ''}}{{ desired_kernel_version }}"
     state: present
   vars:
     kernel_package_name:
@@ -11,28 +15,22 @@
   when:
     - "'proxmox_hv' not in group_names"
 
-- name: Installing specific kernel version on PVE 7
+- name: Installing desired kernel version on PVE
   become: true
   ansible.builtin.package:
-    name: pve-kernel-{{ sp_kernel_version }}
+    name: "{{ proxmox_version_kernel_name[(ansible_distribution_major_version | int)] }}-kernel-{{ desired_kernel_version }}"
     state: present
+  vars:
+    proxmox_version_kernel_name:
+      11: pve
+      12: proxmox
   when:
     - "'proxmox_hv' in group_names"
-    - (ansible_distribution_major_version | int) == 11
 
-- name: Installing specific kernel version on PVE 8 and above
-  become: true
-  ansible.builtin.package:
-    name: proxmox-kernel-{{ sp_kernel_version }}
-    state: present
-  when:
-    - "'proxmox_hv' in group_names"
-    - (ansible_distribution_major_version | int) >= 12
-
-- name: Installing extra modules package on Ubuntu
+- name: Installing the extra modules package on Ubuntu
   become: true
   ansible.builtin.apt:
-    name: linux-modules-extra-{{ sp_kernel_version }}
+    name: linux-modules-extra-{{ desired_kernel_version }}
     state: present
   when:
     - ansible_distribution == 'Ubuntu'
