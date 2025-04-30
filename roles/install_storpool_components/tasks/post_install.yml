@@ -62,7 +62,6 @@
     mode: "0755"
   when:
     - sp_kernel_version is defined
-    - not ansible_kernel | regex_search("^" + sp_kernel_version)
 
 - name: Set default kernel
   become: true
@@ -72,7 +71,6 @@
       "{{ sp_tools_directory }}/sp_set_kernel.py" "{{ sp_kernel_version }}"
   when:
     - sp_kernel_version is defined
-    - not ansible_kernel | regex_search("^" + sp_kernel_version)
   notify:
     - Update GRUB configuration
     - Reboot host
