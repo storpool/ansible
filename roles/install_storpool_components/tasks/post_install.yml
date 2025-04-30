@@ -122,12 +122,16 @@
 - name: Downloading Intel DDP package
   become: true
   ansible.builtin.get_url:
-    url: "https://github.com/intel/ethernet-linux-ice/raw/refs/heads/main/ddp/ice-{{ intel_ice_ddp_version }}.pkg"
+    url: "https://vault.storpool.com/ice/ice-{{ intel_ice_ddp_version }}.pkg"
     dest: /lib/firmware/updates/intel/ice/ddp/
     mode: "0644"
   notify:
     - Rebuild initramfs
     - Reboot host
+  register: download_intel_ddp_result
+  retries: 3
+  delay: 10
+  until: download_intel_ddp_result is not failed
 
 - name: Symlinking the Intel DDP package
   become: true
