@@ -151,7 +151,7 @@
     --ssd-args "--no-notify {{ sp_ssd_disk_init_args | join(" ") }}"
     --hdd-args "--no-notify {{ sp_hdd_disk_init_args | join(" ") }}"
     --exec
-    {{ "--wipe-new-partitions" if sp_wipe_new_partitions is defined else '' }}
+    {{ "--no-wipe-new-partitions" if sp_no_wipe_new_partitions else '' }}
     {{ disk_init_helper_discovery_file }}
   register: disk_init
 

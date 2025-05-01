@@ -501,7 +501,7 @@ all:
                           type: boolean
                           required: false
 
-                        sp_wipe_new_partitions:
+                        sp_no_wipe_new_partitions:
                           type: boolean
                           required: false
 
