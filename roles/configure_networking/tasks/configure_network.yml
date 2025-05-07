@@ -17,6 +17,10 @@
     that: raw_interfaces_names | length >= 1
     fail_msg: Not enough raw interfaces set, currently set {{ raw_interfaces_names | length }}
 
+- name: Re-gather network facts to ensure up-to-date interface information
+  ansible.builtin.setup:
+    gather_subset: network
+
 - name: Checking if raw interface exists on the host
   ansible.builtin.assert:
     that: interface_name in ansible_interfaces
