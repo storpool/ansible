@@ -21,9 +21,10 @@ GRUB_DEFAULT_BACKUP = f"{GRUB_DEFAULT_PATH}.{_BACKUP_TIMESTAMP}"
 
 GRUB_EFI_BASE = pathlib.Path("/boot/efi/EFI/")
 GRUB_CFG_PATHS = [
+    *list(GRUB_EFI_BASE.glob("*/grub.cfg")),
     pathlib.Path("/boot/grub/grub.cfg"),
     pathlib.Path("/boot/grub2/grub.cfg"),
-] + list(GRUB_EFI_BASE.glob("*/grub.cfg"))
+]
 BOOT_LOADER_ENTRIES = pathlib.Path("/boot/loader/entries")
 
 GRUB_MKCONFIG_CMDS = ["grub-mkconfig", "grub2-mkconfig"]
