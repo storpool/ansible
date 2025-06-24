@@ -13,6 +13,10 @@ import subprocess
 import sys
 import tempfile
 
+from typing import Optional
+
+from sp_variant import variant
+
 SAFEENC = "Latin-1"
 
 GRUB_DEFAULT_PATH = pathlib.Path("/etc/default/grub")
@@ -149,6 +153,31 @@ def _safe_write(path: pathlib.Path, content: str):
         return moved
 
 
+def find_grub_cfg() -> Optional[str]:
+    if variant.detect_variant().name == "ALMA9":
+        # # /usr/sbin/grub2-mkconfig -o /boot/efi/EFI/almalinux/grub.cfg
+        # Running `grub2-mkconfig -o /boot/efi/EFI/almalinux/grub.cfg' will overwrite the GRUB wrapper.
+        # Please run `grub2-mkconfig -o /boot/grub2/grub.cfg' instead to update grub.cfg.
+        # GRUB configuration file was not updated.
+        # the /etc/grub2*.cfg is always a symlink to /boot/grub2/grub2*.cfg in RHEL8+ based distros
+        # $ ls -l /etc/grub2.cfg
+        # lrwxrwxrwx. 1 root root 22 Jun  4 10:39 /etc/grub2.cfg -> ../boot/grub2/grub.cfg
+        if pathlib.Path("/sys/firmware/efi/runtime").exists() and pathlib.Path("/etc/grub2-efi.cfg").exists():
+            return "/etc/grub2-efi.cfg"
+        elif pathlib.Path("/etc/grub2.cfg").exists():
+            return "/etc/grub2.cfg"
+        print(f"Could not find /etc/grub2(-efi).cfg on ALMA9")
+        return None
+
+    grub_cfg_path = next(path for path in GRUB_CFG_PATHS if path.exists())
+    if grub_cfg_path:
+        assert isinstance(grub_cfg_path, pathlib.Path)
+        return str(grub_cfg_path)
+
+    print(f"Could not find any of the following GRUB config files: {GRUB_CFG_PATHS}")
+    return None
+
+
 def replace_grub_default(title: str) -> bool:
     """
     Replace the GRUB default boot kernel in /etc/default/grub.
@@ -168,9 +197,8 @@ def replace_grub_default(title: str) -> bool:
     if not grub_mkcfg:
         print(f"Could not find any of the following GRUB tools: {GRUB_MKCONFIG_CMDS}")
         return False
-    grub_cfg_path = next(path for path in GRUB_CFG_PATHS if path.exists())
+    grub_cfg_path = find_grub_cfg()
     if not grub_cfg_path:
-        print(f"Could not find any of the following GRUB config files: {GRUB_CFG_PATHS}")
         return False
 
     return subprocess.call([grub_mkcfg, "-o", grub_cfg_path], timeout=120) == 0
