@@ -106,6 +106,10 @@ all:
                     type: string
                     required: false
 
+                  sp_pre_netconfig_hook:
+                    type: string
+                    required: false
+
                   sp_post_install_components_hook:
                     type: string
                     required: false

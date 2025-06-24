@@ -17,6 +17,12 @@
     that: raw_interfaces_names | length >= 1
     fail_msg: Not enough raw interfaces set, currently set {{ raw_interfaces_names | length }}
 
+- name: Execute StorPool pre-netconfig installation hook
+  become: true
+  ansible.builtin.shell: "{{ sp_pre_netconfig_hook }}"  # noqa: command-instead-of-shell
+  when:
+    - sp_pre_netconfig_hook is defined
+
 - name: Re-gather network facts to ensure up-to-date interface information
   ansible.builtin.setup:
     gather_subset: network
