@@ -3,17 +3,16 @@ distribution_packages:
   - cgroup-tools
   - ifenslave
   - liblz4-tool
+  - rsyslog
   - vlan
 
 debian_11_packages:
   - linux-cpupower
   - linux-perf
-  - rsyslog
 
 debian_12_packages:
   - linux-cpupower
   - linux-perf
-  - rsyslog
 
 ubuntu_18_packages:
   - cgroup-bin
@@ -28,3 +27,4 @@ ubuntu_22_packages:
 
 ubuntu_24_packages:
   - linux-tools-generic
+
