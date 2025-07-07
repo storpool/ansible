@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+epoch_start=$(date --utc +%s)
+ipmitool="/usr/bin/ipmitool"
 memchips=`dmidecode -t memory|grep "Serial Number:"|cut -d: -f 2|md5sum|awk '{print $1}'`
 
 if [ -f /etc/storpool/${memchips}.memtested ]; then
@@ -67,3 +69,15 @@ if [ -s /var/log/mcelog ]; then
 fi
 
 touch /etc/storpool/${memchips}.memtested
+
+if [ -s $ipmitoool ]; then
+    while IFS= read -r line;
+    do
+        event_epoch=$(echo $line | date --utc -d "$(awk '{ print $3 " " $5 }')" +%s)
+        if [[ $event_epoch -gt $epoch_start ]]; then
+            echo $line | egrep -i 'memory|ecc|DIMM|correctable|uncorrectable'
+        else
+            break
+        fi
+    done < <($ipmitool sel list | tac)
+fi
