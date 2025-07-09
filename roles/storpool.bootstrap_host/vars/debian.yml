@@ -27,4 +27,3 @@ ubuntu_22_packages:
 
 ubuntu_24_packages:
   - linux-tools-generic
-
