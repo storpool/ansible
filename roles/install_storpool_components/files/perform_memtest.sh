@@ -75,7 +75,7 @@ if [ -s $ipmitoool ]; then
     do
         event_epoch=$(echo $line | date --utc -d "$(awk '{ print $3 " " $5 }')" +%s)
         if [[ $event_epoch -gt $epoch_start ]]; then
-            echo $line | egrep -i 'memory|ecc|DIMM|correctable|uncorrectable'
+            echo $line | egrep -i 'memory|ecc|DIMM|correctable|uncorrectable' || true
         else
             break
         fi
