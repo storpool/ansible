@@ -21,7 +21,6 @@
 - name: Setting list of modules to be installed
   ansible.builtin.set_fact:
     install_modules_list: "@cli bindings-py beacon kmod {{ service_list | map('split', 'storpool_') | map('last') | reject('eq', 'gui') | join(' ') }}"
-    extra_block_module: "{{ (groups['storpool_block'] is defined and inventory_hostname in groups['storpool_block']) | ternary(' block', '') }}"
 
 - name: Installing StorPool modules
   become: true
@@ -33,7 +32,7 @@
       -r
       {% endif %}
       -w {{ sp_tools_directory | quote }}
-      -m {{ (install_modules_list + extra_block_module) | quote }}
+      -m {{ install_modules_list | quote }}
       {% if sp_retry_install %}
       --retry 2
       {% endif %}
