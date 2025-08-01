@@ -20,3 +20,5 @@ grub_crashkernel_file:
   RedHat: /etc/default/grub
 
 crashkernel_value: "{{ (ansible_distribution_major_version | int < 9) | ternary('auto', (sp_crashkernel_memory | string) + 'M') }}"
+
+allow_downgrade: false

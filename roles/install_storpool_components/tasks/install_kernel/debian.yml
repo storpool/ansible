@@ -1,0 +1,27 @@
+- name: Installing desired kernel version on Debian/Ubuntu
+  become: true
+  ansible.builtin.apt:
+    name: "linux-image-{{ desired_kernel_version }}"
+    state: present
+  when:
+    - "'proxmox_hv' not in group_names"
+
+- name: Installing the extra modules package on Ubuntu
+  become: true
+  ansible.builtin.apt:
+    name: linux-modules-extra-{{ desired_kernel_version }}
+    state: present
+  when:
+    - ansible_distribution == 'Ubuntu'
+
+- name: Installing desired kernel version on PVE
+  become: true
+  ansible.builtin.apt:
+    name: "{{ proxmox_version_kernel_name[(ansible_distribution_major_version | int)] }}-kernel-{{ desired_kernel_version }}"
+    state: present
+  vars:
+    proxmox_version_kernel_name:
+      11: pve
+      12: proxmox
+  when:
+    - "'proxmox_hv' in group_names"

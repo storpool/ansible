@@ -3,40 +3,5 @@
   ansible.builtin.set_fact:
     desired_kernel_version: "{{ sp_kernel_version | default(ansible_kernel) }}"
 
-- name: Update the YUM cache
-  ansible.builtin.yum:
-    update_cache: True
-  when:
-    - ansible_os_family == "RedHat"
-
-- name: Installing desired kernel version
-  become: true
-  ansible.builtin.package:
-    name: "{{ kernel_package_name[(ansible_os_family | lower)] }}-{{'uek-' if 'uek' in desired_kernel_version else ''}}{{ desired_kernel_version }}"
-    state: present
-  vars:
-    kernel_package_name:
-      redhat: kernel
-      debian: linux-image
-  when:
-    - "'proxmox_hv' not in group_names"
-
-- name: Installing desired kernel version on PVE
-  become: true
-  ansible.builtin.package:
-    name: "{{ proxmox_version_kernel_name[(ansible_distribution_major_version | int)] }}-kernel-{{ desired_kernel_version }}"
-    state: present
-  vars:
-    proxmox_version_kernel_name:
-      11: pve
-      12: proxmox
-  when:
-    - "'proxmox_hv' in group_names"
-
-- name: Installing the extra modules package on Ubuntu
-  become: true
-  ansible.builtin.apt:
-    name: linux-modules-extra-{{ desired_kernel_version }}
-    state: present
-  when:
-    - ansible_distribution == 'Ubuntu'
+- name: Including OS family specific tasks
+  include_tasks: "install_kernel/{{ ansible_os_family | lower }}.yml"

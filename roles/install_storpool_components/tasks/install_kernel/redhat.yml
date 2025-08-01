@@ -1,0 +1,30 @@
+- name: Update the YUM cache
+  become: true
+  ansible.builtin.yum:
+    update_cache: True
+
+- name: Set EL kernel package name
+  ansible.builtin.set_fact:
+    kernel_package_name: "kernel{{'-uek' if 'uek' in desired_kernel_version else ''}}"
+
+- name: Copy EL kernel downgrade check script
+  become: true
+  copy:
+    src: files/el_kernel_downgrade.sh
+    dest: "{{ sp_tools_directory }}/el_kernel_downgrade.sh"
+    mode: "0755"
+
+- name: Check if newer kernels are present on the host
+  ansible.builtin.command: "{{ sp_tools_directory }}/el_kernel_downgrade.sh {{ kernel_package_name }} {{ desired_kernel_version }}"
+  register: downgrade_output
+  failed_when: downgrade_output.rc not in [0, 1]
+  changed_when: false
+
+- name: Installing desired kernel version
+  become: true
+  ansible.builtin.yum:
+    name: "{{ kernel_package_name}}-{{ desired_kernel_version }}"
+    state: present
+    allow_downgrade: "{{ downgrade_output.rc == 1 and (ansible_distribution_major_version | int) >= 8 }}"
+  notify:
+    - Reboot host
