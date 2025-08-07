@@ -7,10 +7,17 @@
   until: (yum_install_result is succeeded) and ('Failed' not in yum_install_result.stdout)
   when: "'VERSION_ID=\"7\"' in os_release_lines"
 
-- name: Install python3 on Enterprise Linux 8
-  raw: dnf -q install -y python3 python3-libselinux
+- name: Install python3 on EL8
+  raw: |
+    dnf -q module enable -y python39
+    dnf -q install -y python39 python3-libselinux
   changed_when: false
   failed_when: false
   register: dnf_install_result
   until: (dnf_install_result is succeeded) and ('Failed' not in dnf_install_result.stdout)
+  when: "'PLATFORM_ID=\"platform:el8\"' in os_release_lines"
+
+- name: Set ansible_python_interpreter to /usr/bin/python3.9 for EL8
+  set_fact:
+    ansible_python_interpreter: /usr/bin/python3.9
   when: "'PLATFORM_ID=\"platform:el8\"' in os_release_lines"
