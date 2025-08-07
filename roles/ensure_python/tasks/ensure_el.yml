@@ -21,3 +21,11 @@
   set_fact:
     ansible_python_interpreter: /usr/bin/python3.9
   when: "'PLATFORM_ID=\"platform:el8\"' in os_release_lines"
+
+- name: Install python3 on Enterprise Linux 9
+  raw: dnf -q install -y python3 python3-libselinux
+  changed_when: false
+  failed_when: false
+  register: dnf_install_result
+  until: (dnf_install_result is succeeded) and ('Failed' not in dnf_install_result.stdout)
+  when: "'PLATFORM_ID=\"platform:el9\"' in os_release_lines"
