@@ -10,7 +10,7 @@
 - name: Install python3 on EL8
   raw: |
     dnf -q module enable -y python39
-    dnf -q install -y python39 python3-libselinux
+    dnf -q install -y python3 python39 python3-libselinux
   changed_when: false
   failed_when: dnf_install_result.rc != 0
   register: dnf_install_result
