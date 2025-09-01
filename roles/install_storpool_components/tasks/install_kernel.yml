@@ -5,3 +5,35 @@
 
 - name: Including OS family specific tasks
   include_tasks: "install_kernel/{{ ansible_os_family | lower }}.yml"
+
+- name: Copy default kernel script
+  become: true
+  copy:
+    src: files/sp_set_kernel.py
+    dest: "{{ sp_tools_directory }}/sp_set_kernel.py"
+    mode: "0755"
+  when:
+    - sp_kernel_version is defined
+
+- name: Set default kernel
+  become: true
+  ansible.builtin.command:
+    cmd: >
+      /opt/storpool/python3/bin/python3 -B -u
+      "{{ sp_tools_directory }}/sp_set_kernel.py" "{{ sp_kernel_version }}"
+  when:
+    - sp_kernel_version is defined
+  notify:
+    - Reboot host
+
+- name: Flushing handlers
+  meta: flush_handlers
+
+- name: Verify we are using the specified kernel
+  ansible.builtin.assert:
+    that:
+      - ansible_kernel | regex_search("^" + sp_kernel_version)
+    success_msg: Running expected kernel {{ sp_kernel_version }}
+    fail_msg: Running unexpected kernel {{ ansible_kernel }}
+  when:
+    - sp_kernel_version is defined

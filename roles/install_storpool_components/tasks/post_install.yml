@@ -101,27 +101,6 @@
     - not modify_crashkernel_value.changed
     - grep_crashkernel.rc != 0
 
-- name: Copy default kernel script
-  become: true
-  copy:
-    src: files/sp_set_kernel.py
-    dest: "{{ sp_tools_directory }}/sp_set_kernel.py"
-    mode: "0755"
-  when:
-    - sp_kernel_version is defined
-
-- name: Set default kernel
-  become: true
-  ansible.builtin.command:
-    cmd: >
-      /opt/storpool/python3/bin/python3 -B -u
-      "{{ sp_tools_directory }}/sp_set_kernel.py" "{{ sp_kernel_version }}"
-  when:
-    - sp_kernel_version is defined
-  notify:
-    - Update GRUB configuration
-    - Reboot host
-
 - name: Checking if the kernel cmdline contains all expected parameters
   become: true
   command: /usr/lib/storpool/kernel_cmdline_check --exit-code 2
@@ -222,3 +201,13 @@
     - "'proxmox_hv' in group_names"
   notify:
     - Rebuild kdump initrd
+
+- name: Flushing handlers
+  meta: flush_handlers
+
+- name: Verify kernel parameters are applied
+  command:
+    argv:
+      - /usr/lib/storpool/kernel_cmdline_check
+      - --exit-code
+      - "2"

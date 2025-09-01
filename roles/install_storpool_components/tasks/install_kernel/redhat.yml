@@ -23,7 +23,7 @@
 - name: Installing desired kernel version
   become: true
   ansible.builtin.yum:
-    name: "{{ kernel_package_name}}-{{ desired_kernel_version }}"
+    name: "{{ kernel_package_name }}-{{ desired_kernel_version }}"
     state: present
     allow_downgrade: "{{ downgrade_output.rc == 1 and (ansible_distribution_major_version | int) >= 8 }}"
   notify:

@@ -60,28 +60,6 @@
   when:
     - sp_reboot_after_install
 
-- name: Verify we are using the specified kernel
-  ansible.builtin.assert:
-    that:
-      - ansible_kernel | regex_search("^" + sp_kernel_version)
-    success_msg: Running expected kernel {{ sp_kernel_version }}
-    fail_msg: Running unexpected kernel {{ ansible_kernel }}
-  listen: Reboot host
-  when:
-    - sp_reboot_after_install
-    - sp_kernel_version is defined
-
-- name: Verify kernel parameters are applied
-  command:
-    argv:
-      - /usr/lib/storpool/kernel_cmdline_check
-      - --exit-code
-      - "2"
-  listen: Reboot host
-  when:
-    - sp_reboot_after_install
-    - sp_kernel_version is defined
-
 - name: Find initrd* files in /var/lib/kdump on Proxmox host
   become: true
   ansible.builtin.find:
