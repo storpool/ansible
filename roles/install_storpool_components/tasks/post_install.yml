@@ -179,3 +179,38 @@
     - not sp_vm | bool
     - memory_test_sleeper is defined
     - memory_test_sleeper.ansible_job_id is defined
+
+- name: Replace KDUMP_MODULES=dep with most in /etc/kernel/postinst.d/kdump-tools for Proxmox nodes
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/kernel/postinst.d/kdump-tools
+    regexp: 'KDUMP_MODULES=dep'
+    line: 'KDUMP_MODULES=most'
+    backup: yes
+    state: present
+  when:
+    - "'proxmox_hv' in group_names"
+
+- name: Find initrd* files in /var/lib/kdump on Proxmox host
+  become: true
+  ansible.builtin.find:
+    paths: /var/lib/kdump
+    patterns: '^initrd*'
+    use_regex: true
+  register: kdump_files
+  when:
+    - "'proxmox_hv' in group_names"
+
+- name: Delete found initrd* files for Proxmox host
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ kdump_files.files }}"
+  when: kdump_files.matched > 0
+
+- name: Reload kdump configuration for Proxmox host
+  become: true
+  ansible.builtin.command: kdump-config reload
+  when:
+    - "'proxmox_hv' in group_names"
