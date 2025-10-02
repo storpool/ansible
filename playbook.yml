@@ -14,6 +14,12 @@
     - name: Validation results
       debug:
         var: validation_results
+
+    - name: Check for duplicate SP node IDs in storpool.conf
+      shell: "grep SP_OURID ./storpool.conf | sort | uniq -d"
+      register: duplicate_check
+      changed_when: false
+      failed_when: duplicate_check.stdout_lines | length > 0
   tags:
     - validate-yaml
 
