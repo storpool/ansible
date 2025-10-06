@@ -48,7 +48,11 @@ for i in /sys/devices/system/node/node*; do
 	finalcpulist=`(cd $i && ls -d cpu[0-9]* |sed s/cpu// |sort -n|tail -n ${allowedcpu})`
 #	cpu=`(cd $i && ls -d cpu*|head -n1 |sed s/cpu//)`
 	for cpu in $finalcpulist ; do
-		cgexec -g memory:/ -g cpuset:/ taskset -c $cpu numactl --membind $nodenum ${MT} ${memtotest}k 1 > /tmp/memtester.${node}.${cpu}.log &
+		if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
+			systemd-run --scope --slice=-.slice --quiet taskset -c $cpu numactl --membind $nodenum ${MT} ${memtotest}k 1 > /tmp/memtester.${node}.${cpu}.log &
+		else
+			cgexec -g memory:/ -g cpuset:/ taskset -c $cpu numactl --membind $nodenum ${MT} ${memtotest}k 1 > /tmp/memtester.${node}.${cpu}.log &
+		fi
 		jobs=$jobs" $!"
 	done
 done

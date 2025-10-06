@@ -18,6 +18,8 @@
   shell: |
     if [ -d /sys/fs/cgroup/memory/ ]; then
       cgexec -g memory,cpuset:/ {{ sp_tools_directory }}/mlc/mlc > /etc/storpool/mlc/mlc.output
+    elif [ -f /sys/fs/cgroup/cgroup.controllers ]; then
+      systemd-run --scope --slice=-.slice --quiet {{ sp_tools_directory }}/mlc/mlc > /etc/storpool/mlc/mlc.output
     else
       {{ sp_tools_directory }}/mlc/mlc > /etc/storpool/mlc/mlc.output
     fi

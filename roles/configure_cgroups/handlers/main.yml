@@ -16,6 +16,7 @@
   when:
     - sp_cg_start_cgconfig
     - ansible_os_family == "RedHat"
+    - not cg_v2
 
 - name: Restarting cgconfig on Debian-based systems
   become: true
@@ -26,3 +27,4 @@
   when:
     - sp_cg_start_cgconfig
     - ansible_os_family == "Debian"
+    - not cg_v2

@@ -32,6 +32,19 @@
   when:
     - qemu_slice_result.rc is defined
 
+- name: Checking if cgroups v2 are requested in the storpool.conf
+  become: true
+  shell: |
+    export PATH=$PATH:/usr/sbin
+    /usr/sbin/storpool_showconf -n -e SP_USE_CGROUPS_V2
+  register: cgv2_use_result
+  changed_when: false
+
+- name: Setting cgroupsv2 as a fact
+  set_fact:
+    cg_v2: "{{ cgv2_use_result.stdout | bool }}"
+    cacheable: true
+
 - name: Setting set_memsw fact
   set_fact:
     sp_cg_set_memsw: '{{ "1" if cgroup_memsw_file.stat.exists else "0" }}'
