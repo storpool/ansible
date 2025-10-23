@@ -40,7 +40,7 @@
   when:
     - ansible_os_family == "Debian"
 
-- name: Increasing crashkernel size for Debian-based, and RHEL-based >9
+- name: Increasing crashkernel size for Debian-based
   become: true
   ansible.builtin.lineinfile:
     path: "{{ grub_crashkernel_file[ansible_os_family] }}"
@@ -52,24 +52,54 @@
     - Update GRUB configuration
     - Reboot host
   when:
-    - ansible_os_family == "Debian" or
-      (ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 9)
+    - ansible_os_family == "Debian"
 
-# 'auto' is not supported for RHEL >= 9
-- name: Increasing crashkernel size (RedHat-based <9)
+- name: Ensure existing crashkernel is set to correct value for RHEL-based
   become: true
   ansible.builtin.lineinfile:
     path: "{{ grub_crashkernel_file[ansible_os_family] }}"
-    create: true
-    regexp: crashkernel=.*
-    line: 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT crashkernel=auto"'
+    regexp: '(.*)crashkernel=(?!{{ crashkernel_value }}\b)[^\s\"]+(.*)$'
+    line: '\1crashkernel={{ crashkernel_value }}\2'
+    backrefs: true
+    backup: yes
     mode: "0644"
   notify:
     - Update GRUB configuration
     - Reboot host
   when:
     - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version | int < 9
+  register: modify_crashkernel_value
+
+- name: Check if correct crashkernel value already exists for RHEL-based
+  become: true
+  ansible.builtin.command:
+    cmd: "grep -qF 'crashkernel={{ crashkernel_value }}' \"{{ grub_crashkernel_file[ansible_os_family] }}\""
+  changed_when: false
+  # rc=1 (not found) is a good outcome, not an error
+  failed_when: false
+  register: grep_crashkernel
+  when:
+    - ansible_os_family == "RedHat"
+    - not modify_crashkernel_value.changed
+
+- name: Add correct crashkernel line if missing for RHEL-based"
+  become: true
+  ansible.builtin.lineinfile:
+    path: "{{ grub_crashkernel_file[ansible_os_family] }}"
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT crashkernel={{ crashkernel_value }}"'
+    # --- Inserts after the first 'GRUB_CMDLINE_LINUX=' line ---
+    # --- that is NOT a re-definition of itself. ---
+    insertafter: '^GRUB_CMDLINE_LINUX=\"(?!\$GRUB_CMDLINE_LINUX)'
+    create: true
+    backup: yes
+    mode: "0644"
+  notify:
+    - Update GRUB configuration
+    - Reboot host
+  when:
+    - ansible_os_family == "RedHat"
+    - not modify_crashkernel_value.changed
+    - grep_crashkernel.rc != 0
 
 - name: Copy default kernel script
   become: true
