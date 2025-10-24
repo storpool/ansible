@@ -36,7 +36,7 @@
 
 - name: Rebuilding initrd on Debian-based OS
   become: true
-  ansible.builtin.command: /usr/sbin/update-initramfs -u
+  ansible.builtin.command: /usr/sbin/update-initramfs -u -k all
   listen: Rebuild initramfs
   when:
     - ansible_os_family == 'Debian'
