@@ -50,7 +50,7 @@
       conf
       converged={{ "1" if sp_cg_hyperconverged else "0" }}
       {% if sp_cg_conf_extra | length > 0 %}
-      {{ sp_cg_conf_extra }}
+      {{ sp_cg_conf_extra | join(" ") }}
       {% endif %}
       SET_MEMSW={{ sp_cg_set_memsw }}
   when: not sp_slice_conf_file.stat.exists
@@ -64,7 +64,7 @@
       conf -M -E
       converged={{ "1" if sp_cg_hyperconverged else "0" }}
       {% if sp_cg_conf_extra | length > 0 %}
-      {{ sp_cg_conf_extra }}
+      {{ sp_cg_conf_extra | join(" ") }}
       {% endif %}
       SET_MEMSW={{ sp_cg_set_memsw }}
   when: sp_slice_conf_file.stat.exists
