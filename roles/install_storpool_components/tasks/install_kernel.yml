@@ -3,6 +3,12 @@
   ansible.builtin.set_fact:
     desired_kernel_version: "{{ sp_kernel_version | default(ansible_kernel) }}"
 
+- name: Update the YUM cache
+  ansible.builtin.yum:
+    update_cache: True
+  when:
+    - ansible_os_family == "RedHat"
+
 - name: Installing desired kernel version
   become: true
   ansible.builtin.package:
