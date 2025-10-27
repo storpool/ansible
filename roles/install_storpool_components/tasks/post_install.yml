@@ -220,27 +220,5 @@
     state: present
   when:
     - "'proxmox_hv' in group_names"
-
-- name: Find initrd* files in /var/lib/kdump on Proxmox host
-  become: true
-  ansible.builtin.find:
-    paths: /var/lib/kdump
-    patterns: '^initrd*'
-    use_regex: true
-  register: kdump_files
-  when:
-    - "'proxmox_hv' in group_names"
-
-- name: Delete found initrd* files for Proxmox host
-  become: true
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: absent
-  loop: "{{ kdump_files.files }}"
-  when: kdump_files.matched > 0
-
-- name: Reload kdump configuration for Proxmox host
-  become: true
-  ansible.builtin.command: kdump-config reload
-  when:
-    - "'proxmox_hv' in group_names"
+  notify:
+    - Rebuild kdump initrd

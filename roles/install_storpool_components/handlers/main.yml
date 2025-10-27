@@ -81,3 +81,32 @@
   when:
     - sp_reboot_after_install
     - sp_kernel_version is defined
+
+- name: Find initrd* files in /var/lib/kdump on Proxmox host
+  become: true
+  ansible.builtin.find:
+    paths: /var/lib/kdump
+    patterns: '^initrd*'
+    use_regex: true
+  register: kdump_files
+  listen: Rebuild kdump initrd
+  when:
+    - "'proxmox_hv' in group_names"
+
+- name: Delete found initrd* files for Proxmox host
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ kdump_files.files }}"
+  listen: Rebuild kdump initrd
+  when:
+    - "'proxmox_hv' in group_names"
+    - kdump_files.matched > 0
+
+- name: Rebuild kdump initrd
+  become: true
+  ansible.builtin.command: kdump-config reload
+  listen: Rebuild kdump initrd
+  when:
+    - "'proxmox_hv' in group_names"
