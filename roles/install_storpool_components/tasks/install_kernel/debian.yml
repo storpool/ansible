@@ -25,6 +25,7 @@
     proxmox_version_kernel_name:
       11: pve
       12: proxmox
+      13: proxmox
   when:
     - "'proxmox_hv' in group_names"
   notify:

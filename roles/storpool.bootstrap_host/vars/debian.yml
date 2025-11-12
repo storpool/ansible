@@ -2,28 +2,37 @@
 distribution_packages:
   - cgroup-tools
   - ifenslave
-  - liblz4-tool
   - rsyslog
   - vlan
 
 debian_11_packages:
+  - liblz4-tool
   - linux-cpupower
   - linux-perf
 
 debian_12_packages:
+  - liblz4-tool
+  - linux-cpupower
+  - linux-perf
+
+debian_13_packages:
   - linux-cpupower
   - linux-perf
 
 ubuntu_18_packages:
   - cgroup-bin
   - systemd-container
+  - liblz4-tool
   - linux-tools-generic
 
 ubuntu_20_packages:
+  - liblz4-tool
   - linux-tools-generic
 
 ubuntu_22_packages:
+  - liblz4-tool
   - linux-tools-generic
 
 ubuntu_24_packages:
+  - liblz4-tool
   - linux-tools-generic
