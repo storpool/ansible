@@ -7,6 +7,12 @@
   ansible.builtin.set_fact:
     kernel_package_name: "kernel{{'-uek' if 'uek' in desired_kernel_version else ''}}"
 
+- name: Extract EL release from kernel package name
+  ansible.builtin.set_fact:
+    el_release: "{{ desired_kernel_version | regex_search('el([0-9]+)_([0-9]+)', '\\1', '\\2') | join('.') }}"
+  when:
+    - ( ansible_distribution_major_version | int ) >= 8
+
 - name: Copy EL kernel downgrade check script
   become: true
   copy:
@@ -26,5 +32,8 @@
     name: "{{ kernel_package_name }}-{{ desired_kernel_version }}"
     state: present
     allow_downgrade: "{{ downgrade_output.rc == 1 and (ansible_distribution_major_version | int) >= 8 }}"
+    disablerepo: "{{ '*' if el_release is defined else omit }}"
+    enablerepo: "{{ 'baseos' if el_release is defined else omit }}"
+    releasever: "{{ el_release | default(omit) }}"
   notify:
     - Reboot host
