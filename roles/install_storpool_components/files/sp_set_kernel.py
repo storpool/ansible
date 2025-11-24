@@ -172,6 +172,7 @@ def find_grub_cfg() -> Optional[str]:
     grub_cfg_path = next(path for path in GRUB_CFG_PATHS if path.exists())
     if grub_cfg_path:
         assert isinstance(grub_cfg_path, pathlib.Path)
+        print(f"Found GRUB config path {grub_cfg_path}")
         return str(grub_cfg_path)
 
     print(f"Could not find any of the following GRUB config files: {GRUB_CFG_PATHS}")
