@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import ConfigParser
+import configparser
 import argparse
 import subprocess
 import os
@@ -37,8 +37,8 @@ def main():
 
     args = parser.parse_args()
 
-    config = ConfigParser.ConfigParser()
-    config.readfp(open(args.config_file))
+    config = configparser.ConfigParser()
+    config.read_file(open(args.config_file))
 
     for udev_link in args.udev_links.split(' '):
 

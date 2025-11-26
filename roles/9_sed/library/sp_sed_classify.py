@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule
 
-import ConfigParser
+import configparser
 import os
 import re
 import subprocess
@@ -52,6 +52,8 @@ RE_HDPARM_SECURITY = re.compile(
     re.X | re.M | re.S,
 )
 
+RE_SEDUTIL_VALID_DRIVES = re.compile('^\/dev\/nvme[0-9]+(n[0-9]+)? SED')
+
 
 def isValidATASF(drive):
     """Check the output of hdparm to figure stuff out."""
@@ -60,8 +62,10 @@ def isValidATASF(drive):
         shell=False
     )
 
-    return bool(RE_HDPARM_SECURITY.match(output))
+    decoded_output = output.decode('utf-8') 
 
+    return bool(RE_HDPARM_SECURITY.match(decoded_output))
+    
 def isValidOPAL(drive):
     nvme_controller = os.path.realpath(drive).rpartition('n')[0]
 
@@ -70,11 +74,9 @@ def isValidOPAL(drive):
         shell=False
     )
 
-    if output.startswith('/dev/nvme0 SED'):
-        return True
+    decoded_output = output.decode('utf-8')
 
-    else:
-        return False
+    return bool(RE_SEDUTIL_VALID_DRIVES.match(decoded_output))
 
 def main():
     # define the available arguments/parameters that a user can set

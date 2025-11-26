@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule
 
-import ConfigParser
+import configparser
 import subprocess
 import os
 
@@ -49,8 +49,8 @@ def main():
     )
 
     # load the config
-    config = ConfigParser.ConfigParser()
-    config.readfp(open(module.params['conf']))
+    config = configparser.ConfigParser()
+    config.read_file(open(module.params['conf']))
 
     # lock the device by type
     if module.params['drive'] in config.sections():
@@ -61,14 +61,17 @@ def main():
             nvme_controller = os.path.realpath('/dev/disk/by-id/{}'.format(module.params['drive'])).rpartition('n')[0]
 
             try:
-                result['message'] = subprocess.check_output(
+                output = subprocess.run(
                     ['/usr/sbin/sedutil-cli', '--initialSetup', sed_pass, nvme_controller],
-                    shell=False
+                    capture_output=True,
+                    text=True,
+                    check=True
                 )
+                result['message'] = output.stdout
 
             except Exception as e1:
                 result['changed'] = False
-                module.fail_json(msg='Exception: {}'.format(e1), **result)
+                module.fail_json(msg='Exception: {}'.format(e1.stderr), **result)
 
             try:
                 result['message'] = subprocess.check_output(

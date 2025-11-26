@@ -128,6 +128,18 @@ all:
                     type: list
                     required: false
 
+                  sp_drives:
+                    type: string
+                    required: false
+
+                  sp_sed_conf:
+                    type: string
+                    required: false
+
+                  sp_sed_enable_opal:
+                    type: boolean
+                    required: false
+
                   sp_iscsi_network_mode:
                     type: string
                     required: false
