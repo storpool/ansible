@@ -18,3 +18,5 @@
   become: true
   ansible.builtin.apt:
     update_cache: true
+  retries: 3
+  delay: 10

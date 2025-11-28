@@ -18,6 +18,8 @@
     update_cache: true
   when:
     - ansible_os_family == "Debian"
+  retries: 3
+  delay: 10
 
 - name: Upgrading all installed packages
   become: true
