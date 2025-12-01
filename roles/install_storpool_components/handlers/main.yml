@@ -52,7 +52,7 @@
   become: true
   ansible.builtin.reboot:
     reboot_timeout: 900
-    pre_reboot_delay: 60
+    post_reboot_delay: 60
   listen: Reboot host
   throttle: "{{ sp_reboot_sequentially | ternary(1, 63) }}"
   when:
