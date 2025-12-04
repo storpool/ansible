@@ -9,14 +9,22 @@ if [ -f /etc/storpool/${memchips}.memtested ]; then
 	exit 0
 fi
 
-if [ -e ${1}/memtester ]; then
-	MT=${1}/memtester
-elif [ -e /usr/local/bin/memtester ]; then
-	MT=/usr/local/bin/memtester
-elif [ -e /root/storpool/memtester ]; then
-	MT=/root/storpool/memtester
+ARCH=$(uname -m)
+
+if [ "$ARCH" = "aarch64" ]; then
+    binary="memtester-aarch64"
 else
-	echo Memtester not found
+    binary="memtester"
+fi
+
+if [ -e ${1}/${binary} ]; then
+	MT=${1}/${binary}
+elif [ -e /usr/local/bin/${binary} ]; then
+	MT=/usr/local/bin/${binary}
+elif [ -e /root/storpool/${binary} ]; then
+	MT=/root/storpool/${binary}
+else
+	echo "Error: ${binary} not found"
 	exit 1
 fi
 

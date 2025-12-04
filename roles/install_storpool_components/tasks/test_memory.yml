@@ -6,6 +6,7 @@
     mode: "0755"
   with_items:
     - memtester
+    - memtester-aarch64
     - perform_memtest.sh
 
 - name: Starting memory test in the background
