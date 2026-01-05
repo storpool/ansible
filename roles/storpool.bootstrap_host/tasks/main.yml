@@ -87,10 +87,28 @@
     regexp: \sswap\s
     state: absent
 
+- name: Find existing journald configuration file
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  register: journald_conf_check
+  loop:
+    - /etc/systemd/journald.conf
+    - /usr/lib/systemd/journald.conf
+    - /run/systemd/journald.conf
+
+- name: Set journald configuration path
+  ansible.builtin.set_fact:
+    journald_conf_path: "{{ item.item }}"
+  loop: "{{ journald_conf_check.results | default([]) }}"
+  when:
+    - item.stat.exists
+  loop_control:
+    label: "{{ item.item }}"
+
 - name: Limiting journald memory to 64M
   become: true
   ansible.builtin.lineinfile:
-    path: /etc/systemd/journald.conf
+    path: "{{ journald_conf_path }}"
     regexp: RuntimeMaxUse=
     line: RuntimeMaxUse=64M
     insertbefore: RuntimeKeepFree
