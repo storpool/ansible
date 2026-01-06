@@ -36,6 +36,12 @@ GRUB_MKCONFIG_CMDS = ["grub-mkconfig", "grub2-mkconfig"]
 GRUB_LINE_FILTER = re.compile(r"^submenu|^menuentry|^\s+menuentry")
 
 
+def variant_version(osvariant: variant.Variant) -> int:
+    """Extract integer from string like ALMA9 or ROCKY10."""
+    match = re.search(r'\d+', osvariant.name)
+    assert match
+    return int(match.group())
+
 def get_grub_menu_title(menu: str) -> str:
     """Get a (sub)menu title out of a grub.conf menu entry."""
     menu_split = menu.split("'")
@@ -153,8 +159,8 @@ def _safe_write(path: pathlib.Path, content: str):
         return moved
 
 
-def find_grub_cfg() -> Optional[str]:
-    if variant.detect_variant().name == "ALMA9":
+def find_grub_cfg(osvariant: variant.Variant) -> Optional[str]:
+    if osvariant.name.startswith("ALMA"):
         # # /usr/sbin/grub2-mkconfig -o /boot/efi/EFI/almalinux/grub.cfg
         # Running `grub2-mkconfig -o /boot/efi/EFI/almalinux/grub.cfg' will overwrite the GRUB wrapper.
         # Please run `grub2-mkconfig -o /boot/grub2/grub.cfg' instead to update grub.cfg.
@@ -198,11 +204,15 @@ def replace_grub_default(title: str) -> bool:
     if not grub_mkcfg:
         print(f"Could not find any of the following GRUB tools: {GRUB_MKCONFIG_CMDS}")
         return False
-    grub_cfg_path = find_grub_cfg()
+    osvariant = variant.detect_variant()
+    grub_cfg_path = find_grub_cfg(osvariant)
     if not grub_cfg_path:
         return False
 
-    return subprocess.call([grub_mkcfg, "-o", grub_cfg_path], timeout=120) == 0
+    grub_cmd = [grub_mkcfg, "-o", grub_cfg_path]
+    if osvariant.family == "redhat" and variant_version(osvariant) >= 9:
+        grub_cmd.append("--update-bls-cmdline")
+    return subprocess.call(grub_cmd, timeout=120) == 0
 
 
 def get_kernel_title(kernel: str) -> str:

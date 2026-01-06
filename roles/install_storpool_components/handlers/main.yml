@@ -26,7 +26,7 @@
   become: true
   shell: |
     /usr/sbin/grub2-mkconfig \
-    {{ '--update-bls-cmdline' if (ansible_distribution_major_version == '9')
+    {{ '--update-bls-cmdline' if (ansible_distribution_major_version | int >= 9)
                               else '' }} \
     -o $(readlink -f /etc/grub2{{ '-efi' if sysfs_firmware_efi.stat.exists else '' }}.cfg)
   changed_when: false
