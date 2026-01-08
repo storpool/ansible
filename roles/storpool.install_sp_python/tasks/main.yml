@@ -26,6 +26,7 @@
   when:
     - not ( ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int == 24 )
     - not ( ansible_os_family == 'RedHat' and ansible_distribution_major_version|int > 9 )
+    - not (ansible_distribution == 'Debian' and ansible_distribution_major_version|int >= 13 )
 
 - name: Installing StorPool Python 3 packages
   become: true
