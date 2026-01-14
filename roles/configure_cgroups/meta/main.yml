@@ -1,21 +1,23 @@
 ---
 galaxy_info:
   author: Kaloyan Kotlarski
+  namespace: storpool
+  role_name: configure_cgroups
   description: This role configures CGroups on the target hosts
-  company: StorPool Storage Inc.
+  company: StorPool Storage AD
   issue_tracker_url: https://github.com/storpool/ansible/issues
   license: Apache-2.0
-  min_ansible_version: "2.14"
   platforms:
     - name: EL
       versions:
-        - 7
-        - 8
+        - "8"
+        - "9"
     - name: Ubuntu
       versions:
-        - bionic
         - focal
         - jammy
-
+        - noble
+    - name: Debian
+      versions:
+        - bookworm
   galaxy_tags: []
-dependencies: []

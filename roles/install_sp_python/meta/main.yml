@@ -5,18 +5,19 @@ galaxy_info:
   role_name: install_sp_python
   description: Installs StorPools' version of Python2 and Python3
   company: StorPool Storage AD
+  issue_tracker_url: https://github.com/storpool/ansible/issues
   license: Apache-2.0
-  min_ansible_version: "2.14"
   platforms:
     - name: EL
       versions:
-        - 7
-        - 8
+        - "8"
+        - "9"
     - name: Ubuntu
       versions:
-        - bionic
         - focal
         - jammy
-
-  galaxy_tags: []
+        - noble
+    - name: Debian
+      versions:
+        - bookworm
 dependencies: []

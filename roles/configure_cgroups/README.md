@@ -1,22 +1,26 @@
-Role Name
+configure_cgroups
 =========
 
-A brief description of the role goes here.
+This role configures Linux CGroups to allocate and preserve the required amount of CPU cores and memory for StorPool to work as expected.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+The StorPool software must already be installed via the `install_storpool_components` role.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Variables prefixed with `sp_` are defined as defaults and therefore can be overwritten at the inventory level.
+Variables without the `sp_` prefix are set as role-level variables.
 
-Dependencies
-------------
+| Variable name                    | Type    | Default value           | Description |
+| -------------------------------- |---------|-------------------------| ----------- |
+| sp_cgtool_bin                    | String  | `/usr/sbin/storpool_cg` | Path to the StorPool cgtool executable |
+| sp_cg_conf_extra                 | String  | ""                      | Extra arguments to pass to the StorPool cgtool |
+| sp_cg_start_cgconfig             | Boolean | True                    | Apply the generated CGroup configuration by starting the `cgconfig` systemd service |
+| sp_cg_hyperconverged             | Boolean | False                   | Configure the host as a hyperconverged node |
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
 
 Example Playbook
 ----------------
@@ -25,14 +29,14 @@ Including an example of how to use your role (for instance, with variables passe
 
     - hosts: servers
       roles:
-         - { role: username.rolename, x: 42 }
+         - configure_cgroups
 
 License
 -------
 
-BSD
+Apache-2.0
 
-Author Information
-------------------
+Author 
+------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+StorPool AD 2022.

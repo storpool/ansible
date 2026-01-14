@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  author: Kaloyan Kotlarski
+  namespace: storpool
+  role_name: configure_sed
+  description: Ansible role for configuring SED on disk drives
+  company: StorPool Storage AD
+  issue_tracker_url: https://github.com/storpool/ansible/issues
+  license: Apache-2.0
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+    - name: Debian
+      versions:
+        - bookworm
+  galaxy_tags: []

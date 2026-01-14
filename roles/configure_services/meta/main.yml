@@ -1,12 +1,23 @@
 ---
 galaxy_info:
-  author: StorPool Operations
-  description: Ansibe role to execute StorPool post-installation tasks
-  company: StorPool
-  license: Apache
+  author: Kaloyan Kotlarski
+  namespace: storpool
+  role_name: configure_services
+  description: This role enabled and starts any required StorPool systemd service unit files
+  company: StorPool Storage AD
+  issue_tracker_url: https://github.com/storpool/ansible/issues
+  license: Apache-2.0
   platforms:
-    - name: CentOS
-    - name: Debian
+    - name: EL
+      versions:
+        - "8"
+        - "9"
     - name: Ubuntu
-  min_ansible_version: 2.13
+      versions:
+        - focal
+        - jammy
+        - noble
+    - name: Debian
+      versions:
+        - bookworm
   galaxy_tags: []

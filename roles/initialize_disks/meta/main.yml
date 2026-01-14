@@ -1,9 +1,24 @@
 ---
 galaxy_info:
   author: Kaloyan Kotlarski
-  description: Initializes StorPool disks
-  company: StorPool AD
+  namespace: storpool
+  role_name: initialize_disks
+  description: Discovers, tests and initializes all disks on the host to be used by StorPool
+  company: StorPool Storage AD
+  issue_tracker_url: https://github.com/storpool/ansible/issues
   license: Apache-2.0
-  min_ansible_version: 2.13
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+    - name: Debian
+      versions:
+        - bookworm
   galaxy_tags: []
 dependencies: []
