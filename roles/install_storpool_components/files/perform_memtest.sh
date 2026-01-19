@@ -16,6 +16,11 @@ else
     binary="memtester"
 fi
 
+if [[ $(pgrep -c kvm) -gt 0 ]] || [[ $(pgrep -c qemu) -gt 0 ]]; then
+	echo "Found running qemu processes. Bailing out."
+	exit 1
+fi
+
 if [[ -e "${1}/${binary}" ]]; then
 	MT="${1}/${binary}"
 elif [[ -e "/usr/local/bin/${binary}" ]]; then
