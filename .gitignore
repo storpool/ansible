@@ -7,3 +7,4 @@ inventory.*
 .idea/
 .tox/
 library/.mypy_cache/*
+dist/
