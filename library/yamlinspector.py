@@ -1,5 +1,6 @@
 #!/usr/bin/python
 """Ansible module for validation by schema."""
+
 import yaml
 from ansible.module_utils.basic import AnsibleModule  # type: ignore
 from cerberus import Validator  # type: ignore
