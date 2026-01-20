@@ -16,7 +16,7 @@ else
     binary="memtester"
 fi
 
-if [[ $(pgrep -c kvm) -gt 0 ]] || [[ $(pgrep -c qemu) -gt 0 ]]; then
+if [[ $(pgrep -xc kvm) -gt 0 ]] || [[ $(pgrep -xc qemu) -gt 0 ]]; then
 	echo "Found running qemu processes. Bailing out."
 	exit 1
 fi
