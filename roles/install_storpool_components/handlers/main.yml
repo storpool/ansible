@@ -21,6 +21,16 @@
   when:
     - ansible_os_family == 'Debian'
     - sysfs_firmware_efi.stat.exists
+    - "'proxmox_hv' not in group_names"
+
+- name: Rebuilding GRUB configuration on Proxmox hosts with EFI
+  become: true
+  ansible.builtin.command: grub-mkconfig -o /boot/efi/EFI/proxmox/grub.cfg
+  listen: Update GRUB configuration
+  when:
+    - ansible_os_family == 'Debian'
+    - sysfs_firmware_efi.stat.exists
+    - "'proxmox_hv' in group_names"
 
 - name: Rebuilding GRUB configuration on RHEL-based OS
   become: true
