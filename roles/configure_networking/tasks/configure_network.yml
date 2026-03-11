@@ -186,6 +186,9 @@
   become: true
   ansible.builtin.command: >-
     {{ net_helper_path }} up
+    {% if ansible_os_family == "RedHat" and ( ansible_distribution_major_version | int ) >= 9 %}
+    --nm-controlled
+    {% endif %}
   when:
     - sp_bring_up_network
     - interface_configuration_check.changed or not storpool_network_interface_configuration.stat.exists
