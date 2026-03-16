@@ -76,6 +76,8 @@
   listen: Reboot host
   when:
     - sp_reboot_after_install
+  retries: 3
+  delay: 10
 
 - name: Find initrd* files in /var/lib/kdump on Proxmox host
   become: true
