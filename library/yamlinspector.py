@@ -1,9 +1,87 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+# Copyright: (c) 2025, Dimitar Mavrovski <dimitar.mavrovski@storpool.com>
+# Apache 2.0 License
+
 """Ansible module for validation by schema."""
 
 import yaml
 from ansible.module_utils.basic import AnsibleModule  # type: ignore
 from cerberus import Validator  # type: ignore
+
+DOCUMENTATION = r"""
+---
+module: yamlinspector
+short_description: Inspects the YAML inventory file
+version_added: "1.0.0"
+description: Inspects the YAML inventory to discover
+options:
+  file_content:
+    type: string
+    required: true
+    description: Path to inventory file to use for inspection
+author:
+  - Dimitar Mavrovski
+"""
+
+
+EXAMPLES = r"""
+# Pass in a path to the inventory YAML file
+- name: Check inventory YAML file
+  storpool.deployment.yamlinspector:
+    file_content: ./path/to/inventory.yaml
+"""
+
+RETURN = r"""
+# These are examples of possible return values, and in general should use other names for return values.
+msg:
+  type: str
+  description: Status of the validation process
+    type: str
+    returned: always
+validation_errors:
+    description: All errors found when validating the inventory file.
+    type: dict
+    returned: always
+    sample: 'hello world'
+"""
+
+
+DOCUMENTATION = r"""
+---
+module: yamlinspector
+short_description: Inspects the YAML inventory file
+version_added: "1.0.0"
+description: Inspects the YAML inventory to discover
+options:
+  file_content:
+    type: string
+    required: true
+    description: Path to inventory file to use for inspection
+author:
+  - Dimitar Mavrovski
+"""
+
+
+EXAMPLES = r"""
+# Pass in a path to the inventory YAML file
+- name: Check inventory YAML file
+  storpool.deployment.yamlinspector:
+    file_content: ./path/to/inventory.yaml
+"""
+
+RETURN = r"""
+# These are examples of possible return values, and in general should use other names for return values.
+msg:
+  type: str
+  description: Status of the validation process
+    type: str
+    returned: always
+validation_errors:
+    description: All errors found when validating the inventory file.
+    type: dict
+    returned: always
+    sample: 'hello world'
+"""
 
 
 def load_schema(schema_path):
