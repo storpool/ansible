@@ -21,3 +21,27 @@
     fail_msg: Clock of node {{ inventory_hostname }} is not correct
   vars:
     localhost_date_time: "{{ hostvars['localhost'].ansible_date_time }}"
+
+- name: Checking if system uses UEFI boot
+  ansible.builtin.stat:
+    path: /sys/firmware/efi
+  register: efi_firmware
+
+- name: Checking SecureBoot status
+  ansible.builtin.command: mokutil --sb-state
+  register: secureboot_check
+  changed_when: false
+  failed_when: false
+  when: efi_firmware.stat.exists
+
+- name: Checking that SecureBoot is disabled
+  ansible.builtin.assert:
+    that:
+      - "'SecureBoot enabled' not in secureboot_check.stdout"
+    fail_msg: >-
+      SecureBoot is enabled on {{ inventory_hostname }}.
+      StorPool requires SecureBoot to be disabled to load kernel modules.
+      Please disable SecureBoot in the UEFI/BIOS settings.
+  when:
+    - efi_firmware.stat.exists
+    - secureboot_check.rc == 0
