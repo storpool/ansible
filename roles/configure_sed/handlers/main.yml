@@ -1,0 +1,17 @@
+---
+- name: Rebuilding GRUB configuration on Debian-based OS
+  become: true
+  ansible.builtin.command: /usr/sbin/update-grub2
+  listen: Update GRUB configuration
+  when:
+    - ansible_os_family == 'Debian'
+
+
+- name: Power cycle the current host
+  become: true
+  ansible.builtin.reboot:
+    reboot_command: ipmitool chassis power cycle
+    reboot_timeout: 900
+    pre_reboot_delay: 60
+  listen: power cycle
+  throttle: "{{ sp_reboot_sequentially | default(false) | bool | ternary(1, 63) | int }}"

@@ -1,1 +1,35 @@
 ---
+## Download and deply sedutil
+
+- name: Download sedutil_LINUX.tgz to /tmp/
+  ansible.builtin.get_url:
+    url: https://github.com/Drive-Trust-Alliance/exec/blob/master/sedutil_LINUX.tgz?raw=true
+    dest: /tmp/sedutil_LINUX.tgz
+    mode: '0644'
+    timeout: 10
+  register: download_result
+  ignore_errors: true
+
+- name: Copy local file if download failed
+  ansible.builtin.copy:
+    src: sedutil_LINUX.tgz
+    dest: /tmp/sedutil_LINUX.tgz
+    mode: '0644'
+  when: download_result is failed
+
+- name: Extract sedutil_LINUX.tgz into /tmp/
+  ansible.builtin.unarchive:
+    src: /tmp/sedutil_LINUX.tgz
+    dest: /tmp/
+    remote_src: yes
+    creates: /tmp/sedutil
+
+- name: Copy sedutil-cli to /usr/sbin/
+  ansible.builtin.copy:
+    src: /tmp/sedutil/Release_x86_64/sedutil-cli
+    dest: /usr/sbin/sedutil-cli
+    owner: root
+    group: root
+    mode: '0755'
+    remote_src: yes
+  become: true

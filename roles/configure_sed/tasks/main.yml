@@ -23,6 +23,21 @@
     - sp_sed_conf is defined
     - sp_sed_conf_file is defined
 
+- name: Check if storpool cli is present
+  stat:
+    path: "{{ sp_cli_path }}"
+  register: sp_cli_present
+  when:
+    - sp_cli_path is defined
+
+- command: "storpool net list"
+  register: sp_cli_check
+  changed_when: false
+  failed_when: false
+
+- set_fact:
+    sp_cli_ok: "{{ sp_cli_check.rc == 0 }}"
+
 - name: Include distro-specific task (SED prerequisites)
   include_tasks: subtasks/pre-sed-{{ ansible_os_family | lower }}.yml
   when:
@@ -33,4 +48,3 @@
   include_tasks: configure-sed.yml
   when:
     - sp_sed_conf_file is defined
-    - not sp_sed_conf_file.stat.exists

@@ -9,6 +9,8 @@ import configparser
 import os
 import re
 import subprocess
+import logging
+import json
 
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
@@ -62,10 +64,10 @@ def isValidATASF(drive):
         shell=False
     )
 
-    decoded_output = output.decode('utf-8') 
+    decoded_output = output.decode('utf-8')
 
     return bool(RE_HDPARM_SECURITY.match(decoded_output))
-    
+
 def isValidOPAL(drive):
     nvme_controller = os.path.realpath(drive).rpartition('n')[0]
 
@@ -81,7 +83,7 @@ def isValidOPAL(drive):
 def main():
     # define the available arguments/parameters that a user can set
     module_args = dict(
-        drives = dict(required=True, type='str'),
+        drives = dict(required=True, type='list'),
         facts = dict(required=True, type='dict')
     )
 
@@ -103,24 +105,27 @@ def main():
 #        'miss': list()
     }
 
-    for drive in module.params['drives'].split(','):
+    module.log(json.dumps(module.params['drives']))
+    module.log(json.dumps(module.params['facts']))
+
+    for drive in module.params['drives']:
 
         if drive in module.params['facts']:
 
             for link in module.params['facts'][drive]:
 
                 if link.startswith('ata-') and isValidATASF(drive='/dev/disk/by-id/{0}'.format(link)):
-                    sed_types['atasf'].append(link) 
+                    sed_types['atasf'].append(link)
 
-                elif link.startswith('nvme-') and not link.startswith('nvme-eui') and isValidOPAL(drive='/dev/disk/by-id/{0}'.format(link)):
-                    sed_types['opal'].append(link)   
+                elif link.startswith('nvme-') and not link.startswith('nvme-eui') and not link.endswith('_1') and isValidOPAL(drive='/dev/disk/by-id/{0}'.format(link)):
+                    sed_types['opal'].append(link)
 
 #                else:
 #                    sed_types['miss'].append(link)
 
     result = dict(sed_types)
 
-    module.exit_json(**result) 
+    module.exit_json(**result)
 
 if __name__ == '__main__':
     main()

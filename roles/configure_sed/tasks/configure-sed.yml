@@ -1,82 +1,151 @@
 ---
-- name: Allow libata tpm functionality on boot
-  lineinfile:
+- name: Add additive GRUB parameters if they are missing
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    line: 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX {{ item }}"'
+    insertafter: EOF
+    regexp: '^.*{{ item | regex_escape }}.*$'
     state: present
-    dest: /etc/default/grub
-    backrefs: true
-    regexp: ^(GRUB_CMDLINE_LINUX=(?!.\$GRUB_CMD)(?!.iommu)\"[^\"]*)(\".*)
-    line: \1 libata.allow_tpm=1\2
+  loop:
+    - "libata.allow_tpm=1"
+  notify: Update GRUB configuration
   when:
     - sp_sed_enable_opal is defined
     - sp_sed_enable_opal
 
-- name: Allow writing in /sys/module/libata/parameters/allow_tpm
-  file:
-    path: /sys/module/libata/parameters/allow_tpm
-    mode: "0644"
+- name: Set maintenance on current node
+  storpool_maintenance:
+    state: present
+    duration: 1h
+    description: sp_sed_disks_configuration
   when:
-    - sp_sed_enable_opal is defined
-    - sp_sed_enable_opal
+    - sp_cli_ok is defined
+    - sp_cli_ok
 
-- name: Allow libata tpm functionality on running system
-  shell: >
-    /usr/bin/echo 1 > /sys/module/libata/parameters/allow_tpm
+- name: Obtain sp_drives from storpool_initdisk on running clusters
+  block:
+    - name: Stop services and expose nvme
+      storpool_ctl:
+        state: stopped
+        target: servers
+        expose_nvme: true
+      register: stop_services_result
+
+    - name: Expose NVMe drives for StorPool
+      ansible.builtin.command: /usr/lib/storpool/expose_nvme_drives
+      become: true
+
+    - name: Get the list of all StorPool disks from storpool_initdisk
+      storpool_initdisk:
+        storpool_only: true
+      become: true
+      register: sp_initdisk_result
+
+    - name: Filter unique disks from storpool_initdisk
+      ansible.builtin.set_fact:
+        sp_drives: >
+          {{ sp_initdisk_result.storpool_disk_inventory.keys() | list |
+            map('split', 'p') |
+            map('first') |
+            map('regex_replace', '^/dev/', '') |
+            unique |
+            list }}
   when:
-    - sp_sed_enable_opal is defined
-    - sp_sed_enable_opal
+    - sp_cli_ok is defined
+    - sp_cli_ok
+    - sp_drives is not defined
+    - not sp_sed_conf_file.stat.exists
 
-- name: Restore mode of /sys/module/libata/parameters/allow_tpm
-  file:
-    path: /sys/module/libata/parameters/allow_tpm
-    mode: "0444"
+- name: Classify drives
+  block:
+    - name: Refresh hardware facts to update ansible_device_links
+      ansible.builtin.setup:
+        gather_subset:
+          - hardware
+
+    - name: Classify SED drives
+      sp_sed_classify:
+        drives: "{{ sp_drives }}"
+        facts: "{{ ansible_device_links.ids }}"
+      register: sp_sed_types
+      when:
+        - not sp_sed_conf_file.stat.exists
+  become: true
   when:
-    - sp_sed_enable_opal is defined
-    - sp_sed_enable_opal
+    - sp_drives is defined
+    - sp_drives is iterable
+    - sp_drives | length > 0
 
-- name: Classify SED drives
-  sp_sed_classify:
-    drives: "{{ sp_drives }}"
-    facts: "{{ ansible_device_links.ids }}"
-  register: sp_sed_types
+- name: Generate configuration and lock drives
+  block:
+    - name: Generate SED key-list (random passwords)
+      shell:
+        cmd: |
+          set -o pipefail
+          echo -e "import string,random\nprint(''.join(random.choice(string.ascii_letters + string.digits) for i in range(16)))" | python3
+        executable: /bin/bash
+      register: sp_sed_keylist_random
+      loop: "{{ sp_sed_types['opal'] + sp_sed_types.atasf }}"
+      when:
+        - sp_sed_universal_password is not defined
 
-- name: Generate SED key-list (random passwords)
-  shell:
-    cmd: |
-      set -o pipefail
-      echo -e "import string,random\nprint(''.join(random.choice(string.ascii_letters + string.digits) for i in range(16)))" | python
-    executable: /bin/bash
-  register: sp_sed_keylist_random
-  loop: "{{ sp_sed_types['opal'] + sp_sed_types.atasf }}"
+    - name: Generate SED configuration
+      template:
+        src: templates/sed-conf.j2
+        dest: "{{ sp_sed_conf }}"
+        mode: "0644"
+
+    - name: Fetch SED configuration locally
+      fetch:
+        src: "{{ sp_sed_conf }}"
+        dest: "{{ inventory_dir }}/sed.conf-{{ inventory_hostname }}-{{ ansible_date_time.epoch }}"
+        flat: true
+
+    - name: Lock SED devices
+      sp_sed_lock:
+        conf: "{{ sp_sed_conf }}"
+        drive: "{{ ansible_device_links.ids[item][0] }}"
+      loop: "{{ sp_drives }}"
+      notify: power cycle
+
+    - name: Copy storpool-sed-unlock tool
+      copy:
+        src: storpool-sed-unlock
+        dest: /usr/lib/udev/storpool-sed-unlock
+        mode: "0755"
+
+    - name: Add udev rules
+      template:
+        src: templates/sed-udev-rules.j2
+        dest: /etc/udev/rules.d/90-storpool_sed.rules
+        mode: "0644"
+
+    - name: Sync filesystem buffers before power cycle
+      command: sync
+
+    - name: Flushing handlers
+      meta: flush_handlers
+  become: true
   when:
+    - not sp_sed_conf_file.stat.exists
     - sp_sed_types
-    - sp_sed_universal_password is not defined
+    - (sp_sed_types.atasf is defined) or (sp_sed_types.opal is defined)
+    - (sp_sed_types.atasf | length > 0) or (sp_sed_types.opal | length > 0)
 
-- name: Generate SED configuration
-  template:
-    src: templates/sed-conf.j2
-    dest: "{{ sp_sed_conf }}"
-    mode: "0644"
 
-- name: Fetch SED configuration locally
-  fetch:
-    src: "{{ sp_sed_conf }}"
-    dest: "{{ inventory_dir }}/sed.conf-{{ inventory_hostname }}-{{ ansible_date_time.epoch }}"
-    flat: true
+- name: Start services
+  storpool_ctl:
+    state: started
+    target: servers
+  when:
+    - sp_cli_ok is defined
+    - sp_cli_ok
+    - stop_services_result.changed
+    - not sp_sed_conf_file.stat.exists
 
-- name: Lock SED devices
-  sp_sed_lock:
-    conf: "{{ sp_sed_conf }}"
-    drive: "{{ ansible_device_links.ids[item][0] }}"
-  loop: "{{ sp_drives.split(',') }}"
-
-- name: Copy storpool-sed-unlock tool
-  copy:
-    src: storpool-sed-unlock
-    dest: /usr/lib/udev/storpool-sed-unlock
-    mode: "0755"
-
-- name: Add udev rules
-  template:
-    src: templates/sed-udev-rules.j2
-    dest: /etc/udev/rules.d/99-storpool-sed.rules
-    mode: "0644"
+- name: Remove maintenance on current node
+  storpool_maintenance:
+    state: absent
+  when:
+    - sp_cli_ok is defined
+    - sp_cli_ok

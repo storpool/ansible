@@ -37,6 +37,11 @@ all:
 # Offset to calculate diskid prefix (useful when sp_node_id >= 40), also see 
         sp_diskid_offset:
 
+# Self-Encrypting disks related configuration options
+#       sp_sed_universal_password: "" #
+#       sp_sed_conf: "/etc/storpool/sed.conf" # StorPool SED configurations file path
+#       sp_sed_enable_opal: False # Enable TCG Opal
+
 # Automated network configuration options
 # examples are available in roles/configure_networking/README.md
 

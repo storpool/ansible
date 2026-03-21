@@ -113,6 +113,13 @@
   tags:
     - configure-cgroups
 
+- name: Configure SED
+  hosts: storpool_server
+  roles:
+    - configure_sed
+  tags:
+    - configure-sed
+
 - name: Configuring StorPool services
   hosts: storpool_block,storpool_server,storpool_mgmt,storpool_iscsi,storpool_bridge
   gather_subset:
