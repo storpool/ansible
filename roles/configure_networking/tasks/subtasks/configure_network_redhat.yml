@@ -5,6 +5,8 @@
     src: ifup-pre-local
     dest: /sbin
     mode: "0755"
+  when:
+    - ( ansible_distribution_major_version | int ) < 9
 
 - name: Installing network-scripts on EL 8
   become: true
