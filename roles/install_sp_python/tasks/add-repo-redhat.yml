@@ -10,6 +10,7 @@
   become: true
   ansible.builtin.yum_repository:
     name: storpool-{{ item.url_path }}
+    file: storpool-centos
     baseurl: https://repo.storpool.com/public/{{ item.url_path }}/centos/$releasever/$basearch/
     description: StorPool third-party packages for {{ ansible_distribution }}
     enabled: true
