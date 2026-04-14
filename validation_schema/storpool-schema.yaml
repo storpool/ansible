@@ -132,6 +132,10 @@ all:
                     type: string
                     required: false
 
+                  sp_configure_sed:
+                    type: boolean
+                    required: false
+
                   sp_sed_conf:
                     type: string
                     required: false

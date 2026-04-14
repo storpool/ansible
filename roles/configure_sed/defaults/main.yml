@@ -1,3 +1,4 @@
 ---
+sp_configure_sed: false
 sp_sed_conf: /etc/storpool/sed.conf
 sp_cli_path: /usr/sbin/storpool

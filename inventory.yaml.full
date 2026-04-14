@@ -38,6 +38,7 @@ all:
         sp_diskid_offset:
 
 # Self-Encrypting disks related configuration options
+#       sp_configure_sed: True        # Enable SED configuration role
 #       sp_sed_universal_password: "" #
 #       sp_sed_conf: "/etc/storpool/sed.conf" # StorPool SED configurations file path
 #       sp_sed_enable_opal: False # Enable TCG Opal

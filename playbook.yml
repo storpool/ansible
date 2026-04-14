@@ -116,7 +116,8 @@
 - name: Configure SED
   hosts: storpool_server
   roles:
-    - configure_sed
+    - role: configure_sed
+      when: sp_configure_sed
   tags:
     - configure-sed
 
