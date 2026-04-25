@@ -126,9 +126,12 @@
 - name: Testing discovered disks
   become: true
   command:
-    argv:
-      - "{{ ansible_user_dir }}/storpool/perform_disktest.sh"
-      - '{{ disks_to_be_tested | join(" ") }}'
+    argv: >-
+      {{
+        [ansible_user_dir ~ "/storpool/perform_disktest.sh"]
+        + (["--ignore-seen"] if sp_disktest_ignore_seen else [])
+        + disks_to_be_tested
+      }}
   when:
     - sp_test_discovered_disks
     - sp_discover_disk_run

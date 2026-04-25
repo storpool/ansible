@@ -80,6 +80,10 @@ all:
                     type: boolean
                     required: false
 
+                  sp_disktest_ignore_seen:
+                    type: boolean
+                    required: false
+
                   sp_diskid_offset:
                     type: integer
                     required: false
@@ -333,6 +337,10 @@ all:
                   type: integer
                   required: false
 
+                sp_disktest_ignore_seen:
+                  type: boolean
+                  required: false
+
                 sp_tools_directory:
                   type: string
                   required: false
@@ -514,6 +522,10 @@ all:
                           required: false
 
                         sp_test_discovered_disks:
+                          type: boolean
+                          required: false
+
+                        sp_disktest_ignore_seen:
                           type: boolean
                           required: false
 

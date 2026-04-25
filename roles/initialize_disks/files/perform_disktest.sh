@@ -1,7 +1,13 @@
 #!/bin/bash -xe
 
-if [ -z "$1" ]; then
-	echo Usage: $0 drive drive ...
+disk_tester_args=()
+if [ "${1:-}" = "--ignore-seen" ]; then
+	disk_tester_args+=(--ignore-seen)
+	shift
+fi
+
+if [ $# -lt 1 ]; then
+	echo Usage: $0 [--ignore-seen] drive drive ...
 	exit 2
 fi
 
@@ -17,7 +23,7 @@ mkdir -p /etc/storpool
 mkdir -p "$dirname"
 cd "$dirname"
 
-for i in $*; do
+for i in "$@"; do
 	tries=0
 	# we need to wait a bit if the drive is being exposed at the moment
 	while ! [ -b "$i" ] && [ $tries -lt 10 ]; do
@@ -55,8 +61,8 @@ for i in $*; do
 done
 
 if [ -f drives.txt ]; then
-	/usr/sbin/disk_tester
-	for i in `cat serials.txt`; do
+	/usr/sbin/disk_tester "${disk_tester_args[@]}"
+	while read -r i; do
 		touch "/etc/storpool/${i}.tested"
-	done
+	done < serials.txt
 fi

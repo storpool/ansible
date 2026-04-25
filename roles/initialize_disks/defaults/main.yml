@@ -16,6 +16,7 @@ sp_server_instances: 1
 sp_multi_server_helper: /usr/lib/storpool/multi-server-helper.py
 sp_new_cluster: false
 sp_test_discovered_disks: true
+sp_disktest_ignore_seen: false
 sp_backup_disk_init_config: true
 sp_no_wipe_new_partitions: false
 
