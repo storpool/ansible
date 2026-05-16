@@ -23,16 +23,16 @@ ubuntu_18_packages:
   - cgroup-bin
   - systemd-container
   - liblz4-tool
-  - linux-tools-{{ 'generic' if sp_update_system else ansible_kernel }}
+  - linux-tools-{{ 'generic' if sp_upgrade_os else ansible_kernel }}
 
 ubuntu_20_packages:
   - liblz4-tool
-  - linux-tools-{{ 'generic' if sp_update_system else ansible_kernel }}
+  - linux-tools-{{ 'generic' if sp_upgrade_os else ansible_kernel }}
 
 ubuntu_22_packages:
   - liblz4-tool
-  - linux-tools-{{ 'generic' if sp_update_system else ansible_kernel }}
+  - linux-tools-{{ 'generic' if sp_upgrade_os else ansible_kernel }}
 
 ubuntu_24_packages:
   - liblz4-tool
-  - linux-tools-{{ 'generic' if sp_update_system else ansible_kernel }}
+  - linux-tools-{{ 'generic' if sp_upgrade_os else ansible_kernel }}
